@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Elementi di soluzione/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="Goleador.Api/Goleador.Api.csproj" />
+  <Project Path="Goleador.Application/Goleador.Application.csproj" />
+  <Project Path="Goleador.Domain/Goleador.Domain.csproj" />
+  <Project Path="Goleador.Infrastructure/Goleador.Infrastructure.csproj" />
+  <Project Path="Goleador.Tests/Goleador.Tests.csproj" />
+</Solution>
