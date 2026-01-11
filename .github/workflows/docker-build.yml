@@ -20,7 +20,7 @@ jobs:
 
       # Test Build Backend
       - name: Build Backend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./src/backend
           file: ./src/backend/Dockerfile
@@ -29,7 +29,7 @@ jobs:
 
       # Test Build Frontend
       - name: Build Frontend Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./src/frontend
           file: ./src/frontend/Dockerfile
