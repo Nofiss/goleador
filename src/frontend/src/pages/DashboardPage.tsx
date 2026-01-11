@@ -1,11 +1,100 @@
+import { useQuery } from "@tanstack/react-query";
+import { getTournaments } from "@/api/tournaments";
+import { TournamentStatus } from "@/types";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Trophy, Calendar, ArrowRight } from "lucide-react";
+
 export const DashboardPage = () => {
-	return (
-		<div>
-			<h1 className="text-3xl font-bold tracking-tight mb-4">Dashboard</h1>
-			<p className="text-gray-500">
-				Benvenuto su Goleador! Qui vedrai presto le statistiche e le partite in
-				corso.
-			</p>
-		</div>
-	);
+  const { data: tournaments, isLoading } = useQuery({
+    queryKey: ["tournaments"],
+    queryFn: getTournaments,
+  });
+
+  const activeTournaments = tournaments?.filter(t => t.status === TournamentStatus.Active) || [];
+  const setupTournaments = tournaments?.filter(t => t.status === TournamentStatus.Setup) || [];
+
+  return (
+    <div className="space-y-8">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-8 shadow-lg">
+        <h1 className="text-4xl font-extrabold mb-2">Benvenuto su Goleador ⚽</h1>
+        <p className="text-blue-100 text-lg max-w-2xl">
+          Il gestionale definitivo per i tuoi tornei aziendali. Organizza sfide, traccia i risultati e scala la classifica!
+        </p>
+        <div className="mt-6 flex gap-4">
+            <Button asChild variant="secondary" size="lg">
+                <Link to="/matches">Nuova Partita Rapida</Link>
+            </Button>
+            <Button asChild variant="outline" className="bg-transparent text-white border-white hover:bg-white/20" size="lg">
+                <Link to="/tournaments">Vedi Tornei</Link>
+            </Button>
+        </div>
+      </section>
+
+      {/* Grid Widget */}
+      <div className="grid gap-6 md:grid-cols-2">
+        
+        {/* Widget: Tornei in Corso */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Trophy className="text-yellow-500" /> Tornei in Corso
+                </CardTitle>
+                <CardDescription>Competizioni attualmente attive in azienda.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? <p>Caricamento...</p> : activeTournaments.length === 0 ? (
+                    <div className="text-center py-6 text-gray-400">
+                        Nessun torneo attivo al momento.
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {activeTournaments.map(t => (
+                            <div key={t.id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                                <div>
+                                    <h4 className="font-bold text-lg">{t.name}</h4>
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                        {t.teamSize} vs {t.teamSize}
+                                    </span>
+                                </div>
+                                <Button size="sm" variant="outline" asChild>
+                                    <Link to={`/tournaments/${t.id}`}>Vai <ArrowRight className="ml-1 h-3 w-3" /></Link>
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+
+        {/* Widget: Iscrizioni Aperte */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Calendar className="text-blue-500" /> Iscrizioni Aperte
+                </CardTitle>
+                <CardDescription>Non perdere l'occasione di partecipare!</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {setupTournaments.length === 0 ? (
+                     <div className="text-center py-6 text-gray-400">Nessuna iscrizione aperta.</div>
+                ) : (
+                    <div className="space-y-4">
+                        {setupTournaments.map(t => (
+                            <div key={t.id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                                <h4 className="font-medium">{t.name}</h4>
+                                <Button size="sm" asChild>
+                                    <Link to={`/tournaments/${t.id}`}>Iscriviti</Link>
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 };
