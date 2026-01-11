@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PlayCircle, Trophy } from "lucide-react";
+import { StandingsTable } from "@/features/tournaments/StandingsTable";
 
 export const TournamentDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,28 @@ export const TournamentDetailPage = () => {
           <p className="text-gray-500 mt-1">Formato: {tournament.teamSize} vs {tournament.teamSize}</p>
         </div>
 
+        {tournament.notes && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+            <p className="font-bold text-yellow-700">Note del Torneo</p>
+            <p className="text-yellow-800">{tournament.notes}</p>
+          </div>
+        )}
+
+        <div className="text-xs text-gray-500 mb-6 flex gap-4 flex-wrap">
+          <span>🏆 Win: {tournament.scoringRules.pointsForWin}pt</span>
+          <span>🤝 Draw: {tournament.scoringRules.pointsForDraw}pt</span>
+          {tournament.scoringRules.goalThreshold && (
+            <span className="bg-blue-50 px-2 py-0.5 rounded text-blue-700">
+              ⚽ Bonus: +{tournament.scoringRules.goalThresholdBonus}pt se {tournament.scoringRules.goalThreshold}+ goal
+            </span>
+          )}
+        {tournament.scoringRules.enableTenZeroBonus && (
+          <span className="bg-red-50 px-2 py-0.5 rounded text-red-700">
+              🔥 Cappotto (10-0): +{tournament.scoringRules.tenZeroBonus}pt
+          </span>
+         )}
+      </div>
+
         {/* Bottone Start */}
         {tournament.status === TournamentStatus.Setup && (
             <Button 
@@ -54,9 +77,21 @@ export const TournamentDetailPage = () => {
 
       <Tabs defaultValue={tournament.status === TournamentStatus.Active ? "matches" : "teams"}>
         <TabsList>
-          <TabsTrigger value="teams">Squadre ({tournament.teams.length})</TabsTrigger>
+          <TabsTrigger value="standings">Classifica</TabsTrigger> 
           <TabsTrigger value="matches">Partite</TabsTrigger>
+          <TabsTrigger value="teams">Squadre ({tournament.teams.length})</TabsTrigger>
         </TabsList>
+
+        {/* TAB SQUADRE */}
+        <TabsContent value="standings">
+          {tournament.status === TournamentStatus.Setup ? (
+            <div className="text-center py-10 text-gray-500 border rounded bg-gray-50">
+                La classifica sarà disponibile dopo l'avvio del torneo.
+            </div>
+          ) : (
+            <StandingsTable tournamentId={tournament.id} />
+          )}
+        </TabsContent>
 
         {/* TAB SQUADRE */}
         <TabsContent value="teams" className="space-y-4">

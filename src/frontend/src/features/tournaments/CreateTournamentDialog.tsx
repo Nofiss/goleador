@@ -20,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const CreateTournamentDialog = () => {
   const [open, setOpen] = useState(false);
@@ -29,8 +31,18 @@ export const CreateTournamentDialog = () => {
     name: "",
     type: TournamentType.RoundRobin,
     teamSize: 1, // Default 1vs1
-    hasReturnMatches: false
+    hasReturnMatches: false,
+        notes: "",
+    pointsForWin: 3,
+    pointsForDraw: 1,
+    pointsForLoss: 0,
+    goalThreshold: undefined, // undefined manda null al backend
+    goalThresholdBonus: 0,
+    enableTenZeroBonus: false,
+    tenZeroBonus: 0
   });
+
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const mutation = useMutation({
     mutationFn: createTournament,
@@ -97,6 +109,15 @@ export const CreateTournamentDialog = () => {
                   </SelectContent>
                 </Select>
              </div>
+
+            <div className="space-y-2">
+              <Label>Note (Opzionale)</Label>
+              <Textarea 
+                  placeholder="Regole speciali, premi in palio..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2 pt-2">
@@ -109,6 +130,63 @@ export const CreateTournamentDialog = () => {
                 onChange={(e) => setFormData({...formData, hasReturnMatches: e.target.checked})}
              />
              <Label htmlFor="returnMatches">Andata e Ritorno</Label>
+          </div>
+
+          <div className="border-t pt-4">
+            <Button type="button" variant="ghost" className="w-full text-sm text-gray-500" onClick={() => setShowAdvanced(!showAdvanced)}>
+                {showAdvanced ? "Nascondi Regole Punteggio" : "Configura Punteggi Personalizzati"}
+            </Button>
+
+            {showAdvanced && (
+                <div className="space-y-4 mt-4 bg-gray-50 p-4 rounded-md">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div>
+                            <Label className="text-xs">Vittoria</Label>
+                            <Input type="number" value={formData.pointsForWin} onChange={e => setFormData({...formData, pointsForWin: parseInt(e.target.value)})} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Pareggio</Label>
+                            <Input type="number" value={formData.pointsForDraw} onChange={e => setFormData({...formData, pointsForDraw: parseInt(e.target.value)})} />
+                        </div>
+                        <div>
+                            <Label className="text-xs">Sconfitta</Label>
+                            <Input type="number" value={formData.pointsForLoss} onChange={e => setFormData({...formData, pointsForLoss: parseInt(e.target.value)})} />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Bonus Goal</Label>
+                        <div className="flex gap-2 items-center">
+                            <span className="text-sm">Se segnati &ge;</span>
+                            <Input className="w-16" type="number" placeholder="4" 
+                                value={formData.goalThreshold || ''} 
+                                onChange={e => setFormData({...formData, goalThreshold: e.target.value ? parseInt(e.target.value) : undefined})} 
+                            />
+                            <span className="text-sm">goal, +</span>
+                            <Input className="w-16" type="number" 
+                                value={formData.goalThresholdBonus} 
+                                onChange={e => setFormData({...formData, goalThresholdBonus: parseInt(e.target.value)})} 
+                            />
+                            <span className="text-sm">punti.</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <Checkbox 
+                            id="tenZero"
+                            checked={formData.enableTenZeroBonus}
+                            onCheckedChange={(c) => setFormData({...formData, enableTenZeroBonus: !!c})}
+                        />
+                        <Label htmlFor="tenZero">Bonus 10-0 (Cappotto)</Label>
+                    </div>
+                    {formData.enableTenZeroBonus && (
+                        <div className="flex gap-2 items-center ml-6">
+                            <span className="text-sm">Punti Extra:</span>
+                            <Input className="w-16" type="number" value={formData.tenZeroBonus} onChange={e => setFormData({...formData, tenZeroBonus: parseInt(e.target.value)})} />
+                        </div>
+                    )}
+                </div>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={mutation.isPending}>

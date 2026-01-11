@@ -1,5 +1,5 @@
 import { api } from "./axios";
-import type { Tournament, CreateTournamentRequest, TournamentDetail } from "@/types";
+import type { Tournament, CreateTournamentRequest, TournamentDetail, TournamentStanding } from "@/types";
 
 export const getTournaments = async (): Promise<Tournament[]> => {
   const response = await api.get<Tournament[]>("/api/tournaments");
@@ -22,4 +22,9 @@ export const registerTeam = async (params: { tournamentId: string; teamName: str
 
 export const startTournament = async (id: string) => {
   return api.post(`/api/tournaments/${id}/start`);
+};
+
+export const getTournamentStandings = async (id: string): Promise<TournamentStanding[]> => {
+    const response = await api.get<TournamentStanding[]>(`/api/tournaments/${id}/standings`);
+    return response.data;
 };
