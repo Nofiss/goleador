@@ -55,6 +55,7 @@ erDiagram
 ## 📝 Definizione Entità
 
 ### 1. Player (Giocatori)
+
 Rappresenta i colleghi registrati alla piattaforma.
 
 | Campo | Tipo | Note |
@@ -67,6 +68,7 @@ Rappresenta i colleghi registrati alla piattaforma.
 | **CreatedAt** | `DateTime` | Data di iscrizione. |
 
 ### 2. Table (Tavoli)
+
 I biliardini fisici presenti in azienda.
 
 | Campo | Tipo | Note |
@@ -77,6 +79,7 @@ I biliardini fisici presenti in azienda.
 | **IsActive** | `bool` | Se il tavolo è rotto o rimosso, si mette a false. |
 
 ### 3. Tournament (Tornei)
+
 Raggruppatore logico per competizioni strutturate.
 
 | Campo | Tipo | Note |
@@ -89,6 +92,7 @@ Raggruppatore logico per competizioni strutturate.
 | **EndDate** | `DateTime?` | Nullable, popolato alla fine. |
 
 ### 4. Match (Partite)
+
 L'entità centrale. Può essere un'amichevole (TournamentId = null) o una gara ufficiale.
 
 | Campo | Tipo | Note |
@@ -104,6 +108,7 @@ L'entità centrale. Può essere un'amichevole (TournamentId = null) o una gara u
 > **Nota:** La vittoria viene calcolata a runtime confrontando `ScoreSideA` e `ScoreSideB`.
 
 ### 5. MatchParticipant (Tabella di Join)
+
 Collega i giocatori alla partita, assegnandoli a una squadra (Lato A o Lato B).
 Questo permette di gestire partite 1vs1 (2 record totali) o 2vs2 (4 record totali).
 

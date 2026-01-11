@@ -12,11 +12,13 @@ L'obiettivo non è essere pedanti, ma garantire che il codice scritto da persone
 ## 2. Backend (.NET / C#)
 
 ### Stile e Formattazione
+
 - Usa **PascalCase** per Classi, Metodi, Proprietà pubbliche (`GetPlayerById`).
 - Usa **_camelCase** per i campi privati (`_playerRepository`).
 - Usa `var` quando il tipo è ovvio dall'assegnazione (es. `var player = new Player();`), altrimenti esplicita il tipo.
 
 ### Architettura (Clean Architecture)
+
 - **Skinny Controllers:** I Controller API non devono contenere logica di business. Devono solo:
   1. Ricevere la request.
   2. Chiamare il servizio/mediator (Application Layer).
@@ -24,12 +26,14 @@ L'obiettivo non è essere pedanti, ma garantire che il codice scritto da persone
 - **Domain First:** Le entità del dominio (`User`, `Match`) non devono dipendere da nulla (niente annotazioni EF Core se possibile, niente logica di presentazione).
 
 ### Async/Await
+
 - Usa sempre **async/await** per operazioni I/O (Database, Chiamate esterne).
 - **MAI** usare `.Result` o `.Wait()` (rischio deadlock). Se devi chiamare codice asincrono in un contesto sincrono, c'è un problema di design.
 
 ### Esempio Controller
 
 ❌ **Bad:**
+
 ```csharp
 [HttpPost]
 public IActionResult CreateMatch(MatchDto dto)
@@ -46,6 +50,7 @@ public IActionResult CreateMatch(MatchDto dto)
 ```
 
 ✅ **Good:**
+
 ```csharp
 [HttpPost]
 public async Task<IActionResult> CreateMatch(CreateMatchCommand command)
@@ -63,25 +68,30 @@ public async Task<IActionResult> CreateMatch(CreateMatchCommand command)
 ## 3. Frontend (React / TypeScript)
 
 ### Componenti
+
 - Usa **Functional Components** e **Hooks**. Niente Class Components.
 - Nome del file = Nome del Componente (PascalCase). Es. `MatchCard.tsx`.
 - Un componente per file (a meno di piccoli sotto-componenti strettamente accoppiati).
 
 ### TypeScript
+
 - **NO `any`:** È vietato usare `any`. Se non sai il tipo, usa `unknown` o definisci un'interfaccia.
 - Definisci le `Props` come interfaccia o type sopra il componente.
 
 ### Hooks & State
+
 - **Logica complessa:** Estrai la logica complessa in Custom Hooks (es. `useMatchScore.ts`) per mantenere la UI pulita.
 - **TanStack Query:** Per i dati server, usa sempre `useQuery` o `useMutation`. Non salvare i dati dell'API in uno `useState` locale se non strettamente necessario per manipolazioni temporanee.
 
 ### Styling (Tailwind + shadcn)
+
 - Usa le utility class di Tailwind.
 - Se la stringa di classi diventa illeggibile, usa la funzione helper `cn()` (standard di shadcn) o estrai un componente wrapper.
 
 ### Esempio Componente
 
 ❌ **Bad:**
+
 ```tsx
 // Niente tipi, logica mischiata, stile inline
 const Button = (props: any) => {
@@ -93,6 +103,7 @@ const Button = (props: any) => {
 ```
 
 ✅ **Good:**
+
 ```tsx
 interface SaveButtonProps {
   label: string;

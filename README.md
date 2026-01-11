@@ -7,28 +7,33 @@ Nato come tool interno, il progetto mira a digitalizzare il classico "foglio car
 ## 🚀 Panoramica del Progetto
 
 L'applicazione è strutturata come un **Monorepo** che ospita:
-- **Backend:** .NET 8 (Web API) sviluppato con Clean Architecture.
+
+- **Backend:** .NET 10 (Web API) sviluppato con Clean Architecture.
 - **Frontend:** React (Vite + TypeScript) per una UI reattiva e veloce.
 - **Database:** Astrazione tramite Entity Framework Core per supportare molteplici provider (SQL Server, PostgreSQL, SQLite).
 
 ## ✨ Funzionalità Principali
 
 ### 👥 Gestione Giocatori & Profili
+
 - Creazione e gestione dei profili utente (Colleghi).
 - Storico personale delle partite giocate.
 - **Statistiche avanzate:** Win Rate, Goal fatti/subiti e trend di rendimento.
 
 ### 🏆 Tornei & Competizioni
+
 - **Creazione Tornei:** Supporto per diverse modalità (es. Eliminazione diretta, Girone all'italiana).
 - **Matchmaking:** Generazione automatica del calendario delle partite.
 - **Bracket View:** Visualizzazione grafica del tabellone del torneo.
 
 ### ⚔️ Partite & Punteggi
+
 - **Quick Match:** Registrazione rapida di una partita amichevole "al volo".
 - **Match Programmati:** Svolgimento di partite previste da un torneo attivo.
 - **Validazione:** Workflow di conferma risultato (es. inserito da un team, confermato dall'altro).
 
 ### 📊 Classifiche (Leaderboards)
+
 - Classifiche globali e per torneo.
 - Sistema di ranking (es. ELO o a punti) per determinare il "Re del Biliardino" in azienda.
 
@@ -45,7 +50,9 @@ L'applicazione è strutturata come un **Monorepo** che ospita:
 ## 🏁 Per Iniziare (Quick Start)
 
 ### Prerequisiti
+
 Assicurati di avere installato sulla tua macchina:
+
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Node.js](https://nodejs.org/) (v20+ raccomandato)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
@@ -53,18 +60,21 @@ Assicurati di avere installato sulla tua macchina:
 ### Esecuzione in Locale
 
 1. **Clona il repository:**
+
    ```bash
    git clone https://github.com/tuo-user/goleador.git
    cd goleador
    ```
 
 2. **Avvia l'infrastruttura (Database):**
+
    ```bash
    cd infrastructure
    docker-compose up -d
    ```
 
 3. **Backend:**
+
    ```bash
    cd src/backend
    dotnet restore
@@ -72,6 +82,7 @@ Assicurati di avere installato sulla tua macchina:
    ```
 
 4. **Frontend:**
+
    ```bash
    cd src/frontend
    npm install
@@ -88,5 +99,5 @@ Assicurati di avere installato sulla tua macchina:
 ```
 
 ## 📝 Licenza
+
 Progetto interno - Tutti i diritti riservati.
-```

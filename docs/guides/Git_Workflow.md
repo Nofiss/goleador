@@ -5,16 +5,19 @@ Per mantenere la history pulita e facilitare la collaborazione su **Goleador**, 
 ## 1. I Branch
 
 ### 🌳 `main` (Default)
+
 - Rappresenta l'ambiente di **Produzione**.
 - Il codice qui deve essere sempre compilabile e stabile.
 - **Nessun commit diretto:** Le modifiche arrivano solo tramite Pull Request (PR).
 
 ### 🌿 Feature Branches
+
 - Creati a partire da `main`.
 - Usati per sviluppare nuove funzionalità o fix.
 - Una volta completati, vengono mergiati su `main` tramite PR e poi cancellati.
 
 ### Convenzione Naming Branch
+
 Usa il formato: `tipo/descrizione-kebab-case`
 
 | Prefisso | Quando usarlo | Esempio |
@@ -32,6 +35,7 @@ Seguiamo lo standard [Conventional Commits](https://www.conventionalcommits.org/
 Questo formato rende la history leggibile e permette (in futuro) di generare changelog automatici.
 
 ### Formato
+
 ```text
 <tipo>(<ambito opzionale>): <descrizione breve>
 
@@ -39,6 +43,7 @@ Questo formato rende la history leggibile e permette (in futuro) di generare cha
 ```
 
 ### Tipi (`<tipo>`)
+
 - **feat**: Una nuova funzionalità (corrisponde a *Minor* nel Semantic Versioning).
 - **fix**: Correzione di un bug (corrisponde a *Patch*).
 - **docs**: Modifiche alla documentazione.
@@ -48,7 +53,9 @@ Questo formato rende la history leggibile e permette (in futuro) di generare cha
 - **chore**: Modifiche al processo di build, docker, dipendenze (es. aggiornamento npm).
 
 ### Ambito (`<ambito>`) - Importante per Monorepo
+
 Specifica quale parte del progetto hai toccato:
+
 - `backend`
 - `frontend`
 - `db`
@@ -74,16 +81,18 @@ Specifica quale parte del progetto hai toccato:
 
 Quando una feature è pronta:
 
-1.  Assicurati di essere allineato con `main` (`git pull origin main`).
-2.  Pusha il tuo branch.
-3.  Apri una PR su GitHub/GitLab.
+1. Assicurati di essere allineato con `main` (`git pull origin main`).
+2. Pusha il tuo branch.
+3. Apri una PR su GitHub/GitLab.
 
 ### Checklist prima del Merge
+
 - [ ] Il codice compila senza errori.
 - [ ] I test (se presenti) passano.
 - [ ] Non ci sono file inutili committati (es. `bin/`, `node_modules/`).
 - [ ] Il codice rispetta le convenzioni di stile.
 
 ### Strategia di Merge
+
 Preferiamo lo **Squash and Merge**.
 Questo prende tutti i commit "sporchi" del feature branch (es. "wip", "typo", "fix") e li schiaccia in un unico commit pulito sul `main`.
