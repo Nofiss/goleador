@@ -4,6 +4,7 @@ using Goleador.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Goleador.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260111124803_AddMatchStatus")]
+    partial class AddMatchStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,10 +125,6 @@ namespace Goleador.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -203,52 +202,6 @@ namespace Goleador.Infrastructure.Migrations
                     b.Navigation("Match");
 
                     b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("Goleador.Domain.Entities.Tournament", b =>
-                {
-                    b.OwnsOne("Goleador.Domain.ValueObjects.TournamentScoringRules", "ScoringRules", b1 =>
-                        {
-                            b1.Property<Guid>("TournamentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<bool>("EnableTenZeroBonus")
-                                .HasColumnType("bit");
-
-                            b1.Property<int?>("GoalThreshold")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("GoalThresholdBonus")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("PointsForDraw")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(1);
-
-                            b1.Property<int>("PointsForLoss")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(0);
-
-                            b1.Property<int>("PointsForWin")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int")
-                                .HasDefaultValue(3);
-
-                            b1.Property<int>("TenZeroBonus")
-                                .HasColumnType("int");
-
-                            b1.HasKey("TournamentId");
-
-                            b1.ToTable("Tournaments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TournamentId");
-                        });
-
-                    b.Navigation("ScoringRules")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Goleador.Domain.Entities.TournamentTeam", b =>

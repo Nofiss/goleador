@@ -7,6 +7,8 @@ public interface IApplicationDbContext
 {
     DbSet<Player> Players { get; }
     DbSet<Match> Matches { get; }
+    DbSet<Tournament> Tournaments { get; }
+    DbSet<TournamentTeam> TournamentTeams { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

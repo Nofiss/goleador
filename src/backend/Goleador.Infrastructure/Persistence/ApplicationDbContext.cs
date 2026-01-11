@@ -9,6 +9,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Player> Players { get; set; }
     public DbSet<Match> Matches { get; set; }
+    public DbSet<Tournament> Tournaments { get; set; }
+    public DbSet<TournamentTeam> TournamentTeams { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

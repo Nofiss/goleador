@@ -4,20 +4,14 @@ namespace Goleador.Domain.Entities;
 
 public class Player : BaseEntity
 {
-    public string Nickname { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string Email { get; private set; }
+    public string Nickname { get; private set; } = string.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string Email { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
 
     // Costruttore vuoto richiesto da EF Core per la reflection
-    private Player()
-    {
-        Nickname = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        Email = string.Empty;
-    }
+    Player() { }
 
     public Player(string nickname, string firstName, string lastName, string email)
     {
