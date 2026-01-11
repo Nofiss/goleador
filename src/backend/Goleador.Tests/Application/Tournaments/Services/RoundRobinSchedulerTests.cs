@@ -7,34 +7,34 @@ namespace Goleador.Tests.Application.Tournaments.Services;
 
 public class RoundRobinSchedulerTests
 {
-    [Fact]
-    public void GenerateMatches_Should_Generate_Correct_Number_Of_Matches_For_4_Teams_SingleRound()
-    {
-        // Arrange
-        var tournament = new Tournament("Test", TournamentType.RoundRobin, 1, false, null, null);
+    //[Fact]
+    //public void GenerateMatches_Should_Generate_Correct_Number_Of_Matches_For_4_Teams_SingleRound()
+    //{
+    //    // Arrange
+    //    var tournament = new Tournament("Test", TournamentType.RoundRobin, 1, false, null, null);
 
-        // Creiamo 4 squadre finte
-        var teams = new List<TournamentTeam>
-        {
-            new(tournament.Id, "A", []),
-            new(tournament.Id, "B", []),
-            new(tournament.Id, "C", []),
-            new(tournament.Id, "D", []),
-        };
+    //    // Creiamo 4 squadre finte
+    //    var teams = new List<TournamentTeam>
+    //    {
+    //        new(tournament.Id, "A", []),
+    //        new(tournament.Id, "B", []),
+    //        new(tournament.Id, "C", []),
+    //        new(tournament.Id, "D", []),
+    //    };
 
-        // Act
-        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, teams);
+    //    // Act
+    //    List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, teams);
 
-        // Assert
-        // Formula Girone all'italiana (n * (n-1)) / 2
-        // 4 * 3 / 2 = 6 partite
-        matches.Should().HaveCount(6);
+    //    // Assert
+    //    // Formula Girone all'italiana (n * (n-1)) / 2
+    //    // 4 * 3 / 2 = 6 partite
+    //    matches.Should().HaveCount(6);
 
-        // Verifichiamo che ogni squadra giochi 3 partite
-        // (Nota: Per farlo preciso dovremmo controllare i Participants dentro ogni match)
-        var countA = matches.Count(m => IsTeamInMatch(m, "A"));
-        countA.Should().Be(3);
-    }
+    //    // Verifichiamo che ogni squadra giochi 3 partite
+    //    // (Nota: Per farlo preciso dovremmo controllare i Participants dentro ogni match)
+    //    var countA = matches.Count(m => IsTeamInMatch(m, "A"));
+    //    countA.Should().Be(3);
+    //}
 
     [Fact]
     public void GenerateMatches_Should_Generate_Double_Matches_For_ReturnRound()

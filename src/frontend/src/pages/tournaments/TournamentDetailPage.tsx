@@ -1,20 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlayCircle, Trophy } from "lucide-react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getTournamentById, startTournament } from "@/api/tournaments";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { RegisterTeamForm } from "@/features/tournaments/RegisterTeamForm";
 import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { useAuth } from "@/hooks/useAuth";
-import { TournamentStatus } from "@/types";
-import { useState } from "react";
-import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
+import { type MatchDto, TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
-	const { isAdmin, isReferee  } = useAuth();
+	const { isAdmin, isReferee } = useAuth();
 
 	const { id } = useParams<{ id: string }>();
 	const queryClient = useQueryClient();
@@ -25,7 +25,7 @@ export const TournamentDetailPage = () => {
 		enabled: !!id,
 	});
 
-    const [selectedMatch, setSelectedMatch] = useState<any>(null);
+	const [selectedMatch, setSelectedMatch] = useState<any>(null);
 
 	const startMutation = useMutation({
 		mutationFn: startTournament,
@@ -174,17 +174,17 @@ export const TournamentDetailPage = () => {
 											{match.scoreHome} - {match.scoreAway}
 										</div>
 									)}
-									                        {/* Bottone Azione (Visibile solo se Referee) */}
-                        {isReferee && (
-                             <Button 
-                                variant={match.status === 0 ? "default" : "outline"} 
-                                size="sm"
-                                className="w-full"
-                                onClick={() => setSelectedMatch(match)}
-                             >
-                                {match.status === 0 ? "Inserisci Risultato" : "Correggi"}
-                             </Button>
-                        )}
+									{/* Bottone Azione (Visibile solo se Referee) */}
+									{isReferee && (
+										<Button
+											variant={match.status === 0 ? "default" : "outline"}
+											size="sm"
+											className="w-full"
+											onClick={() => setSelectedMatch(match)}
+										>
+											{match.status === 0 ? "Inserisci Risultato" : "Correggi"}
+										</Button>
+									)}
 								</div>
 							))}
 							{tournament.matches.length === 0 && (
@@ -195,12 +195,12 @@ export const TournamentDetailPage = () => {
 				</TabsContent>
 			</Tabs>
 
-			<MatchResultDialog 
-                match={selectedMatch} 
-                isOpen={!!selectedMatch} 
-                onClose={() => setSelectedMatch(null)} 
-                tournamentId={tournament?.id || ""}
-            />
+			<MatchResultDialog
+				match={selectedMatch}
+				isOpen={!!selectedMatch}
+				onClose={() => setSelectedMatch(null)}
+				tournamentId={tournament?.id || ""}
+			/>
 		</div>
 	);
 };

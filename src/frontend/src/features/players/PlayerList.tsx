@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { BarChart2, RefreshCcw } from "lucide-react";
 import { useState } from "react";
-import { api } from "@/api/axios";
 import { getPlayers } from "@/api/players";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +12,6 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { PlayerStatsDialog } from "@/features/players/PlayerStatsDialog";
-import type { Player } from "@/types";
 
 export const PlayerList = () => {
 	// 1. Fetch dei dati con TanStack Query

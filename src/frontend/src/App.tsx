@@ -1,33 +1,42 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/layouts/AppLayout";
 import { DashboardPage } from "@/pages/DashboardPage";
-import { PlayersPage } from "@/pages/PlayersPage";
-import { TournamentDetailPage } from "@/pages/TournamentDetailPage";
-import { TournamentsPage } from "@/pages/TournamentsPage";
-import { LoginPage } from "./pages/LoginPage";
-import { MatchesPage } from "./pages/MatchesPage";
+import { LoginPage } from "@/pages/LoginPage";
+// Matches
+import { MatchCreatePage } from "@/pages/matches/MatchCreatePage";
+import { MatchesListPage } from "@/pages/matches/MatchesListPage";
+import { PlayerCreatePage } from "@/pages/players/PlayerCreatePage";
+// Players
+import { PlayersListPage } from "@/pages/players/PlayersListPage";
+import { TournamentCreatePage } from "@/pages/tournaments/TournamentCreatePage";
+import { TournamentDetailPage } from "@/pages/tournaments/TournamentDetailPage";
+// Tournaments
+import { TournamentsListPage } from "@/pages/tournaments/TournamentsListPage";
 
 function App() {
 	return (
 		<BrowserRouter>
 			<Routes>
-				{/* Il Layout avvolge tutte le rotte interne */}
+				<Route path="/login" element={<LoginPage />} />
+
+				{/* Rotte Protette dal Layout */}
 				<Route element={<AppLayout />}>
-					{/* Rotta Default: Dashboard */}
 					<Route path="/" element={<DashboardPage />} />
 
-					<Route path="/login" element={<LoginPage />} />
+					{/* Players Routes */}
+					<Route path="/players" element={<PlayersListPage />} />
+					<Route path="/players/new" element={<PlayerCreatePage />} />
 
-					{/* Rotta Players */}
-					<Route path="/players" element={<PlayersPage />} />
-
-					<Route path="/matches" element={<MatchesPage />} />
-
-					<Route path="/tournaments" element={<TournamentsPage />} />
+					{/* Tournaments Routes */}
+					<Route path="/tournaments" element={<TournamentsListPage />} />
+					<Route path="/tournaments/new" element={<TournamentCreatePage />} />
 					<Route path="/tournaments/:id" element={<TournamentDetailPage />} />
+
+					{/* Matches Routes */}
+					<Route path="/matches" element={<MatchesListPage />} />
+					<Route path="/matches/new" element={<MatchCreatePage />} />
 				</Route>
 
-				{/* Catch all: se uno scrive un URL a caso, rimanda alla home */}
 				<Route path="*" element={<Navigate to="/" replace />} />
 			</Routes>
 		</BrowserRouter>
