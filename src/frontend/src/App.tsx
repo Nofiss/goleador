@@ -3,6 +3,8 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { PlayersPage } from "@/pages/PlayersPage";
 import { MatchesPage } from "./pages/MatchesPage";
+import { TournamentsPage } from "@/pages/TournamentsPage";
+import { TournamentDetailPage } from "@/pages/TournamentDetailPage";
 
 function App() {
   return (
@@ -19,7 +21,8 @@ function App() {
           
           <Route path="/matches" element={<MatchesPage />} /> 
 
-          <Route path="/tournaments" element={<div>Pagina Tornei (Coming Soon)</div>} />
+          <Route path="/tournaments" element={<TournamentsPage />} />
+          <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
 
         </Route>
 
