@@ -1,0 +1,63 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Goleador.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Goleador.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+    : ControllerBase
+{
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginAsync([FromBody] LoginModel model)
+    {
+        ApplicationUser? user = await userManager.FindByEmailAsync(model.Email);
+        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+        {
+            IList<string> userRoles = await userManager.GetRolesAsync(user);
+
+            var authClaims = new List<Claim>
+            {
+                new(ClaimTypes.Name, user.UserName!),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
+
+            foreach (var role in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var authSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
+            );
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["Jwt:Issuer"],
+                audience: configuration["Jwt:Audience"],
+                expires: DateTime.Now.AddHours(3),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(
+                    authSigningKey,
+                    SecurityAlgorithms.HmacSha256
+                )
+            );
+
+            return Ok(
+                new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo,
+                    roles = userRoles, // Restituiamo i ruoli al frontend
+                }
+            );
+        }
+        return Unauthorized();
+    }
+}
+
+public record LoginModel(string Email, string Password);

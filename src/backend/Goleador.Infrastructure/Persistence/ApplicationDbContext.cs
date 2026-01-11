@@ -1,11 +1,13 @@
 using System.Reflection;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
+using Goleador.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Goleador.Infrastructure.Persistence;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
     public DbSet<Player> Players { get; set; }
     public DbSet<Match> Matches { get; set; }

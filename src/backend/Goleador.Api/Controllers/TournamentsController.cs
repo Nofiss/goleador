@@ -4,17 +4,21 @@ using Goleador.Application.Tournaments.Commands.StartTournament;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
 using Goleador.Application.Tournaments.Queries.GetTournaments;
 using Goleador.Application.Tournaments.Queries.GetTournamentStandings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Goleador.Api.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class TournamentsController : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<TournamentDto>>> GetAllAsync() =>
         await Mediator.Send(new GetTournamentsQuery());
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<TournamentDetailDto>> GetByIdAsync(Guid id) =>
         await Mediator.Send(new GetTournamentByIdQuery(id));
 

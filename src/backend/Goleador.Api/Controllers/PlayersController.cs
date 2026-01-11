@@ -1,12 +1,15 @@
 using Goleador.Application.Players.Commands.CreatePlayer;
 using Goleador.Application.Players.Queries.GetPlayers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Goleador.Api.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class PlayersController : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<PlayerDto>>> GetAllAsync() =>
         await Mediator.Send(new GetPlayersQuery());
 
