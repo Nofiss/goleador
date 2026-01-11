@@ -1,5 +1,6 @@
 using Goleador.Application.Players.Commands.CreatePlayer;
 using Goleador.Application.Players.Queries.GetPlayers;
+using Goleador.Application.Players.Queries.GetPlayerStatistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,11 @@ public class PlayersController : ApiControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<List<PlayerDto>>> GetAllAsync() =>
         await Mediator.Send(new GetPlayersQuery());
+
+    [HttpGet("{id}/statistics")]
+    [AllowAnonymous]
+    public async Task<ActionResult<PlayerStatisticsDto>> GetStatisticsAsync(Guid id) =>
+        await Mediator.Send(new GetPlayerStatisticsQuery(id));
 
     [HttpPost]
     public async Task<ActionResult<Guid>> CreateAsync(CreatePlayerCommand command)

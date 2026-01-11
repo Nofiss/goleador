@@ -6,6 +6,20 @@ export interface Player {
 	createdAt: string;
 }
 
+export interface PlayerStatistics {
+	playerId: string;
+	nickname: string;
+	matchesPlayed: number;
+	wins: number;
+	draws: number;
+	losses: number;
+	goalsFor: number;
+	goalsAgainst: number;
+	goalDifference: number;
+	winRate: number;
+	recentForm: string[]; // ["W", "L", "D"...]
+}
+
 export const TournamentStatus = {
 	Setup: 0,
 	Active: 1,
