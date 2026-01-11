@@ -1,14 +1,43 @@
 services:
-  goleador-db:
+  # Database
+  db:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: goleador_sql_server
+    container_name: goleador_db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd # Password complessa obbligatoria
-    ports:
-      - "1433:1433"
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
     volumes:
-      - mssql-data:/var/opt/mssql
+      - mssql-prod-data:/var/opt/mssql
+    restart: always
+
+  # Backend API
+  api:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    container_name: goleador_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GoleadorDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+      - Jwt__Key=GoleadorSecretKey_MustBeVeryLongAndSecure_AtLeast32Chars!
+      - Jwt__Issuer=GoleadorApi
+      - Jwt__Audience=GoleadorClient
+    ports:
+      - "8080:8080" # L'API risponde sulla 8080
+    depends_on:
+      - db
+    restart: always
+
+  # Frontend React
+  web:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: goleador_web
+    ports:
+      - "80:80" # Il sito risponde sulla 80 standard
+    depends_on:
+      - api
+    restart: always
 
 volumes:
-  mssql-data:
+  mssql-prod-data:

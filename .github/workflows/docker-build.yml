@@ -1,0 +1,37 @@
+name: 🐳 Docker Build Check
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/backend/**'
+      - 'src/frontend/**'
+      - 'docker-compose.prod.yml'
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Test Build Backend
+      - name: Build Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/backend
+          file: ./src/backend/Dockerfile
+          push: false # Solo build, niente push per ora
+          tags: goleador-api:latest
+
+      # Test Build Frontend
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/frontend
+          file: ./src/frontend/Dockerfile
+          push: false
+          tags: goleador-web:latest
