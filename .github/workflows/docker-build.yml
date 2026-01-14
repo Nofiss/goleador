@@ -11,7 +11,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: nofiss/goleador
 
 jobs:
   build-and-push:
@@ -23,6 +22,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Downcase REPO name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+        env:
+          GITHUB_REPOSITORY: "${{ github.repository }}"
 
       # 1. Login su GitHub Container Registry
       - name: Log in to the Container registry
@@ -43,7 +48,7 @@ jobs:
           context: ./src/backend
           file: ./src/backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/goleador-api:latest
+          tags: ghcr.io/${{ env.REPO_LOWER }}/goleador-api:latest
 
       # 4. Build & Push FRONTEND
       - name: Build and push Frontend
@@ -52,4 +57,4 @@ jobs:
           context: ./src/frontend
           file: ./src/frontend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/goleador-web:latest
+          tags: ghcr.io/${{ env.REPO_LOWER }}/goleador-web:latest

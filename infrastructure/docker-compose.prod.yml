@@ -12,7 +12,7 @@ services:
 
   # Backend API
   api:
-    image: ghcr.io/tuo-username/goleador/goleador-api:latest
+    image: ghcr.io/nofiss/goleador/goleador-api:latest
     container_name: goleador_api
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=GoleadorDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
@@ -27,7 +27,7 @@ services:
 
   # Frontend React
   web:
-    image: ghcr.io/tuo-username/goleador/goleador-web:latest
+    image: ghcr.io/nofiss/goleador/goleador-web:latest
     container_name: goleador_web
     ports:
       - "80:80" # Il sito risponde sulla 80 standard
