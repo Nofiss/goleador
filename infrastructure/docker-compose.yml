@@ -12,9 +12,7 @@ services:
 
   # Backend API
   api:
-    build:
-      context: ./src/backend
-      dockerfile: Dockerfile
+    image: ghcr.io/tuo-username/goleador/goleador-api:latest
     container_name: goleador_api
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=GoleadorDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
@@ -29,9 +27,7 @@ services:
 
   # Frontend React
   web:
-    build:
-      context: ./src/frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/tuo-username/goleador/goleador-web:latest
     container_name: goleador_web
     ports:
       - "80:80" # Il sito risponde sulla 80 standard
