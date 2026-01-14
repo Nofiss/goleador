@@ -2,9 +2,9 @@ name: 🛡️ CI - Build & Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -14,31 +14,31 @@ jobs:
   backend:
     name: 🏗️ Backend (.NET)
     runs-on: ubuntu-latest
-    
+
     # Esegui solo se cambiano file nel backend o nei workflow
     defaults:
       run:
         working-directory: ./src/backend
 
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: 10.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Test
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal
 
   # ===========================
-  # FRONTEND JOB
+  # FRONTEND JOB (PNPM)
   # ===========================
   frontend:
     name: 🎨 Frontend (React)
@@ -49,24 +49,35 @@ jobs:
         working-directory: ./src/frontend
 
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v6
-      with:
-        node-version: 20
-        cache: 'npm'
-        cache-dependency-path: src/frontend/package-lock.json
+      # 1. Installa e configura PNPM
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 # Usa la major version che stai usando in locale
+          run_install: false
 
-    - name: Install dependencies
-      run: npm ci
+      # 2. Setup Node.js + Caching automatico per pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+          # È FONDAMENTALE specificare il percorso corretto del lock file relativo alla root
+          cache-dependency-path: src/frontend/pnpm-lock.yaml
 
-    - name: Type Check (TypeScript)
-      run: npx tsc --noEmit
+      # 3. Installazione dipendenze
+      # --frozen-lockfile è l'equivalente pnpm di 'npm ci' (fallisce se il lock file cambia)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    # Se hai configurato ESLint:
-    # - name: Lint
-    #   run: npm run lint
+      # 4. Controlli e Build
+      - name: Type Check (TypeScript)
+        run: pnpm tsc --noEmit
 
-    - name: Build
-      run: npm run build
+      # - name: Biome ci
+      #   run: pnpm biome:ci
+
+      - name: Build
+        run: pnpm run build

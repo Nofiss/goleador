@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getRecentMatches } from "@/api/matches";
+// import { useQuery } from "@tanstack/react-query";
+// import { getRecentMatches } from "@/api/matches";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {

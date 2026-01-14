@@ -1,12 +1,12 @@
-import { type TournamentDetail, TournamentStatus } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PlayCircle } from "lucide-react";
+import { startTournament } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { JoinTournamentButton } from "../JoinTournamentButton";
+import { type TournamentDetail, TournamentStatus } from "@/types";
 import { GenerateTeamsButton } from "../GenerateTeamsButton";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { startTournament } from "@/api/tournaments";
+import { JoinTournamentButton } from "../JoinTournamentButton";
 
 interface Props {
 	tournament: TournamentDetail;

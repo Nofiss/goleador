@@ -1,10 +1,14 @@
+import { MapPin } from "lucide-react";
 import { useState } from "react";
-import { type TournamentDetail, TournamentStatus } from "@/types";
 import { Button } from "@/components/ui/button";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { MapPin } from "lucide-react";
+import {
+	type TournamentDetail,
+	type TournamentMatch,
+	TournamentStatus,
+} from "@/types";
 
 interface Props {
 	tournament: TournamentDetail;
@@ -12,7 +16,9 @@ interface Props {
 
 export const MatchesTab = ({ tournament }: Props) => {
 	const { isReferee } = useAuth();
-	const [selectedMatch, setSelectedMatch] = useState<any>(null);
+	const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(
+		null,
+	);
 
 	if (tournament.status === TournamentStatus.Setup) {
 		return (

@@ -42,6 +42,7 @@ public class TournamentsController : ApiControllerBase
     }
 
     [HttpGet("{id}/standings")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<TournamentStandingDto>>> GetStandingsAsync(Guid id) =>
         await Mediator.Send(new GetTournamentStandingsQuery(id));
 

@@ -19,7 +19,7 @@ export const LoginPage = () => {
 			const res = await api.post("/api/auth/login", { email, password });
 			login(res.data.token, res.data.roles);
 			navigate("/"); // Torna alla dashboard
-		} catch (err) {
+		} catch {
 			setError("Credenziali non valide");
 		}
 	};

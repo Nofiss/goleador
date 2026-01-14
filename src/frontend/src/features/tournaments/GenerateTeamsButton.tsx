@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Sparkles } from "lucide-react";
 import { api } from "@/api/axios";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 
 export const GenerateTeamsButton = ({
 	tournamentId,

@@ -1,16 +1,16 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getTables, deleteTable } from "@/api/tables";
-import { useAuth } from "@/hooks/useAuth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { MapPin, Trash2 } from "lucide-react";
+import { deleteTable, getTables } from "@/api/tables";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
+	CardContent,
+	CardDescription,
 	CardHeader,
 	CardTitle,
-	CardDescription,
-	CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Trash2, MapPin } from "lucide-react";
 import { CreateTableDialog } from "@/features/tables/CreateTableDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 export const TablesPage = () => {
 	const { isAdmin } = useAuth();

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "@/api/axios";
+import { getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,8 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getTables } from "@/api/tables";
-import type { TournamentMatch } from "@/types";
 import {
 	Select,
 	SelectContent,
@@ -20,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { TournamentMatch } from "@/types";
 
 interface MatchResultDialogProps {
 	match: TournamentMatch | null;

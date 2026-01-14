@@ -2,6 +2,7 @@ import {
 	Gamepad2,
 	LayoutDashboard,
 	LogOut,
+	Map as MapIcon,
 	Menu,
 	Trophy,
 	Users,
@@ -34,7 +35,7 @@ export const AppLayout = () => {
 		{ name: "Partite", href: "/matches", icon: Gamepad2 },
 		{ name: "Tornei", href: "/tournaments", icon: Trophy },
 		{ name: "Giocatori", href: "/players", icon: Users },
-		{ name: "Tavoli", href: "/tables", icon: Map },
+		{ name: "Tavoli", href: "/tables", icon: MapIcon },
 	];
 
 	const handleLogout = () => {

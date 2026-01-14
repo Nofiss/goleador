@@ -1,10 +1,10 @@
-import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import { getTournamentById } from "@/api/tournaments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TournamentHeader } from "@/features/tournaments/details/TournamentHeader";
-import { TeamsTab } from "@/features/tournaments/details/TeamsTab";
 import { MatchesTab } from "@/features/tournaments/details/MatchesTab";
+import { TeamsTab } from "@/features/tournaments/details/TeamsTab";
+import { TournamentHeader } from "@/features/tournaments/details/TournamentHeader";
 import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TournamentStatus } from "@/types";
 

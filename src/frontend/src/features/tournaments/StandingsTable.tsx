@@ -24,7 +24,7 @@ export const StandingsTable = ({ tournamentId }: { tournamentId: string }) => {
 			<Table>
 				<TableHeader>
 					<TableRow className="bg-gray-50">
-						<TableHead className="w-[50px]">Pos</TableHead>
+						<TableHead className="w-12.5">Pos</TableHead>
 						<TableHead>Squadra</TableHead>
 						<TableHead className="text-center font-bold">PT</TableHead>
 						<TableHead className="text-center text-gray-500">G</TableHead>

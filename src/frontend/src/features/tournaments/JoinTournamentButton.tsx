@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
 import { joinTournament } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	Dialog,
 	DialogContent,
@@ -10,7 +10,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { UserPlus } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const JoinTournamentButton = ({
 	tournamentId,
@@ -27,8 +27,8 @@ export const JoinTournamentButton = ({
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			setOpen(false);
 		},
-		onError: (err: any) => {
-			alert(err.response?.data?.detail || "Errore durante l'iscrizione");
+		onError: () => {
+			alert("Errore durante l'iscrizione");
 		},
 	});
 
@@ -39,7 +39,7 @@ export const JoinTournamentButton = ({
 					<UserPlus className="mr-2 h-4 w-4" /> Partecipa
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-106.25">
 				<DialogHeader>
 					<DialogTitle>Iscrizione Torneo</DialogTitle>
 				</DialogHeader>

@@ -1,8 +1,8 @@
-import { type TournamentDetail, TournamentStatus } from "@/types";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Users, User } from "lucide-react";
-import { RegisterTeamForm } from "../RegisterTeamForm";
+import { Users } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
+import { type TournamentDetail, TournamentStatus } from "@/types";
+import { RegisterTeamForm } from "../RegisterTeamForm";
 
 interface Props {
 	tournament: TournamentDetail;
