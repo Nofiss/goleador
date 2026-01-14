@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: Nofiss/goleador
+  IMAGE_NAME: nofiss/goleador
 
 jobs:
   build-and-push:
