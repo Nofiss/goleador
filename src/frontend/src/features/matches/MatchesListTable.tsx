@@ -10,12 +10,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { MatchDto } from "@/types";
 
 export const MatchesListTable = () => {
-	const { data: matches, isLoading } = useQuery({
-		queryKey: ["matches"],
-		queryFn: getRecentMatches,
-	});
+	// const { data: matches, isLoading } = useQuery({
+	// 	queryKey: ["matches"],
+	// 	queryFn: getRecentMatches,
+	// });
+
+	const { data: matches, isLoading } = {
+		data: [] as MatchDto[],
+		isLoading: false,
+	};
 
 	if (isLoading)
 		return <div className="text-center py-10">Caricamento partite...</div>;

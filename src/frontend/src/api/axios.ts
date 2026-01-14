@@ -5,24 +5,34 @@ export const api = axios.create({
 	headers: { "Content-Type": "application/json" },
 });
 
-// Aggiungi token automaticamente
-api.interceptors.request.use((config) => {
-	const token = localStorage.getItem("goleador_token");
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`;
-	}
-	return config;
-});
+api.interceptors.request.use(
+	(config) => {
+		const token = localStorage.getItem("goleador_token");
+		if (token) {
+			if (config.headers) {
+				config.headers.Authorization = `Bearer ${token}`;
+			}
+		}
+		return config;
+	},
+	(error) => Promise.reject(error),
+);
 
-// Gestione scadenza token (401)
 api.interceptors.response.use(
 	(response) => response,
 	(error) => {
+		// Gestione Token Scaduto/Mancante (401)
 		if (error.response?.status === 401) {
-			// Token scaduto o invalido
 			localStorage.removeItem("goleador_token");
+			localStorage.removeItem("goleador_roles");
 			window.location.href = "/login";
 		}
+
+		// Gestione Permessi Insufficienti (403) - NON fare redirect, mostra errore
+		if (error.response?.status === 403) {
+			console.error("Non hai i permessi per questa azione.");
+		}
+
 		return Promise.reject(error);
 	},
 );

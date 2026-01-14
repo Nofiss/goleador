@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Goleador.Application.Auth.Commands.Register;
 using Goleador.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,10 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Goleador.Api.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
-    : ControllerBase
+    : ApiControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync([FromBody] LoginModel model)
@@ -57,6 +56,13 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
             );
         }
         return Unauthorized();
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterAsync(RegisterUserCommand command)
+    {
+        await Mediator.Send(command);
+        return Ok(new { message = "Registrazione completata! Ora puoi fare login." });
     }
 }
 

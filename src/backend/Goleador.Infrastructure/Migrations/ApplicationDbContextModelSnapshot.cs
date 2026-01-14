@@ -48,6 +48,8 @@ namespace Goleador.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TableId");
+
                     b.HasIndex("TournamentId");
 
                     b.ToTable("Matches");
@@ -100,12 +102,48 @@ namespace Goleador.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Nickname")
                         .IsUnique();
 
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
                     b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("Goleador.Domain.Entities.Table", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tables", (string)null);
                 });
 
             modelBuilder.Entity("Goleador.Domain.Entities.Tournament", b =>
@@ -376,10 +414,16 @@ namespace Goleador.Infrastructure.Migrations
 
             modelBuilder.Entity("Goleador.Domain.Entities.Match", b =>
                 {
+                    b.HasOne("Goleador.Domain.Entities.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId");
+
                     b.HasOne("Goleador.Domain.Entities.Tournament", "Tournament")
                         .WithMany("Matches")
                         .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Table");
 
                     b.Navigation("Tournament");
                 });

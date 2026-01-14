@@ -1,4 +1,6 @@
 using Goleador.Application.Tournaments.Commands.CreateTournament;
+using Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
+using Goleador.Application.Tournaments.Commands.JoinTournament;
 using Goleador.Application.Tournaments.Commands.RegisterTeam;
 using Goleador.Application.Tournaments.Commands.StartTournament;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
@@ -42,4 +44,17 @@ public class TournamentsController : ApiControllerBase
     [HttpGet("{id}/standings")]
     public async Task<ActionResult<List<TournamentStandingDto>>> GetStandingsAsync(Guid id) =>
         await Mediator.Send(new GetTournamentStandingsQuery(id));
+
+    [HttpPost("{id}/join")]
+    [Authorize]
+    public async Task<ActionResult<Guid>> JoinAsync(Guid id, [FromBody] string teamName) =>
+        await Mediator.Send(new JoinTournamentCommand(id, teamName));
+
+    [HttpPost("{id}/generate-teams")]
+    [Authorize(Roles = "Admin")] // Solo l'admin può premere il bottone magico
+    public async Task<IActionResult> GenerateTeamsAsync(Guid id)
+    {
+        await Mediator.Send(new GenerateBalancedTeamsCommand(id));
+        return NoContent();
+    }
 }

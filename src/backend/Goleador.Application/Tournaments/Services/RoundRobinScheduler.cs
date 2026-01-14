@@ -55,43 +55,6 @@ public static class RoundRobinScheduler
         }
 
         // Gestione Ritorno (Return Matches)
-        if (tournament.HasReturnMatches)
-        {
-            var returnMatches = new List<Match>();
-            foreach (Match match in matches)
-            {
-                // Creiamo una nuova partita invertendo i partecipanti
-                // Nota: Dobbiamo estrarre i player dai partecipanti della partita di andata
-                var homeParticipants = match.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
-                var awayParticipants = match.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
-
-                // Per ricreare il match di ritorno serve l'ID del torneo e i team originali...
-                // Semplifichiamo: cloniamo la logica usando i team originali sarebbe stato più pulito,
-                // ma dato che abbiamo già le entità Match, invertiamo semplicemente i lati.
-
-                // Nota tecnica: Qui stiamo creando una nuova entità Match.
-                // Poiché non abbiamo i riferimenti diretti ai Team nell'entità Match (ma solo ai Player),
-                // dobbiamo ricostruirla dai player.
-                // MA ASPETTA: Per semplicità, in questo scheduler abbiamo accesso agli oggetti 'teamHome' e 'teamAway' nel loop sopra.
-                // È meglio generare il ritorno SUBITO nel loop o duplicare la lista alla fine?
-                // Duplichiamo la logica è più sicuro.
-            }
-
-            // Approccio più semplice per il ritorno: 
-            // Rieseguiamo il loop scambiando Home e Away alla creazione.
-            // (Per brevità di codice qui, duplichiamo la lista matches creata invertendo i campi)
-            var returnRoundMatches = new List<Match>();
-            foreach (Match m in matches)
-            {
-                // Nota: Qui è complesso clonare l'entità Match perché i partecipanti sono una collection privata.
-                // È meglio se il metodo CreateMatch accetta i Team e noi lo richiamiamo invertito.
-                // Ma i Team nella lista originale sono stati ruotati!
-                // SOLUZIONE: Lasciamo stare la clonazione complessa e facciamo un secondo giro di generazione se necessario,
-                // oppure (più semplice) accettiamo che il ritorno sia gestito duplicando l'algoritmo.
-            }
-        }
-
-        // CORREZIONE LOGICA RITORNO:
         // Il modo più pulito con l'algoritmo di Berger è generare il ritorno semplicemente invertendo Home/Away
         // nella lista generata.
         if (tournament.HasReturnMatches)
@@ -108,21 +71,21 @@ public static class RoundRobinScheduler
                 // Ma ci servono gli ID dei giocatori.
 
                 // Recuperiamo i player Home e Away dal match appena creato
-                var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.Player).ToList();
-                var awayPlayers = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.Player).ToList();
+                var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
+                var awayPlayers = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
 
                 var returnMatch = new Match(0, 0, tournament.Id); // Score 0-0
                 // Impostiamo lo stato come Scheduled (0)
                 // (Assumiamo che il costruttore o default lo metta a Scheduled, e score a 0)
 
-                foreach (Player? p in awayPlayers)
+                foreach (Guid id in awayPlayers)
                 {
-                    returnMatch.AddParticipant(p.Id, Side.Home); // Vecchi Away diventano Home
+                    returnMatch.AddParticipant(id, Side.Home); // Vecchi Away diventano Home
                 }
 
-                foreach (Player? p in homePlayers)
+                foreach (Guid id in homePlayers)
                 {
-                    returnMatch.AddParticipant(p.Id, Side.Away); // Vecchi Home diventano Away
+                    returnMatch.AddParticipant(id, Side.Away); // Vecchi Home diventano Away
                 }
 
                 returnMatches.Add(returnMatch);

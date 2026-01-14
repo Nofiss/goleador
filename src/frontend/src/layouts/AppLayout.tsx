@@ -34,6 +34,7 @@ export const AppLayout = () => {
 		{ name: "Partite", href: "/matches", icon: Gamepad2 },
 		{ name: "Tornei", href: "/tournaments", icon: Trophy },
 		{ name: "Giocatori", href: "/players", icon: Users },
+		{ name: "Tavoli", href: "/tables", icon: Map },
 	];
 
 	const handleLogout = () => {

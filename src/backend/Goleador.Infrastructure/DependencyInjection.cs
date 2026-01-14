@@ -1,5 +1,7 @@
 using Goleador.Application.Common.Interfaces;
+using Goleador.Infrastructure.Identity;
 using Goleador.Infrastructure.Persistence;
+using Goleador.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,10 @@ public static class DependencyInjection
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>()
         );
+
+        services.AddTransient<IIdentityService, IdentityService>();
+
+        services.AddScoped<ITeamGeneratorService, OpenAiTeamGeneratorService>();
 
         return services;
     }

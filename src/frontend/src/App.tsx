@@ -12,6 +12,8 @@ import { TournamentCreatePage } from "@/pages/tournaments/TournamentCreatePage";
 import { TournamentDetailPage } from "@/pages/tournaments/TournamentDetailPage";
 // Tournaments
 import { TournamentsListPage } from "@/pages/tournaments/TournamentsListPage";
+// Tables
+import { TablesPage } from "./pages/tables/TablesPage";
 
 function App() {
 	return (
@@ -35,6 +37,9 @@ function App() {
 					{/* Matches Routes */}
 					<Route path="/matches" element={<MatchesListPage />} />
 					<Route path="/matches/new" element={<MatchCreatePage />} />
+
+					{/* Tables Routes */}
+					<Route path="/tables" element={<TablesPage />} />
 				</Route>
 
 				<Route path="*" element={<Navigate to="/" replace />} />

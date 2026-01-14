@@ -10,10 +10,18 @@ public class Player : BaseEntity
     public string Email { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
 
+    public string? UserId { get; private set; }
+
     // Costruttore vuoto richiesto da EF Core per la reflection
     Player() { }
 
-    public Player(string nickname, string firstName, string lastName, string email)
+    public Player(
+        string nickname,
+        string firstName,
+        string lastName,
+        string email,
+        string? userId = null
+    )
     {
         // Qui potremmo mettere validazioni di dominio basilari (es. controlli null)
         // Ma per regole complesse useremo FluentValidation nell'Application Layer.
@@ -32,6 +40,7 @@ public class Player : BaseEntity
         FirstName = firstName;
         LastName = lastName;
         Email = email;
+        UserId = userId;
         CreatedAt = DateTime.UtcNow;
     }
 

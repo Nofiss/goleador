@@ -33,6 +33,8 @@ public class RegisterTeamCommandHandler(IApplicationDbContext context)
         // 4. Aggiungi al torneo (questo metodo fa i check di validità stato e numero giocatori)
         tournament.RegisterTeam(team);
 
+        context.TournamentTeams.Add(team);
+
         await context.SaveChangesAsync(cancellationToken);
 
         return team.Id;

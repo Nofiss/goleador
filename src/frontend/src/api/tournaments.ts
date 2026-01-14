@@ -45,3 +45,10 @@ export const getTournamentStandings = async (
 	);
 	return response.data;
 };
+
+export const joinTournament = async (
+	tournamentId: string,
+	teamName: string,
+) => {
+	return api.post(`/api/tournaments/${tournamentId}/join`, { teamName });
+};

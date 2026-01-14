@@ -15,6 +15,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.Nickname).IsRequired().HasMaxLength(50);
 
         builder.HasIndex(p => p.Nickname).IsUnique();
+        builder.HasIndex(p => p.UserId).IsUnique();
 
         // Altri campi stringa con limiti sensati
         builder.Property(p => p.FirstName).IsRequired().HasMaxLength(100);
@@ -22,5 +23,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.LastName).IsRequired().HasMaxLength(100);
 
         builder.Property(p => p.Email).IsRequired().HasMaxLength(255);
+
+        builder.Property(p => p.UserId).HasMaxLength(450);
     }
 }

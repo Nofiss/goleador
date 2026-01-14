@@ -53,6 +53,8 @@ public class TournamentMatchDto
     public MatchStatus Status { get; set; }
     public string HomeTeamName { get; set; } = string.Empty;
     public string AwayTeamName { get; set; } = string.Empty;
+    public int? TableId { get; set; }
+    public string TableName { get; set; } = string.Empty;
 }
 
 public class ScoringRulesDto

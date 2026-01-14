@@ -14,8 +14,8 @@ public class Match : BaseEntity
     public Guid? TournamentId { get; private set; }
     public Tournament? Tournament { get; private set; }
 
-    // Per ora TableId lo teniamo semplice (nullable), senza relazione forte per non bloccarci
     public int? TableId { get; private set; }
+    public Table? Table { get; private set; }
 
     readonly List<MatchParticipant> _participants = [];
     public IReadOnlyCollection<MatchParticipant> Participants => _participants.AsReadOnly();
@@ -49,4 +49,10 @@ public class Match : BaseEntity
         Status = MatchStatus.Played; // La partita passa a "Giocata"
         DatePlayed = DateTime.UtcNow; // Aggiorniamo la data all'effettivo momento dell'inserimento
     }
+
+    public void AssignTable(int? tableId) =>
+        // Qui potresti aggiungere logica di validazione se necessario
+        // Es. verificare se lo stato è già Played e impedire il cambio tavolo, se vuoi.
+
+        TableId = tableId;
 }
