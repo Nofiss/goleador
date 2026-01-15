@@ -54,4 +54,7 @@ public class Player : BaseEntity
 
         Email = newEmail;
     }
+
+    public void SetUser(string userId) => UserId = userId;
+    public void RemoveUserLink() => UserId = null;
 }

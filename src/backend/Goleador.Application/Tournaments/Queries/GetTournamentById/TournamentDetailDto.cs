@@ -25,6 +25,7 @@ public class TournamentDetailDto
         {
             CreateMap<Tournament, TournamentDetailDto>();
             CreateMap<TournamentTeam, TeamDto>();
+            CreateMap<Player, TeamPlayerDto>();
             CreateMap<Match, TournamentMatchDto>()
                 // Mappiamo i nomi dei partecipanti per visualizzarli facilmente
                 .ForMember(d => d.HomeTeamName, opt => opt.MapFrom(s => GetTeamName(s, Side.Home)))
@@ -43,6 +44,13 @@ public class TeamDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public List<TeamPlayerDto> Players { get; set; } = [];
+}
+
+public class TeamPlayerDto
+{
+    public Guid Id { get; set; }
+    public string Nickname { get; set; } = string.Empty;
 }
 
 public class TournamentMatchDto

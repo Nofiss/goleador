@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchesTab } from "@/features/tournaments/details/MatchesTab";
 import { TeamsTab } from "@/features/tournaments/details/TeamsTab";
 import { TournamentHeader } from "@/features/tournaments/details/TournamentHeader";
-import { StandingsTable } from "@/features/tournaments/StandingsTable";
+import { StandingsTable } from "@/features/tournaments/details/StandingsTable";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {

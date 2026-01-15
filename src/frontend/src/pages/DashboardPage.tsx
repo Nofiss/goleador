@@ -26,22 +26,30 @@ export const DashboardPage = () => {
 	return (
 		<div className="space-y-8">
 			{/* Hero Section */}
-			<section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-8 shadow-lg">
-				<h1 className="text-4xl font-extrabold mb-2">
+			<section className="bg-linear-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-6 md:p-8 shadow-lg">
+				<h1 className="text-3xl md:text-4xl font-extrabold mb-2">
 					Benvenuto su Goleador ⚽
 				</h1>
-				<p className="text-blue-100 text-lg max-w-2xl">
-					Il gestionale definitivo per i tuoi tornei aziendali. Organizza sfide,
-					traccia i risultati e scala la classifica!
+				<p className="text-blue-100 text-base md:text-lg max-w-2xl">
+					Il gestionale definitivo per i tuoi tornei aziendali.
+					Organizza sfide, traccia i risultati e scala la classifica!
 				</p>
-				<div className="mt-6 flex gap-4">
-					<Button asChild variant="secondary" size="lg">
+
+				{/* FIX RESPONSIVE: flex-col su mobile, flex-row su schermi sm+ */}
+				<div className="mt-6 flex flex-col sm:flex-row gap-4">
+					<Button
+						asChild
+						variant="secondary"
+						size="lg"
+						className="w-full sm:w-auto" // Full width su mobile
+					>
 						<Link to="/matches">Nuova Partita Rapida</Link>
 					</Button>
+
 					<Button
 						asChild
 						variant="outline"
-						className="bg-transparent text-white border-white hover:bg-white/20"
+						className="bg-transparent text-white border-white hover:bg-white/20 w-full sm:w-auto" // Full width su mobile
 						size="lg"
 					>
 						<Link to="/tournaments">Vedi Tornei</Link>

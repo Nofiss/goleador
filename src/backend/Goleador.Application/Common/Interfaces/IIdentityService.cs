@@ -6,4 +6,7 @@ public interface IIdentityService
         string email,
         string password
     );
+    Task<List<(string Id, string Email, string Username, string[] Roles)>> GetAllUsersAsync();
+
+    Task<(bool Success, string[] Errors)> UpdateUserRolesAsync(string userId, string[] newRoles);
 }

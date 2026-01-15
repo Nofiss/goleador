@@ -22,7 +22,7 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	if (tournament.status === TournamentStatus.Setup) {
 		return (
-			<div className="text-center py-12 bg-gray-50 border rounded-lg text-muted-foreground">
+			<div className="text-center py-12 bg-muted/30 border border-dashed rounded-lg text-muted-foreground">
 				Il calendario verrà generato all'avvio del torneo.
 			</div>
 		);
@@ -35,25 +35,27 @@ export const MatchesTab = ({ tournament }: Props) => {
 					<div
 						key={match.id}
 						className={cn(
-							"border rounded-xl p-4 shadow-sm bg-white flex flex-col justify-between h-full relative overflow-hidden",
+							"border rounded-xl p-4 shadow-sm bg-card flex flex-col justify-between h-full relative overflow-hidden",
 							match.status === 1
-								? "border-gray-200"
-								: "border-blue-200 ring-1 ring-blue-50",
+								? "border-border"
+								: "border-blue-500/30 ring-1 ring-blue-500/10 dark:ring-blue-400/20",
 						)}
 					>
 						{/* Status Indicator */}
 						<div
 							className={cn(
 								"absolute top-0 left-0 w-1 h-full",
-								match.status === 1 ? "bg-gray-300" : "bg-blue-500",
+								match.status === 1 ? "bg-muted-foreground/30" : "bg-blue-500",
 							)}
 						/>
 
 						<div className="pl-3 mb-4">
-							<div className="flex justify-between items-center text-xs text-muted-foreground mb-3">
-								<span>{match.status === 0 ? "DA GIOCARE" : "TERMINATA"}</span>
+							<div className="flex justify-between items-center text-[10px] font-bold tracking-wider text-muted-foreground mb-3">
+								<span className={cn(match.status === 0 ? "text-blue-500" : "text-muted-foreground")}>
+									{match.status === 0 ? "DA GIOCARE" : "TERMINATA"}
+								</span>
 								{match.tableName && (
-									<span className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+									<span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-foreground">
 										<MapPin className="h-3 w-3" /> {match.tableName}
 									</span>
 								)}
@@ -66,13 +68,13 @@ export const MatchesTab = ({ tournament }: Props) => {
 									<span
 										className={cn(
 											"font-semibold truncate",
-											match.scoreHome > match.scoreAway && "text-black",
-											match.scoreHome < match.scoreAway && "text-gray-500",
+											match.status === 1 && match.scoreHome > match.scoreAway ? "text-foreground" : "text-muted-foreground",
+											match.status === 1 && match.scoreHome < match.scoreAway && "opacity-60"
 										)}
 									>
 										{match.homeTeamName}
 									</span>
-									<span className="font-mono text-lg font-bold w-8 text-center">
+									<span className="font-mono text-lg font-bold w-8 text-center text-foreground">
 										{match.status === 1 ? match.scoreHome : "-"}
 									</span>
 								</div>
@@ -82,13 +84,13 @@ export const MatchesTab = ({ tournament }: Props) => {
 									<span
 										className={cn(
 											"font-semibold truncate",
-											match.scoreAway > match.scoreHome && "text-black",
-											match.scoreAway < match.scoreHome && "text-gray-500",
+											match.status === 1 && match.scoreAway > match.scoreHome ? "text-foreground" : "text-muted-foreground",
+											match.status === 1 && match.scoreAway < match.scoreHome && "opacity-60"
 										)}
 									>
 										{match.awayTeamName}
 									</span>
-									<span className="font-mono text-lg font-bold w-8 text-center">
+									<span className="font-mono text-lg font-bold w-8 text-center text-foreground">
 										{match.status === 1 ? match.scoreAway : "-"}
 									</span>
 								</div>
@@ -97,9 +99,9 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 						{/* Action */}
 						{isReferee && (
-							<div className="pl-3 pt-2 border-t mt-auto">
+							<div className="pl-3 pt-2 border-t border-border mt-auto">
 								<Button
-									variant={match.status === 0 ? "default" : "ghost"}
+									variant={match.status === 0 ? "default" : "secondary"}
 									size="sm"
 									className="w-full h-8 text-xs"
 									onClick={() => setSelectedMatch(match)}

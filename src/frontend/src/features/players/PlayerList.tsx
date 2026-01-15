@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart2, RefreshCcw } from "lucide-react";
+import { BarChart2, RefreshCcw, User } from "lucide-react";
 import { useState } from "react";
 import { getPlayers } from "@/api/players";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,17 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { PlayerStatsDialog } from "@/features/players/PlayerStatsDialog";
+import { cn } from "@/lib/utils";
 
 export const PlayerList = () => {
-	// 1. Fetch dei dati con TanStack Query
 	const {
 		data: players,
 		isLoading,
 		isError,
 		refetch,
+		isFetching,
 	} = useQuery({
-		queryKey: ["players"], // Chiave univoca per la cache
+		queryKey: ["players"],
 		queryFn: async () => {
 			const data = await getPlayers();
 			return data;
@@ -31,61 +32,99 @@ export const PlayerList = () => {
 	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
 	if (isLoading)
-		return <div className="text-center p-4">Caricamento giocatori...</div>;
+		return (
+			<div className="flex flex-col items-center justify-center p-12 text-muted-foreground animate-pulse">
+				<RefreshCcw className="h-8 w-8 mb-4 animate-spin opacity-20" />
+				<p className="text-sm font-medium tracking-wide uppercase">Caricamento giocatori...</p>
+			</div>
+		);
+
 	if (isError)
 		return (
-			<div className="text-center p-4 text-red-500">
-				Errore nel caricamento.
+			<div className="text-center p-12 border-2 border-dashed border-destructive/20 rounded-xl bg-destructive/5 text-destructive">
+				<p className="font-semibold">Errore nel caricamento dei dati.</p>
+				<Button variant="ghost" className="mt-4" onClick={() => refetch()}>
+					Riprova
+				</Button>
 			</div>
 		);
 
 	return (
 		<>
-			<div className="w-full max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg border shadow-sm">
-				<div className="flex justify-between items-center mb-6">
-					<h2 className="text-2xl font-bold">
-						Rosa Giocatori ({players?.length})
-					</h2>
-					<Button variant="outline" size="sm" onClick={() => refetch()}>
-						<RefreshCcw className="mr-2 h-4 w-4" /> Aggiorna
+			<div className="w-full max-w-4xl mx-auto mt-8 p-6 bg-card rounded-xl border border-border shadow-sm">
+				{/* Header */}
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+					<div>
+						<h2 className="text-2xl font-bold tracking-tight text-foreground">
+							Rosa Giocatori
+						</h2>
+						<p className="text-sm text-muted-foreground">
+							Gestisci i {players?.length || 0} atleti registrati in piattaforma.
+						</p>
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => refetch()}
+						disabled={isFetching}
+						className="bg-background/50 backdrop-blur-sm"
+					>
+						<RefreshCcw className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")} />
+						{isFetching ? "Aggiornamento..." : "Aggiorna"}
 					</Button>
 				</div>
 
-				<div className="rounded-md border">
+				{/* Tabella */}
+				<div className="rounded-lg border border-border overflow-hidden bg-background/30">
 					<Table>
-						<TableHeader>
+						<TableHeader className="bg-muted/50">
 							<TableRow>
-								<TableHead>Nickname</TableHead>
-								<TableHead>Nome Completo</TableHead>
-								<TableHead>Email</TableHead>
+								<TableHead className="font-bold text-foreground">Nickname</TableHead>
+								<TableHead className="hidden md:table-cell">Nome Completo</TableHead>
+								<TableHead className="hidden sm:table-cell">Email</TableHead>
 								<TableHead className="text-right">Iscritto il</TableHead>
+								<TableHead className="w-20"></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{players?.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={4} className="h-24 text-center">
-										Nessun giocatore trovato. Aggiungine uno!
+									<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+										<div className="flex flex-col items-center gap-2">
+											<User className="h-8 w-8 opacity-10" />
+											<p>Nessun giocatore trovato.</p>
+										</div>
 									</TableCell>
 								</TableRow>
 							) : (
 								players?.map((player) => (
-									<TableRow key={player.id}>
-										<TableCell className="font-medium">
-											{player.nickname}
+									<TableRow key={player.id} className="hover:bg-muted/30 transition-colors group">
+										<TableCell className="font-bold text-primary">
+											<div className="flex items-center gap-2">
+												<div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+													<User className="h-3.5 w-3.5 text-primary" />
+												</div>
+												{player.nickname}
+											</div>
 										</TableCell>
-										<TableCell>{player.fullName}</TableCell>
-										<TableCell>{player.email}</TableCell>
-										<TableCell className="text-right">
+										<TableCell className="hidden md:table-cell text-foreground/80">
+											{player.fullName}
+										</TableCell>
+										<TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
+											{player.email}
+										</TableCell>
+										<TableCell className="text-right font-mono text-xs text-muted-foreground">
 											{new Date(player.createdAt).toLocaleDateString("it-IT")}
 										</TableCell>
 										<TableCell className="text-right">
 											<Button
-												variant="ghost"
+												variant="secondary"
 												size="sm"
+												className="h-8 opacity-0 group-hover:opacity-100 transition-opacity"
 												onClick={() => setSelectedPlayerId(player.id)}
 											>
-												<BarChart2 className="h-4 w-4 mr-2" /> Stats
+												<BarChart2 className="h-3.5 w-3.5 mr-1.5" />
+												<span className="text-xs">Stats</span>
 											</Button>
 										</TableCell>
 									</TableRow>
@@ -96,7 +135,6 @@ export const PlayerList = () => {
 				</div>
 			</div>
 
-			{/* Il Dialog vive fuori dalla tabella, ma dentro il componente */}
 			<PlayerStatsDialog
 				playerId={selectedPlayerId}
 				onClose={() => setSelectedPlayerId(null)}

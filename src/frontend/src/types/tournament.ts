@@ -48,6 +48,17 @@ export interface CreateTournamentRequest {
 	tenZeroBonus: number;
 }
 
+export interface TournamentTeamPlayer {
+    id: string;
+    nickname: string;
+}
+
+export interface TournamentTeam {
+    id: string;
+    name: string;
+    players: TournamentTeamPlayer[];
+}
+
 export interface TournamentMatch {
 	id: string;
 	scoreHome: number;
@@ -57,10 +68,11 @@ export interface TournamentMatch {
 	awayTeamName: string;
 	tableId?: number;
 	tableName?: string;
+  players: TournamentTeamPlayer[];
 }
 
 export interface TournamentDetail extends Tournament {
-	teams: { id: string; name: string }[];
+	teams: TournamentTeam[];
 	matches: TournamentMatch[];
 	notes?: string;
 	scoringRules: ScoringRules;

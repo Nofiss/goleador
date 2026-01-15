@@ -6,26 +6,56 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": ["!node_modules", "!dist", "!.next", "!out", "!build"]
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true
-		}
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineWidth": 100,
+		"lineEnding": "lf"
 	},
 	"javascript": {
 		"formatter": {
-			"quoteStyle": "double"
+			"quoteStyle": "double",
+			"jsxQuoteStyle": "double",
+			"trailingCommas": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always",
+			"bracketSpacing": true
 		}
 	},
 	"css": {
 		"parser": {
 			"tailwindDirectives": true
+		},
+		"formatter": {
+			"enabled": true
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"complexity": {
+				"noUselessTypeConstraint": "error"
+			},
+			"correctness": {
+				"noUnusedVariables": "warn",
+				"useExhaustiveDependencies": "error"
+			},
+			"style": {
+				"noDefaultExport": "off",
+				"useTemplate": "error",
+				"useNamingConvention": "warn",
+				"useSelfClosingElements": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn",
+				"noEmptyBlockStatements": "error"
+			}
 		}
 	},
 	"assist": {
@@ -36,4 +66,5 @@
 			}
 		}
 	}
+
 }
