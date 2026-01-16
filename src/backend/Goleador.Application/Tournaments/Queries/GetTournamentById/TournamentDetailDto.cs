@@ -16,6 +16,7 @@ public class TournamentDetailDto
     public ScoringRulesDto ScoringRules { get; set; } = new();
 
     // Relazioni
+    public List<TeamPlayerDto> RegisteredPlayers { get; set; } = [];
     public List<TeamDto> Teams { get; set; } = [];
     public List<TournamentMatchDto> Matches { get; set; } = [];
 

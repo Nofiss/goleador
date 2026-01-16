@@ -6,15 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { TournamentTeamPlayer } from "@/types";
+
+interface RegisterTeamFormProps {
+	tournamentId: string;
+	registeredPlayers: TournamentTeamPlayer[];
+	assignedPlayerIds: string[];
+}
 
 export const RegisterTeamForm = ({
-	tournamentId,
-}: {
-	tournamentId: string;
-}) => {
+	tournamentId, registeredPlayers, assignedPlayerIds
+}: RegisterTeamFormProps) => {
 	const queryClient = useQueryClient();
 	const [teamName, setTeamName] = useState("");
 	const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+
+    const candidates = registeredPlayers.filter((p: any) => !assignedPlayerIds.includes(p.id));
 
 	const { data: players } = useQuery({
 		queryKey: ["players"],

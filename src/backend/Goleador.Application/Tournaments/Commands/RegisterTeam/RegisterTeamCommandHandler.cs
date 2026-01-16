@@ -10,33 +10,44 @@ public class RegisterTeamCommandHandler(IApplicationDbContext context)
 {
     public async Task<Guid> Handle(RegisterTeamCommand request, CancellationToken cancellationToken)
     {
-        // 1. Recupera il torneo
         Tournament tournament =
             await context
-                .Tournaments.Include(t => t.Teams) // Carica le squadre esistenti per controlli futuri
+                .Tournaments.Include(t => t.Teams)
+                    .ThenInclude(tt => tt.Players)
+                .Include(t => t.Registrations)
+                    .ThenInclude(r => r.Player)
                 .FirstOrDefaultAsync(t => t.Id == request.TournamentId, cancellationToken)
             ?? throw new KeyNotFoundException("Tournament not found");
 
-        // 2. Recupera i giocatori dal DB
-        List<Player> players = await context
-            .Players.Where(p => request.PlayerIds.Contains(p.Id))
-            .ToListAsync(cancellationToken);
+        var poolPlayerIds = tournament.Registrations.Select(r => r.PlayerId).ToHashSet();
 
-        if (players.Count != request.PlayerIds.Count)
+        foreach (Guid reqPlayerId in request.PlayerIds)
         {
-            throw new KeyNotFoundException("One or more players not found");
+            if (!poolPlayerIds.Contains(reqPlayerId))
+            {
+                throw new InvalidOperationException(
+                    $"Il giocatore {reqPlayerId} non è iscritto al torneo."
+                );
+            }
+        }
+        var alreadyInTeamIds = tournament
+            .Teams.SelectMany(t => t.Players)
+            .Select(p => p.Id)
+            .ToHashSet();
+        if (request.PlayerIds.Any(alreadyInTeamIds.Contains))
+        {
+            throw new InvalidOperationException("Uno dei giocatori è già assegnato a una squadra.");
         }
 
-        // 3. Crea la squadra
-        var team = new TournamentTeam(tournament.Id, request.TeamName, players);
+        var playersToTeam = tournament
+            .Registrations.Where(r => request.PlayerIds.Contains(r.PlayerId))
+            .Select(r => r.Player)
+            .ToList();
 
-        // 4. Aggiungi al torneo (questo metodo fa i check di validità stato e numero giocatori)
-        tournament.RegisterTeam(team);
-
+        var team = new TournamentTeam(tournament.Id, request.TeamName, playersToTeam);
         context.TournamentTeams.Add(team);
 
         await context.SaveChangesAsync(cancellationToken);
-
         return team.Id;
     }
 }

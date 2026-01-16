@@ -12,6 +12,8 @@ interface Props {
 export const TeamsTab = ({ tournament }: Props) => {
 	const { isAdmin } = useAuth();
 
+	const assignedPlayerIds = tournament.teams.flatMap(t => t.players.map(p => p.id));
+
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 			{/* Colonna SX: Lista Squadre */}
@@ -85,7 +87,11 @@ export const TeamsTab = ({ tournament }: Props) => {
 			{tournament.status === TournamentStatus.Setup && isAdmin && (
 				<div className="lg:col-span-1">
 					<div className="sticky top-6">
-						<RegisterTeamForm tournamentId={tournament.id} />
+					                    <RegisterTeamForm 
+                        tournamentId={tournament.id}
+                        registeredPlayers={tournament.registeredPlayers}
+                        assignedPlayerIds={assignedPlayerIds}
+                    />
 					</div>
 				</div>
 			)}

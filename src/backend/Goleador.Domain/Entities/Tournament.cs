@@ -18,6 +18,9 @@ public class Tournament : BaseEntity
         TournamentScoringRules.Default();
 
     // Relazioni
+    readonly List<TournamentRegistration> _registrations = [];
+    public IReadOnlyCollection<TournamentRegistration> Registrations => _registrations.AsReadOnly();
+
     readonly List<TournamentTeam> _teams = [];
     public IReadOnlyCollection<TournamentTeam> Teams => _teams.AsReadOnly();
 
@@ -45,6 +48,21 @@ public class Tournament : BaseEntity
     }
 
     // Metodi di dominio
+    public void RegisterPlayer(Guid playerId)
+    {
+        if (Status != TournamentStatus.Setup)
+        {
+            throw new InvalidOperationException("Registration is closed.");
+        }
+
+        if (_registrations.Any(r => r.PlayerId == playerId))
+        {
+            throw new InvalidOperationException("Player already registered.");
+        }
+
+        _registrations.Add(new TournamentRegistration(Id, playerId));
+    }
+
     public void RegisterTeam(TournamentTeam team)
     {
         if (Status != TournamentStatus.Setup)

@@ -72,6 +72,7 @@ export interface TournamentMatch {
 }
 
 export interface TournamentDetail extends Tournament {
+	registeredPlayers: TournamentTeamPlayer[];
 	teams: TournamentTeam[];
 	matches: TournamentMatch[];
 	notes?: string;
