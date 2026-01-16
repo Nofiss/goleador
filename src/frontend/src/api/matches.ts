@@ -2,7 +2,7 @@ import type { MatchDto } from "@/types";
 import { api } from "./axios";
 
 export const getRecentMatches = async (): Promise<MatchDto[]> => {
-	const response = await api.get<MatchDto[]>("/api/matches");
+	const response = await api.get<MatchDto[]>("/matches");
 	return response.data;
 };
 
@@ -12,5 +12,5 @@ export const createMatch = async (data: {
 	scoreHome: number;
 	scoreAway: number;
 }) => {
-	return api.post("/api/matches", data);
+	return api.post("/matches", data);
 };

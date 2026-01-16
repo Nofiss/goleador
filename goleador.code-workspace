@@ -1,0 +1,154 @@
+{
+	"folders": [
+		{
+			"name": "Goleador Root",
+			"path": "."
+		},
+		{
+			"name": "Frontend",
+			"path": "./src/frontend"
+		},
+		{
+			"name": "Backend",
+			"path": "./src/backend"
+		}
+	],
+	"settings": {
+		// --- ESCLUSIONE FILE ---
+		"files.exclude": {
+			"**/bin": true,
+			"**/obj": true,
+			"**/node_modules": true,
+			"**/.vs": true,
+			"**/.git": true,
+			"**/.DS_Store": true
+		},
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/bin": true,
+			"**/obj": true
+		},
+		// --- FORMATTAZIONE FRONTEND (Biome + Tailwind) ---
+		"[typescriptreact][typescript][css]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"editor.formatOnSave": true,
+		"prettier.requireConfig": true,
+		// --- FORMATTAZIONE BACKEND (C#) ---
+		"[csharp]": {
+			"editor.defaultFormatter": "ms-dotnettools.csharp"
+		},
+		"omnisharp.useModernNet": true,
+		"dotnet.defaultSolution": "src/backend/Goleador.sln"
+	},
+	"extensions": {
+		"recommendations": [
+			// Backend
+			"ms-dotnettools.csdevkit",
+			"ms-dotnettools.csharp",
+			"kreativ-software.csharpextensions",
+			// Frontend
+			"biomejs.biome",
+			"bradlc.vscode-tailwindcss",
+			"dsznajder.es7-react-js-snippets",
+			// Utilities
+			"tamasfe.even-better-toml",
+			"humao.rest-client",
+			"eamodio.gitlens",
+			"ms-vscode.powershell"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				// Debugga il Backend .NET
+				"name": "🟢 Backend (API)",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "build-backend",
+				"program": "${workspaceFolder}/src/backend/Goleador.Api/bin/Debug/net8.0/Goleador.Api.dll",
+				"args": [],
+				"cwd": "${workspaceFolder}/src/backend/Goleador.Api",
+				"stopAtEntry": false,
+				"serverReadyAction": {
+					"action": "openExternally",
+					"pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+				},
+				"env": {
+					"ASPNETCORE_ENVIRONMENT": "Development"
+				},
+				"sourceFileMap": {
+					"/Views": "${workspaceFolder}/Views"
+				}
+			},
+			{
+				// Debugga il Frontend (Lancia Chrome)
+				"name": "🔵 Frontend (Chrome)",
+				"type": "chrome",
+				"request": "launch",
+				"url": "http://localhost:5173",
+				"webRoot": "${workspaceFolder}/src/frontend/src",
+				"preLaunchTask": "start-frontend"
+			}
+		],
+		"compounds": [
+			{
+				// Opzione "Full Stack": Lancia tutto insieme
+				"name": "🚀 Full Stack Debug",
+				"configurations": [
+					"🟢 Backend (API)",
+					"🔵 Frontend (Chrome)"
+				]
+			}
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "build-backend",
+				"command": "dotnet",
+				"type": "process",
+				"args": [
+					"build",
+					"${workspaceFolder}/src/backend/Goleador.Api/Goleador.Api.csproj",
+					"/property:GenerateFullPaths=true",
+					"/consoleloggerparameters:NoSummary"
+				],
+				"problemMatcher": "$msCompile"
+			},
+			{
+				"label": "start-frontend",
+				"type": "shell",
+				"command": "pnpm dev",
+				"options": {
+					"cwd": "${workspaceFolder}/src/frontend"
+				},
+				"isBackground": true,
+				"problemMatcher": {
+					"owner": "custom",
+					"pattern": {
+						"regexp": "^$"
+					},
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": "VITE",
+						"endsPattern": "Local:"
+					}
+				}
+			},
+			{
+				"label": "docker-db-up",
+				"type": "shell",
+				"command": "docker-compose up -d",
+				"options": {
+					"cwd": "${workspaceFolder}/infrastructure"
+				},
+				"presentation": {
+					"reveal": "silent"
+				}
+			}
+		]
+	}
+}
