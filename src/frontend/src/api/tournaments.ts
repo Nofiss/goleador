@@ -13,7 +13,7 @@ export const getTournaments = async (): Promise<Tournament[]> => {
 
 export const createTournament = async (data: CreateTournamentRequest): Promise<string> => {
 	const response = await api.post<string>("/tournaments", data);
-	return response.data; // Ritorna l'ID
+	return response.data;
 };
 
 export const getTournamentById = async (id: string): Promise<TournamentDetail> => {
@@ -22,7 +22,7 @@ export const getTournamentById = async (id: string): Promise<TournamentDetail> =
 };
 
 export const registerPlayer = async (params: { tournamentId: string; playerId: string }) => {
-	return api.post(`/api/tournaments/${params.tournamentId}/register-player`, params);
+	return api.post(`/tournaments/${params.tournamentId}/register-player`, params);
 };
 
 export const registerTeam = async (params: {
@@ -34,7 +34,7 @@ export const registerTeam = async (params: {
 };
 
 export const renameTeam = async (teamId: string, newName: string) => {
-	return api.put(`/api/tournaments/teams/${teamId}/rename`, { newName });
+	return api.put(`/tournaments/teams/${teamId}/rename`, { newName });
 };
 
 export const startTournament = async (id: string) => {
