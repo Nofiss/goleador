@@ -37,6 +37,15 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release --verbosity normal
 
+      - name: Publish Backend
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Upload Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: src/backend/publish/
+
   # ===========================
   # FRONTEND JOB (PNPM)
   # ===========================
@@ -81,3 +90,55 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/frontend/dist/
+
+  # ===========================
+  # RELEASE JOB
+  # ===========================
+  release:
+    name: 🚀 Create Release
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Backend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-dist
+          path: ./release-assets/backend
+
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./release-assets/frontend
+
+      # Comprime i file per la release
+      - name: Zip Artifacts
+        run: |
+          cd ./release-assets
+          zip -r ../backend-build.zip backend
+          zip -r ../frontend-build.zip frontend
+
+      # Crea la Release su GitHub
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Genera un tag automatico basato sulla data e il numero della build
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: |
+            backend-build.zip
+            frontend-build.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
