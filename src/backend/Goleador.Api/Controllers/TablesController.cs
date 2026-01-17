@@ -11,15 +11,15 @@ public class TablesController : ApiControllerBase
 {
     [HttpGet]
     [AllowAnonymous] // Tutti possono vedere quali tavoli ci sono
-    public async Task<ActionResult<List<TableDto>>> GetAllAsync() =>
+    public async Task<ActionResult<List<TableDto>>> GetAll() =>
         await Mediator.Send(new GetTablesQuery());
 
     [HttpPost]
-    public async Task<ActionResult<int>> CreateAsync(CreateTableCommand command) =>
+    public async Task<ActionResult<int>> Create(CreateTableCommand command) =>
         await Mediator.Send(command);
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAsync(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         await Mediator.Send(new DeleteTableCommand(id));
         return NoContent();

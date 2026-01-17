@@ -10,11 +10,11 @@ namespace Goleador.Api.Controllers;
 public class UsersController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<UserDto>>> GetAllAsync() =>
+    public async Task<ActionResult<List<UserDto>>> GetAll() =>
         await Mediator.Send(new GetUsersQuery());
 
     [HttpPut("{id}/roles")]
-    public async Task<IActionResult> UpdateRolesAsync(string id, UpdateUserRolesCommand command)
+    public async Task<IActionResult> UpdateRoles(string id, UpdateUserRolesCommand command)
     {
         if (id != command.UserId)
         {
@@ -26,7 +26,7 @@ public class UsersController : ApiControllerBase
     }
 
     [HttpPut("{id}/link-player")]
-    public async Task<IActionResult> LinkPlayerAsync(string id, [FromBody] Guid? playerId)
+    public async Task<IActionResult> LinkPlayer(string id, [FromBody] Guid? playerId)
     {
         // playerId può essere null
         await Mediator.Send(new LinkUserToPlayerCommand(id, playerId));

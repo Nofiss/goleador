@@ -11,16 +11,16 @@ public class PlayersController : ApiControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<List<PlayerDto>>> GetAllAsync() =>
+    public async Task<ActionResult<List<PlayerDto>>> GetAll() =>
         await Mediator.Send(new GetPlayersQuery());
 
     [HttpGet("{id}/statistics")]
     [AllowAnonymous]
-    public async Task<ActionResult<PlayerStatisticsDto>> GetStatisticsAsync(Guid id) =>
+    public async Task<ActionResult<PlayerStatisticsDto>> GetStatistics(Guid id) =>
         await Mediator.Send(new GetPlayerStatisticsQuery(id));
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateAsync(CreatePlayerCommand command)
+    public async Task<ActionResult<Guid>> Create(CreatePlayerCommand command)
     {
         // Invia il comando al layer Application tramite MediatR.
         // Non sappiamo (e non ci interessa) chi lo gestirà.
