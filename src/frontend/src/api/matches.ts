@@ -14,3 +14,15 @@ export const createMatch = async (data: {
 }) => {
 	return api.post("/matches", data);
 };
+
+export const setMatchResult = async (
+	matchId: string,
+	data: {
+		id: string;
+		scoreHome: number;
+		scoreAway: number;
+		tableId: number | null;
+	},
+) => {
+	return api.put(`/matches/${matchId}`, data);
+};

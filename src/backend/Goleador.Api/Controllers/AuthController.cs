@@ -15,10 +15,10 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        ApplicationUser? user = await userManager.FindByEmail(model.Email);
-        if (user != null && await userManager.CheckPassword(user, model.Password))
+        ApplicationUser? user = await userManager.FindByEmailAsync(model.Email);
+        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
         {
-            IList<string> userRoles = await userManager.GetRoles(user);
+            IList<string> userRoles = await userManager.GetRolesAsync(user);
 
             var authClaims = new List<Claim>
             {
