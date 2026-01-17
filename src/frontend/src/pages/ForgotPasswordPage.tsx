@@ -1,11 +1,11 @@
+import { CheckCircle2, ChevronLeft, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, Mail, CheckCircle2 } from "lucide-react";
 import { api } from "@/api/axios";
+import { AppLogo } from "@/components/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AppLogo } from "@/components/AppLogo";
 
 export const ForgotPasswordPage = () => {
 	const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ export const ForgotPasswordPage = () => {
 		setError("");
 
 		try {
-			await api.post("/api/auth/forgot-password", { email });
+			await api.post("/auth/forgot-password", { email });
 			setIsSubmitted(true);
 		} catch (err) {
 			setError("Impossibile trovare un account con questa email.");
@@ -88,7 +88,11 @@ export const ForgotPasswordPage = () => {
 							<p className="text-muted-foreground mt-2">
 								Abbiamo inviato un link di recupero a <strong>{email}</strong>.
 							</p>
-							<Button variant="outline" className="mt-8 w-full" onClick={() => setIsSubmitted(false)}>
+							<Button
+								variant="outline"
+								className="mt-8 w-full"
+								onClick={() => setIsSubmitted(false)}
+							>
 								Prova con un'altra email
 							</Button>
 						</div>

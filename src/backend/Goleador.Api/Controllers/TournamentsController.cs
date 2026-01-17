@@ -1,6 +1,8 @@
+using Goleador.Application.Teams.Commands.RenameTeam;
 using Goleador.Application.Tournaments.Commands.CreateTournament;
 using Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
 using Goleador.Application.Tournaments.Commands.JoinTournament;
+using Goleador.Application.Tournaments.Commands.RegisterPlayer;
 using Goleador.Application.Tournaments.Commands.RegisterTeam;
 using Goleador.Application.Tournaments.Commands.StartTournament;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
@@ -28,11 +30,33 @@ public class TournamentsController : ApiControllerBase
     public async Task<ActionResult<Guid>> CreateAsync(CreateTournamentCommand command) =>
         await Mediator.Send(command);
 
+    [HttpPost("{id}/register-player")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RegisterPlayerAsync(
+        Guid id,
+        [FromBody] RegisterPlayerRequest request
+    )
+    {
+        await Mediator.Send(new RegisterPlayerCommand(id, request.PlayerId));
+        return NoContent();
+    }
+
     [HttpPost("{id}/teams")]
     public async Task<ActionResult<Guid>> RegisterTeamAsync(Guid id, RegisterTeamCommand command) =>
         id != command.TournamentId
             ? (ActionResult<Guid>)BadRequest()
             : (ActionResult<Guid>)await Mediator.Send(command);
+
+    [HttpPut("teams/{teamId}/rename")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RenameTeamAsync(
+        Guid teamId,
+        [FromBody] RenameTeamRequest request
+    )
+    {
+        await Mediator.Send(new RenameTeamCommand(teamId, request.NewName));
+        return NoContent();
+    }
 
     [HttpPost("{id}/start")]
     public async Task<IActionResult> StartAsync(Guid id)

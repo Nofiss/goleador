@@ -1,11 +1,11 @@
+import { AtSign, ChevronLeft, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Lock, Mail, User, AtSign } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/axios";
+import { AppLogo } from "@/components/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AppLogo } from "@/components/AppLogo";
 
 export const RegisterPage = () => {
 	const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ export const RegisterPage = () => {
 		setError("");
 
 		try {
-			await api.post("/api/auth/register", formData);
+			await api.post("/auth/register", formData);
 			navigate("/login"); // Reindirizza al login dopo il successo
 		} catch (err: any) {
 			setError(err.response?.data?.message || "Errore durante la registrazione");
@@ -47,7 +47,11 @@ export const RegisterPage = () => {
 			</div>
 
 			<div className="absolute top-4 left-4 sm:top-8 sm:left-8">
-				<Button variant="ghost" asChild className="gap-2 text-muted-foreground hover:text-foreground">
+				<Button
+					variant="ghost"
+					asChild
+					className="gap-2 text-muted-foreground hover:text-foreground"
+				>
 					<Link to="/">
 						<ChevronLeft className="h-4 w-4" /> Home
 					</Link>
@@ -139,7 +143,11 @@ export const RegisterPage = () => {
 							</div>
 						)}
 
-						<Button type="submit" className="w-full h-11 text-base font-semibold" disabled={isLoading}>
+						<Button
+							type="submit"
+							className="w-full h-11 text-base font-semibold"
+							disabled={isLoading}
+						>
 							{isLoading ? "Creazione account..." : "Registrati"}
 						</Button>
 					</form>

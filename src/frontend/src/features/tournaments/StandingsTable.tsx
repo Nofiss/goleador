@@ -9,15 +9,31 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { TournamentStatus } from "@/types";
 
-export const StandingsTable = ({ tournamentId }: { tournamentId: string }) => {
+interface StandingsTableProps {
+	tournamentId: string,
+	status: TournamentStatus
+}
+
+export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
 	const { data: standings, isLoading } = useQuery({
 		queryKey: ["standings", tournamentId],
 		queryFn: () => getTournamentStandings(tournamentId),
 	});
 
-	if (isLoading)
+	if (status === TournamentStatus.Setup) {
+		return (
+			<div className="text-center py-10 text-muted-foreground border rounded bg-gray-50">
+				Classifica disponibile all'avvio.
+			</div>
+		)
+	}
+
+
+	if (isLoading) {
 		return <div className="text-center p-4 text-muted-foreground">Caricamento classifica...</div>;
+	}
 
 	return (
 		<div className="border rounded-md bg-card">

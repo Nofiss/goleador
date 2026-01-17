@@ -17,7 +17,7 @@ export const DashboardPage = () => {
 		queryKey: ["tournaments"],
 		queryFn: getTournaments,
 	});
-
+	console.log(tournaments)
 	const activeTournaments =
 		tournaments?.filter((t) => t.status === TournamentStatus.Active) || [];
 	const setupTournaments =
@@ -26,7 +26,7 @@ export const DashboardPage = () => {
 	return (
 		<div className="space-y-8">
 			{/* Hero Section */}
-			<section className="bg-linear-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-6 md:p-8 shadow-lg">
+			<section className="bg-linear-to-r from-blue-600 to-indigo-700 dark:from-blue-400 dark:to-indigo-500 text-white rounded-2xl p-6 md:p-8 shadow-lg">
 				<h1 className="text-3xl md:text-4xl font-extrabold mb-2">
 					Benvenuto su Goleador ⚽
 				</h1>

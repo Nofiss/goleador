@@ -20,4 +20,14 @@ public class TournamentTeam : BaseEntity
         Name = name;
         _players.AddRange(players);
     }
+
+    public void Rename(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            throw new ArgumentException("Team name cannot be empty.");
+        }
+
+        Name = newName.Trim();
+    }
 }

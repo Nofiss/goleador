@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { getTournamentById } from "@/api/tournaments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MatchesTab } from "@/features/tournaments/details/MatchesTab";
-import { TeamsTab } from "@/features/tournaments/details/TeamsTab";
-import { TournamentHeader } from "@/features/tournaments/details/TournamentHeader";
-import { StandingsTable } from "@/features/tournaments/details/StandingsTable";
+import { MatchesTab } from "@/features/tournaments/MatchesTab";
+import { TeamsTab } from "@/features/tournaments/TeamsTab";
+import { TournamentHeader } from "@/features/tournaments/TournamentHeader";
+import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
@@ -46,13 +46,7 @@ export const TournamentDetailPage = () => {
 					</TabsContent>
 
 					<TabsContent value="standings">
-						{tournament.status === TournamentStatus.Setup ? (
-							<div className="text-center py-10 text-muted-foreground border rounded bg-gray-50">
-								Classifica disponibile all'avvio.
-							</div>
-						) : (
-							<StandingsTable tournamentId={tournament.id} />
-						)}
+						<StandingsTable tournamentId={tournament.id} status={tournament.status} />
 					</TabsContent>
 				</div>
 			</Tabs>

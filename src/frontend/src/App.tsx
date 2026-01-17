@@ -1,22 +1,17 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layouts/AppLayout";
 import { DashboardPage } from "@/pages/DashboardPage";
-import { LoginPage } from "@/pages/LoginPage";
-import { RegisterPage } from "@/pages/RegisterPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
-// Matches
+import { LoginPage } from "@/pages/LoginPage";
 import { MatchCreatePage } from "@/pages/matches/MatchCreatePage";
 import { MatchesListPage } from "@/pages/matches/MatchesListPage";
 import { PlayerCreatePage } from "@/pages/players/PlayerCreatePage";
-// Players
 import { PlayersListPage } from "@/pages/players/PlayersListPage";
+import { RegisterPage } from "@/pages/RegisterPage";
 import { TournamentCreatePage } from "@/pages/tournaments/TournamentCreatePage";
 import { TournamentDetailPage } from "@/pages/tournaments/TournamentDetailPage";
-// Tournaments
 import { TournamentsListPage } from "@/pages/tournaments/TournamentsListPage";
-// Tables
 import { TablesPage } from "./pages/tables/TablesPage";
-// Users
 import { UsersPage } from "./pages/users/UsersPage";
 
 function App() {

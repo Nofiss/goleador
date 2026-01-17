@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { type TournamentDetail, TournamentStatus } from "@/types";
-import { GenerateTeamsButton } from "../GenerateTeamsButton";
-import { JoinTournamentButton } from "../JoinTournamentButton";
+import { GenerateTeamsButton } from "./actions/GenerateTeamsButton";
+import { JoinTournamentButton } from "./actions/JoinTournamentButton";
 
 interface Props {
 	tournament: TournamentDetail;

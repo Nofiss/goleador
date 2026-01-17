@@ -15,6 +15,10 @@
 	],
 	"settings": {
 		// --- ESCLUSIONE FILE ---
+		"files.associations": {
+			"*.css": "tailwindcss",
+			"*.scss": "tailwindcss",
+		},
 		"files.exclude": {
 			"**/bin": true,
 			"**/obj": true,

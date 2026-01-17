@@ -1,7 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CreateTournamentForm } from "@/features/tournaments/CreateTournamentForm";
+import { CreateTournamentForm } from "@/features/tournaments/forms/CreateTournamentForm";
 
 export const TournamentCreatePage = () => {
 	const navigate = useNavigate();

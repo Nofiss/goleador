@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, Lock } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/axios";
+import { AppLogo } from "@/components/AppLogo"; // Assicurati che il path sia corretto
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { AppLogo } from "@/components/AppLogo"; // Assicurati che il path sia corretto
 
 export const LoginPage = () => {
 	const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ export const LoginPage = () => {
 		setError("");
 
 		try {
-			const res = await api.post("/api/auth/login", { email, password });
+			const res = await api.post("/auth/login", { email, password });
 			login(res.data.token, res.data.roles);
 			navigate("/");
 		} catch {
@@ -42,7 +42,11 @@ export const LoginPage = () => {
 
 			{/* Pulsante Home */}
 			<div className="absolute top-4 left-4 sm:top-8 sm:left-8">
-				<Button variant="ghost" asChild className="gap-2 text-muted-foreground hover:text-foreground">
+				<Button
+					variant="ghost"
+					asChild
+					className="gap-2 text-muted-foreground hover:text-foreground"
+				>
 					<Link to="/">
 						<ChevronLeft className="h-4 w-4" />
 						Home
@@ -54,9 +58,7 @@ export const LoginPage = () => {
 				{/* LOGO SOSTITUITO QUI */}
 				<div className="flex flex-col items-center mb-8">
 					<AppLogo variant="vertical" size="lg" className="mb-2" />
-					<p className="text-muted-foreground mt-2">
-						Accedi per gestire i tuoi tornei
-					</p>
+					<p className="text-muted-foreground mt-2">Accedi per gestire i tuoi tornei</p>
 				</div>
 
 				<div className="p-8 bg-card rounded-2xl border border-border shadow-xl backdrop-blur-sm">
