@@ -6,6 +6,7 @@ import { getTournaments } from "@/api/tournaments";
 import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { TournamentStatus } from "@/types";
 
@@ -28,6 +29,8 @@ const itemVariants = {
 } as Variants;
 
 export const DashboardPage = () => {
+	const { isAuthenticated } = useAuth();
+
 	const { data: tournaments } = useQuery({
 		queryKey: ["tournaments"],
 		queryFn: getTournaments,
@@ -205,9 +208,11 @@ export const DashboardPage = () => {
 													Posti aperti
 												</Badge>
 											</div>
-											<Button asChild className="bg-primary hover:bg-primary/90">
-												<Link to={`/tournaments/${t.id}`}>Iscriviti</Link>
-											</Button>
+											{isAuthenticated && (
+												<Button asChild className="bg-primary hover:bg-primary/90">
+													<Link to={`/tournaments/${t.id}`}>Iscriviti</Link>
+												</Button>
+											)}
 										</div>
 									))
 								)}
