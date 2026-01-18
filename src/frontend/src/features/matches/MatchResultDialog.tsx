@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { api } from "@/api/axios";
+import { setMatchResult } from "@/api/matches";
 import { getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,8 +56,7 @@ export const MatchResultDialog = ({
 	const mutation = useMutation({
 		mutationFn: async () => {
 			if (!match) return;
-			// Chiama l'endpoint PUT protetto
-			await api.put(`/api/matches/${match.id}`, {
+			await setMatchResult(match.id, {
 				id: match.id,
 				scoreHome,
 				scoreAway,
@@ -113,9 +112,7 @@ export const MatchResultDialog = ({
 								min="0"
 								className="text-center text-2xl h-14 font-mono"
 								value={scoreHome}
-								onChange={(e) =>
-									setScoreHome(parseInt(e.target.value, 10) || 0)
-								}
+								onChange={(e) => setScoreHome(parseInt(e.target.value, 10) || 0)}
 							/>
 						</div>
 
@@ -134,9 +131,7 @@ export const MatchResultDialog = ({
 								min="0"
 								className="text-center text-2xl h-14 font-mono"
 								value={scoreAway}
-								onChange={(e) =>
-									setScoreAway(parseInt(e.target.value, 10) || 0)
-								}
+								onChange={(e) => setScoreAway(parseInt(e.target.value, 10) || 0)}
 							/>
 						</div>
 					</div>
@@ -146,10 +141,7 @@ export const MatchResultDialog = ({
 					<Button variant="outline" onClick={onClose}>
 						Annulla
 					</Button>
-					<Button
-						onClick={() => mutation.mutate()}
-						disabled={mutation.isPending}
-					>
+					<Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
 						{mutation.isPending ? "Salvataggio..." : "Conferma Risultato"}
 					</Button>
 				</DialogFooter>

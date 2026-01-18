@@ -13,7 +13,7 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
     : ApiControllerBase
 {
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(model.Email);
         if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
@@ -59,7 +59,7 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync(RegisterUserCommand command)
+    public async Task<IActionResult> Register(RegisterUserCommand command)
     {
         await Mediator.Send(command);
         return Ok(new { message = "Registrazione completata! Ora puoi fare login." });

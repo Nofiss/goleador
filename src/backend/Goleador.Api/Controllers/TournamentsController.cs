@@ -18,21 +18,21 @@ public class TournamentsController : ApiControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<List<TournamentDto>>> GetAllAsync() =>
+    public async Task<ActionResult<List<TournamentDto>>> GetAll() =>
         await Mediator.Send(new GetTournamentsQuery());
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<TournamentDetailDto>> GetByIdAsync(Guid id) =>
+    public async Task<ActionResult<TournamentDetailDto>> GetById(Guid id) =>
         await Mediator.Send(new GetTournamentByIdQuery(id));
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateAsync(CreateTournamentCommand command) =>
+    public async Task<ActionResult<Guid>> Create(CreateTournamentCommand command) =>
         await Mediator.Send(command);
 
     [HttpPost("{id}/register-player")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RegisterPlayerAsync(
+    public async Task<IActionResult> RegisterPlayer(
         Guid id,
         [FromBody] RegisterPlayerRequest request
     )
@@ -42,14 +42,14 @@ public class TournamentsController : ApiControllerBase
     }
 
     [HttpPost("{id}/teams")]
-    public async Task<ActionResult<Guid>> RegisterTeamAsync(Guid id, RegisterTeamCommand command) =>
+    public async Task<ActionResult<Guid>> RegisterTeam(Guid id, RegisterTeamCommand command) =>
         id != command.TournamentId
             ? (ActionResult<Guid>)BadRequest()
             : (ActionResult<Guid>)await Mediator.Send(command);
 
     [HttpPut("teams/{teamId}/rename")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RenameTeamAsync(
+    public async Task<IActionResult> RenameTeam(
         Guid teamId,
         [FromBody] RenameTeamRequest request
     )
@@ -59,7 +59,7 @@ public class TournamentsController : ApiControllerBase
     }
 
     [HttpPost("{id}/start")]
-    public async Task<IActionResult> StartAsync(Guid id)
+    public async Task<IActionResult> Start(Guid id)
     {
         await Mediator.Send(new StartTournamentCommand(id));
         return NoContent();
@@ -67,17 +67,17 @@ public class TournamentsController : ApiControllerBase
 
     [HttpGet("{id}/standings")]
     [AllowAnonymous]
-    public async Task<ActionResult<List<TournamentStandingDto>>> GetStandingsAsync(Guid id) =>
+    public async Task<ActionResult<List<TournamentStandingDto>>> GetStandings(Guid id) =>
         await Mediator.Send(new GetTournamentStandingsQuery(id));
 
     [HttpPost("{id}/join")]
     [Authorize]
-    public async Task<ActionResult<Guid>> JoinAsync(Guid id, [FromBody] string teamName) =>
+    public async Task<ActionResult<Guid>> Join(Guid id, [FromBody] string teamName) =>
         await Mediator.Send(new JoinTournamentCommand(id, teamName));
 
     [HttpPost("{id}/generate-teams")]
     [Authorize(Roles = "Admin")] // Solo l'admin può premere il bottone magico
-    public async Task<IActionResult> GenerateTeamsAsync(Guid id)
+    public async Task<IActionResult> GenerateTeams(Guid id)
     {
         await Mediator.Send(new GenerateBalancedTeamsCommand(id));
         return NoContent();

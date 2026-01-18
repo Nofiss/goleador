@@ -124,3 +124,10 @@ dotnet_naming_symbols.private_fields.applicable_kinds = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_style.prefix_underscore.capitalization = camel_case
 dotnet_naming_style.prefix_underscore.required_prefix = _
+
+# ============================================================
+# 7. Eccezioni per i Controller (API)
+# ============================================================
+[**Controller.cs]
+# Disabilita il warning per il suffisso Async nei file dei Controller
+dotnet_naming_rule.async_methods_end_in_async.severity = none

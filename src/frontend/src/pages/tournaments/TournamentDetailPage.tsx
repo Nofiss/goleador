@@ -3,9 +3,9 @@ import { useParams } from "react-router-dom";
 import { getTournamentById } from "@/api/tournaments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchesTab } from "@/features/tournaments/MatchesTab";
+import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TeamsTab } from "@/features/tournaments/TeamsTab";
 import { TournamentHeader } from "@/features/tournaments/TournamentHeader";
-import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
@@ -17,12 +17,10 @@ export const TournamentDetailPage = () => {
 		enabled: !!id,
 	});
 
-	if (isLoading || !tournament)
-		return <div className="p-8 text-center">Caricamento Torneo...</div>;
+	if (isLoading || !tournament) return <div className="p-8 text-center">Caricamento Torneo...</div>;
 
 	// Default tab logic
-	const defaultTab =
-		tournament.status === TournamentStatus.Setup ? "teams" : "matches";
+	const defaultTab = tournament.status === TournamentStatus.Setup ? "teams" : "matches";
 
 	return (
 		<div className="space-y-6 max-w-6xl mx-auto pb-20">

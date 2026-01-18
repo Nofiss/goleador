@@ -9,12 +9,12 @@ public class MatchesController : ApiControllerBase
 {
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<Guid>> CreateAsync(CreateMatchCommand command) =>
+    public async Task<ActionResult<Guid>> Create(CreateMatchCommand command) =>
         await Mediator.Send(command);
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin, Referee")]
-    public async Task<IActionResult> UpdateResultAsync(Guid id, UpdateMatchResultCommand command)
+    public async Task<IActionResult> UpdateResult(Guid id, UpdateMatchResultCommand command)
     {
         if (id != command.Id)
         {
