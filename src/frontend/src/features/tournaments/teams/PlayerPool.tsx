@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, User, UserCheck, UserPlus, Users2, X } from "lucide-react";
+import { Search, User, UserPlus, Users2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getPlayers } from "@/api/players";
 import { registerPlayer } from "@/api/tournaments"; // Assumendo esista un'api per rimuovere
