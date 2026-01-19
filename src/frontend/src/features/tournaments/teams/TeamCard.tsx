@@ -9,10 +9,12 @@ interface TeamCardProps {
 	team: TournamentTeam;
 	tournamentId: string;
 	isAdmin?: boolean;
+	isSetup?: boolean;
 }
 
-export const TeamCard = ({ team, tournamentId, isAdmin }: TeamCardProps) => {
+export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps) => {
 	const [isRenameOpen, setIsRenameOpen] = useState(false);
+	console.log(isAdmin);
 
 	return (
 		<>
@@ -33,8 +35,8 @@ export const TeamCard = ({ team, tournamentId, isAdmin }: TeamCardProps) => {
 						</div>
 					</div>
 
-					{isAdmin && (
-						<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+					<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+						{isAdmin && (
 							<Button
 								variant="ghost"
 								size="icon"
@@ -43,6 +45,8 @@ export const TeamCard = ({ team, tournamentId, isAdmin }: TeamCardProps) => {
 							>
 								<Edit2 className="h-4 w-4" />
 							</Button>
+						)}
+						{isSetup && (
 							<Button
 								variant="ghost"
 								size="icon"
@@ -50,8 +54,8 @@ export const TeamCard = ({ team, tournamentId, isAdmin }: TeamCardProps) => {
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>
-						</div>
-					)}
+						)}
+					</div>
 				</div>
 
 				{/* Players List */}

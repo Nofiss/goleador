@@ -75,24 +75,21 @@ WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-        options
-            .WithTitle("Goleador API")
-            .WithTheme(ScalarTheme.BluePlanet)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-            .AddPreferredSecuritySchemes("Bearer")
-            .AddHttpAuthentication(
-                "Bearer",
-                auth =>
-                {
-                    auth.Token = "";
-                }
-            )
-    );
-}
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
+    options
+        .WithTitle("Goleador API")
+        .WithTheme(ScalarTheme.BluePlanet)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+        .AddPreferredSecuritySchemes("Bearer")
+        .AddHttpAuthentication(
+            "Bearer",
+            auth =>
+            {
+                auth.Token = "";
+            }
+        )
+);
 
 app.UseHttpsRedirection();
 

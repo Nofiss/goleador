@@ -14,6 +14,7 @@ public class TournamentDetailDto
     public int TeamSize { get; set; }
     public string? Notes { get; set; }
     public ScoringRulesDto ScoringRules { get; set; } = new();
+    public bool HasReturnMatches { get; set; }
 
     // Relazioni
     public List<TeamPlayerDto> RegisteredPlayers { get; set; } = [];
@@ -64,6 +65,7 @@ public class TournamentMatchDto
     public string AwayTeamName { get; set; } = string.Empty;
     public int? TableId { get; set; }
     public string TableName { get; set; } = string.Empty;
+    public DateTime DatePlayed { get; set; }
 }
 
 public class ScoringRulesDto

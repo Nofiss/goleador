@@ -55,6 +55,29 @@ public class Player : BaseEntity
         Email = newEmail;
     }
 
+    public void UpdateDetails(string firstName, string lastName, string email)
+    {
+        if (string.IsNullOrWhiteSpace(firstName))
+        {
+            throw new ArgumentException("First name cannot be empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            throw new ArgumentException("Last name cannot be empty");
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException("Email cannot be empty");
+        }
+
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+    }
+
     public void SetUser(string userId) => UserId = userId;
+
     public void RemoveUserLink() => UserId = null;
 }

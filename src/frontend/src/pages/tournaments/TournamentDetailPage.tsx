@@ -20,7 +20,7 @@ export const TournamentDetailPage = () => {
 	if (isLoading || !tournament) return <div className="p-8 text-center">Caricamento Torneo...</div>;
 
 	// Default tab logic
-	const defaultTab = tournament.status === TournamentStatus.setup ? "teams" : "matches";
+	const defaultTab = tournament.status === TournamentStatus.setup ? "teams" : "standings";
 
 	return (
 		<div className="space-y-6 max-w-6xl mx-auto pb-20">

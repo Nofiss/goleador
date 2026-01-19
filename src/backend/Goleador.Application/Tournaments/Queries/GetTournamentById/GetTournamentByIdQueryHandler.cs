@@ -18,7 +18,8 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         Tournament tournament =
             await context
                 .Tournaments.AsNoTracking()
-                .Include(t => t.Registrations).ThenInclude(r => r.Player)
+                .Include(t => t.Registrations)
+                    .ThenInclude(r => r.Player)
                 .Include(t => t.Teams)
                     .ThenInclude(tt => tt.Players)
                 .Include(t => t.Matches)
@@ -62,11 +63,14 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
             matchDto.TableName = matchEntity.Table?.Name ?? string.Empty;
         }
 
-        dto.RegisteredPlayers = [.. tournament.Registrations.Select(r => new TeamPlayerDto
-        {
-            Id = r.Player.Id,
-            Nickname = r.Player.Nickname
-        })];
+        dto.RegisteredPlayers =
+        [
+            .. tournament.Registrations.Select(r => new TeamPlayerDto
+            {
+                Id = r.Player.Id,
+                Nickname = r.Player.Nickname,
+            }),
+        ];
 
         // 4. Ordinamento Partite (Prima quelle da giocare, poi per data)
         dto.Matches = [.. dto.Matches];

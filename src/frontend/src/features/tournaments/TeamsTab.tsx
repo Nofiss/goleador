@@ -89,7 +89,8 @@ export const TeamsTab = ({ tournament }: Props) => {
 								key={team.id}
 								team={team}
 								tournamentId={tournament.id}
-								isAdmin={isAdmin && isSetup}
+								isAdmin={isAdmin}
+								isSetup={isSetup}
 							/>
 						))}
 					</div>

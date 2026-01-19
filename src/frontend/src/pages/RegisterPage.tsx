@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 
 export const RegisterPage = () => {
 	const [formData, setFormData] = useState({
-		fullName: "",
+		firstName: "",
+		lastName: "",
 		nickname: "",
 		email: "",
 		password: "",
@@ -70,30 +71,44 @@ export const RegisterPage = () => {
 					<form onSubmit={handleRegister} className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
 							<div className="space-y-2 col-span-2 sm:col-span-1">
-								<Label htmlFor="fullName">Nome Completo</Label>
+								<Label htmlFor="firstName">Nome</Label>
 								<div className="relative">
 									<Input
-										id="fullName"
-										placeholder="Mario Rossi"
+										id="firstName"
+										placeholder="Mario"
 										className="bg-background pl-9"
-										onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+										onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
 										required
 									/>
 									<User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
 								</div>
 							</div>
 							<div className="space-y-2 col-span-2 sm:col-span-1">
-								<Label htmlFor="nickname">Nickname</Label>
+								<Label htmlFor="lastName">Cognome</Label>
 								<div className="relative">
 									<Input
-										id="nickname"
-										placeholder="SuperMario"
+										id="lastName"
+										placeholder="Rossi"
 										className="bg-background pl-9"
-										onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+										onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
 										required
 									/>
-									<AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+									<User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
 								</div>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="nickname">NickName</Label>
+							<div className="relative">
+								<Input
+									id="nickname"
+									placeholder="SuperMario"
+									className="bg-background pl-9"
+									onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+									required
+								/>
+								<AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
 							</div>
 						</div>
 

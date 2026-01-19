@@ -1,4 +1,4 @@
-import { ArrowRightLeft, MapPin } from "lucide-react";
+import { ArrowRightLeft, CalendarClock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
@@ -78,6 +78,22 @@ export const MatchesTab = ({ tournament }: Props) => {
 							{/* Header Card */}
 							<div className="flex justify-between items-start text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
 								<span className="font-bold">{match.status === 0 ? "Da Giocare" : "Terminata"}</span>
+
+								{match.status === 1 && match.datePlayed && (
+									<span
+										className="flex items-center gap-1 text-[10px] font-medium text-slate-500"
+										title={new Date(match.datePlayed).toLocaleString()}
+									>
+										<CalendarClock className="h-3 w-3" />
+										{new Date(match.datePlayed).toLocaleDateString("it-IT", {
+											day: "2-digit",
+											month: "short",
+											hour: "2-digit",
+											minute: "2-digit",
+										})}
+									</span>
+								)}
+
 								{match.tableName && (
 									<span className="flex items-center gap-1 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 normal-case border">
 										<MapPin className="h-3 w-3" /> {match.tableName}
@@ -180,99 +196,3 @@ export const MatchesTab = ({ tournament }: Props) => {
 		</>
 	);
 };
-
-// 	return (
-// 		<>
-// 			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-// 				{tournament.matches.map((match) => (
-// 					<div
-// 						key={match.id}
-// 						className={cn(
-// 							"border rounded-xl p-4 shadow-sm bg-card flex flex-col justify-between h-full relative overflow-hidden",
-// 							match.status === 1
-// 								? "border-border"
-// 								: "border-blue-500/30 ring-1 ring-blue-500/10 dark:ring-blue-400/20",
-// 						)}
-// 					>
-// 						{/* Status Indicator */}
-// 						<div
-// 							className={cn(
-// 								"absolute top-0 left-0 w-1 h-full",
-// 								match.status === 1 ? "bg-muted-foreground/30" : "bg-blue-500",
-// 							)}
-// 						/>
-
-// 						<div className="pl-3 mb-4">
-// 							<div className="flex justify-between items-center text-[10px] font-bold tracking-wider text-muted-foreground mb-3">
-// 								<span className={cn(match.status === 0 ? "text-blue-500" : "text-muted-foreground")}>
-// 									{match.status === 0 ? "DA GIOCARE" : "TERMINATA"}
-// 								</span>
-// 								{match.tableName && (
-// 									<span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-foreground">
-// 										<MapPin className="h-3 w-3" /> {match.tableName}
-// 									</span>
-// 								)}
-// 							</div>
-
-// 							{/* Teams & Score */}
-// 							<div className="space-y-3">
-// 								{/* Home */}
-// 								<div className="flex justify-between items-center">
-// 									<span
-// 										className={cn(
-// 											"font-semibold truncate",
-// 											match.status === 1 && match.scoreHome > match.scoreAway ? "text-foreground" : "text-muted-foreground",
-// 											match.status === 1 && match.scoreHome < match.scoreAway && "opacity-60"
-// 										)}
-// 									>
-// 										{match.homeTeamName}
-// 									</span>
-// 									<span className="font-mono text-lg font-bold w-8 text-center text-foreground">
-// 										{match.status === 1 ? match.scoreHome : "-"}
-// 									</span>
-// 								</div>
-
-// 								{/* Away */}
-// 								<div className="flex justify-between items-center">
-// 									<span
-// 										className={cn(
-// 											"font-semibold truncate",
-// 											match.status === 1 && match.scoreAway > match.scoreHome ? "text-foreground" : "text-muted-foreground",
-// 											match.status === 1 && match.scoreAway < match.scoreHome && "opacity-60"
-// 										)}
-// 									>
-// 										{match.awayTeamName}
-// 									</span>
-// 									<span className="font-mono text-lg font-bold w-8 text-center text-foreground">
-// 										{match.status === 1 ? match.scoreAway : "-"}
-// 									</span>
-// 								</div>
-// 							</div>
-// 						</div>
-
-// 						{/* Action */}
-// 						{isReferee && (
-// 							<div className="pl-3 pt-2 border-t border-border mt-auto">
-// 								<Button
-// 									variant={match.status === 0 ? "default" : "secondary"}
-// 									size="sm"
-// 									className="w-full h-8 text-xs"
-// 									onClick={() => setSelectedMatch(match)}
-// 								>
-// 									{match.status === 0 ? "Inserisci Risultato" : "Modifica"}
-// 								</Button>
-// 							</div>
-// 						)}
-// 					</div>
-// 				))}
-// 			</div>
-
-// 			<MatchResultDialog
-// 				match={selectedMatch}
-// 				isOpen={!!selectedMatch}
-// 				onClose={() => setSelectedMatch(null)}
-// 				tournamentId={tournament.id}
-// 			/>
-// 		</>
-// 	);
-// };

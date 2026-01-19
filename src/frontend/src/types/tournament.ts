@@ -66,6 +66,7 @@ export interface TournamentMatch {
 	awayTeamName: string;
 	tableId?: number;
 	tableName?: string;
+	datePlayed?: string;
 	players: TournamentTeamPlayer[];
 }
 

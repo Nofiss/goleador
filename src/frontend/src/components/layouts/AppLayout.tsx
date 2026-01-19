@@ -28,7 +28,7 @@ import {
 	SheetHeader,
 	SheetTitle,
 	SheetDescription,
-	SheetTrigger
+	SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -56,7 +56,6 @@ export const AppLayout = () => {
 		<div className="min-h-screen bg-background flex flex-col">
 			{/* Top Navbar */}
 			<header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 px-6 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/60">
-
 				{/* Mobile Menu */}
 				<Sheet open={isOpen} onOpenChange={setIsOpen}>
 					<SheetTrigger asChild>
@@ -101,7 +100,7 @@ export const AppLayout = () => {
 
 				{/* Desktop Logo */}
 				<Link to="/" className="hidden md:flex">
-					<AppLogo size="sm" />
+					<AppLogo size="md" />
 				</Link>
 
 				{/* Desktop Navigation */}
@@ -163,7 +162,12 @@ export const AppLayout = () => {
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (
-						<Button asChild variant="default" size="sm" className="font-semibold shadow-lg shadow-primary/20">
+						<Button
+							asChild
+							variant="default"
+							size="sm"
+							className="font-semibold shadow-lg shadow-primary/20"
+						>
 							<Link to="/login">Accedi</Link>
 						</Button>
 					)}

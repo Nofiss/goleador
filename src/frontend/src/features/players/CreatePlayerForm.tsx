@@ -9,7 +9,6 @@ interface CreatePlayerFormProps {
 	onSuccess?: () => void;
 }
 
-// Definiamo il tipo dei dati che mandiamo al server
 interface CreatePlayerRequest {
 	nickname: string;
 	firstName: string;
@@ -18,7 +17,6 @@ interface CreatePlayerRequest {
 }
 
 export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
-	// Stato locale per i campi del form
 	const [formData, setFormData] = useState<CreatePlayerRequest>({
 		nickname: "",
 		firstName: "",
@@ -26,32 +24,32 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 		email: "",
 	});
 
-	const [message, setMessage] = useState<string>("");
+	const [message, setMessage] = useState<{ text: string; type: "success" | "error" | null }>({
+		text: "",
+		type: null,
+	});
 
-	// TanStack Query Mutation: gestisce lo stato della chiamata (loading, error, success)
 	const mutation = useMutation({
 		mutationFn: (newPlayer: CreatePlayerRequest) => {
 			return api.post("/players", newPlayer);
 		},
 		onSuccess: () => {
-			setMessage("✅ Giocatore creato con successo!");
-			setFormData({ nickname: "", firstName: "", lastName: "", email: "" }); // Reset form
+			setMessage({ text: "✅ Giocatore creato con successo!", type: "success" });
+			setFormData({ nickname: "", firstName: "", lastName: "", email: "" });
 			if (onSuccess) onSuccess();
 		},
 		onError: (error: any) => {
-			// Qui intercettiamo l'errore 400 che abbiamo configurato nel backend
 			const errorData = error.response?.data;
-			if (errorData?.errors) {
-				setMessage(`❌ Errore: ${JSON.stringify(errorData.errors)}`);
-			} else {
-				setMessage("❌ Si è verificato un errore.");
-			}
+			const errorText = errorData?.errors
+				? `❌ Errore: ${JSON.stringify(errorData.errors)}`
+				: "❌ Si è verificato un errore.";
+			setMessage({ text: errorText, type: "error" });
 		},
 	});
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setMessage("");
+		setMessage({ text: "", type: null });
 		mutation.mutate(formData);
 	};
 
@@ -62,18 +60,21 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="space-y-4 max-w-md mx-auto p-6 border rounded-lg shadow-sm bg-white"
+			className="space-y-4 max-w-md mx-auto p-6 border rounded-lg shadow-sm bg-card text-card-foreground"
 		>
 			<h2 className="text-2xl font-bold mb-4">Registra Giocatore</h2>
 
 			<div className="space-y-2">
-				<Label htmlFor="nickname">Nickname</Label>
+				<Label htmlFor="nickname" className="text-sm font-medium">
+					Nickname
+				</Label>
 				<Input
 					id="nickname"
 					name="nickname"
 					placeholder="Es. TheBomber"
 					value={formData.nickname}
 					onChange={handleChange}
+					className="bg-background" // Input leggermente diverso dal fondo card
 				/>
 			</div>
 
@@ -85,11 +86,18 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 						name="firstName"
 						value={formData.firstName}
 						onChange={handleChange}
+						className="bg-background"
 					/>
 				</div>
 				<div className="space-y-2">
 					<Label htmlFor="lastName">Cognome</Label>
-					<Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} />
+					<Input
+						id="lastName"
+						name="lastName"
+						value={formData.lastName}
+						onChange={handleChange}
+						className="bg-background"
+					/>
 				</div>
 			</div>
 
@@ -102,6 +110,7 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 					placeholder="mario.rossi@azienda.com"
 					value={formData.email}
 					onChange={handleChange}
+					className="bg-background"
 				/>
 			</div>
 
@@ -109,11 +118,15 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 				{mutation.isPending ? "Salvataggio..." : "Crea Giocatore"}
 			</Button>
 
-			{message && (
+			{message.type && (
 				<div
-					className={`p-3 rounded text-sm ${message.startsWith("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+					className={`p-3 rounded-md text-sm font-medium border ${
+						message.type === "success"
+							? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+							: "bg-destructive/15 text-destructive border-destructive/20"
+					}`}
 				>
-					{message}
+					{message.text}
 				</div>
 			)}
 		</form>
