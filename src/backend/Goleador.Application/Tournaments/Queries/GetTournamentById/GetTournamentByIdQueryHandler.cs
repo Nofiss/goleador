@@ -69,12 +69,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         })];
 
         // 4. Ordinamento Partite (Prima quelle da giocare, poi per data)
-        dto.Matches =
-        [
-            .. dto
-                .Matches.OrderBy(m => m.Status) // 0 (Scheduled) prima di 1 (Played)
-                .ThenBy(m => m.Id),
-        ];
+        dto.Matches = [.. dto.Matches];
 
         return dto;
     }

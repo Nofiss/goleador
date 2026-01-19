@@ -31,7 +31,7 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 	// TanStack Query Mutation: gestisce lo stato della chiamata (loading, error, success)
 	const mutation = useMutation({
 		mutationFn: (newPlayer: CreatePlayerRequest) => {
-			return api.post("/api/players", newPlayer);
+			return api.post("/players", newPlayer);
 		},
 		onSuccess: () => {
 			setMessage("✅ Giocatore creato con successo!");
@@ -89,12 +89,7 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 				</div>
 				<div className="space-y-2">
 					<Label htmlFor="lastName">Cognome</Label>
-					<Input
-						id="lastName"
-						name="lastName"
-						value={formData.lastName}
-						onChange={handleChange}
-					/>
+					<Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} />
 				</div>
 			</div>
 

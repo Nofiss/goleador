@@ -20,7 +20,7 @@ export const TeamsTab = ({ tournament }: Props) => {
 		(p) => !assignedPlayerIds.has(p.id),
 	);
 
-	const isSetup = tournament.status === TournamentStatus.Setup;
+	const isSetup = tournament.status === TournamentStatus.setup;
 
 	const newLocal = "text-sm text-muted-foreground/60 max-w-[250px] text-center";
 	return (

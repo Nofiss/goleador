@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 import { TournamentStatus } from "@/types";
 
 interface StandingsTableProps {
-	tournamentId: string,
-	status: TournamentStatus
+	tournamentId: string;
+	status: TournamentStatus;
 }
 
 export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
@@ -22,14 +22,13 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 		queryFn: () => getTournamentStandings(tournamentId),
 	});
 
-	if (status === TournamentStatus.Setup) {
+	if (status === TournamentStatus.setup) {
 		return (
 			<div className="text-center py-10 text-muted-foreground border rounded bg-gray-50">
 				Classifica disponibile all'avvio.
 			</div>
-		)
+		);
 	}
-
 
 	if (isLoading) {
 		return <div className="text-center p-4 text-muted-foreground">Caricamento classifica...</div>;
@@ -85,9 +84,7 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 								<TableCell className="text-center font-bold text-lg text-primary">
 									{row.points}
 								</TableCell>
-								<TableCell className="text-center text-muted-foreground">
-									{row.played}
-								</TableCell>
+								<TableCell className="text-center text-muted-foreground">{row.played}</TableCell>
 								<TableCell className="text-center hidden md:table-cell text-green-600 dark:text-green-500">
 									{row.won}
 								</TableCell>
@@ -104,9 +101,7 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 									{row.goalsAgainst}
 								</TableCell>
 								<TableCell className="text-center font-mono text-sm">
-									{row.goalDifference > 0
-										? `+${row.goalDifference}`
-										: row.goalDifference}
+									{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
 								</TableCell>
 							</TableRow>
 						))

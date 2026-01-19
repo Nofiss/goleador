@@ -29,13 +29,13 @@ export const TournamentHeader = ({ tournament }: Props) => {
 			<div>
 				<div className="flex items-center gap-3 mb-2">
 					<h1 className="text-3xl font-bold">{tournament.name}</h1>
-					{tournament.status === TournamentStatus.Setup && (
+					{tournament.status === TournamentStatus.setup && (
 						<Badge variant="secondary">Iscrizioni</Badge>
 					)}
-					{tournament.status === TournamentStatus.Active && (
+					{tournament.status === TournamentStatus.active && (
 						<Badge className="bg-green-600">In Corso</Badge>
 					)}
-					{tournament.status === TournamentStatus.Finished && (
+					{tournament.status === TournamentStatus.finished && (
 						<Badge variant="outline">Concluso</Badge>
 					)}
 				</div>
@@ -52,7 +52,7 @@ export const TournamentHeader = ({ tournament }: Props) => {
 				{/* ACTION BUTTONS */}
 
 				{/* Admin: Start */}
-				{isAdmin && tournament.status === TournamentStatus.Setup && (
+				{isAdmin && tournament.status === TournamentStatus.setup && (
 					<Button
 						onClick={() => startMutation.mutate(tournament.id)}
 						disabled={tournament.teams.length < 2 || startMutation.isPending}
@@ -63,18 +63,14 @@ export const TournamentHeader = ({ tournament }: Props) => {
 				)}
 
 				{/* Admin: AI Generate (2v2) */}
-				{isAdmin &&
-					tournament.status === TournamentStatus.Setup &&
-					tournament.teamSize === 2 && (
-						<GenerateTeamsButton tournamentId={tournament.id} />
-					)}
+				{isAdmin && tournament.status === TournamentStatus.setup && tournament.teamSize === 2 && (
+					<GenerateTeamsButton tournamentId={tournament.id} />
+				)}
 
 				{/* User: Join (1v1) */}
 				{isAuthenticated &&
-					tournament.status === TournamentStatus.Setup &&
-					tournament.teamSize === 1 && (
-						<JoinTournamentButton tournamentId={tournament.id} />
-					)}
+					tournament.status === TournamentStatus.setup &&
+					tournament.teamSize === 1 && <JoinTournamentButton tournamentId={tournament.id} />}
 			</div>
 		</div>
 	);

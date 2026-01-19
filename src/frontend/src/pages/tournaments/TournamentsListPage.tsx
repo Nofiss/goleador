@@ -4,13 +4,7 @@ import { Link } from "react-router-dom";
 import { getTournaments } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { TournamentStatus } from "@/types";
 
@@ -23,13 +17,11 @@ export const TournamentsListPage = () => {
 
 	const getStatusBadge = (status: TournamentStatus) => {
 		switch (status) {
-			case TournamentStatus.Setup:
+			case TournamentStatus.setup:
 				return <Badge variant="secondary">Iscrizioni</Badge>;
-			case TournamentStatus.Active:
-				return (
-					<Badge className="bg-green-600 hover:bg-green-700">In Corso</Badge>
-				);
-			case TournamentStatus.Finished:
+			case TournamentStatus.active:
+				return <Badge className="bg-green-600 hover:bg-green-700">In Corso</Badge>;
+			case TournamentStatus.finished:
 				return <Badge variant="outline">Concluso</Badge>;
 			default:
 				return null;
@@ -41,9 +33,7 @@ export const TournamentsListPage = () => {
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Tornei</h1>
-					<p className="text-muted-foreground mt-1">
-						Gestisci le competizioni aziendali.
-					</p>
+					<p className="text-muted-foreground mt-1">Gestisci le competizioni aziendali.</p>
 				</div>
 				{isAdmin && (
 					<Button asChild>
@@ -66,8 +56,7 @@ export const TournamentsListPage = () => {
 									{getStatusBadge(t.status)}
 								</div>
 								<CardDescription>
-									{t.teamSize} vs {t.teamSize} •{" "}
-									{t.type === 0 ? "Girone" : "Eliminazione"}
+									{t.teamSize} vs {t.teamSize} • {t.type === 0 ? "Girone" : "Eliminazione"}
 								</CardDescription>
 							</CardHeader>
 							<CardContent>

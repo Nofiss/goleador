@@ -37,8 +37,8 @@ export const DashboardPage = () => {
 	});
 	const { theme } = useTheme(); // Ottieni il tema corrente
 
-	const activeTournaments = tournaments?.filter((t) => t.status === TournamentStatus.Active) || [];
-	const setupTournaments = tournaments?.filter((t) => t.status === TournamentStatus.Setup) || [];
+	const activeTournaments = tournaments?.filter((t) => t.status === TournamentStatus.active) || [];
+	const setupTournaments = tournaments?.filter((t) => t.status === TournamentStatus.setup) || [];
 
 	return (
 		<div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">

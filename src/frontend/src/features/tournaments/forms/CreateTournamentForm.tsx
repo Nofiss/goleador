@@ -28,7 +28,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 
 	const [formData, setFormData] = useState<CreateTournamentRequest>({
 		name: "",
-		type: TournamentType.RoundRobin,
+		type: TournamentType.roundRobin,
 		teamSize: 1, // Default 1vs1
 		hasReturnMatches: false,
 		notes: "",
@@ -62,9 +62,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						<Label>Nome Torneo</Label>
 						<Input
 							value={formData.name}
-							onChange={(e) =>
-								setFormData({ ...formData, name: e.target.value })
-							}
+							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 							placeholder="Es. Champions League 2026"
 							required
 						/>
@@ -86,14 +84,11 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value={TournamentType.RoundRobin.toString()}>
+									<SelectItem value={TournamentType.roundRobin.toString()}>
 										Girone (Campionato)
 									</SelectItem>
 									{/* Elimination non è ancora supportato dal backend scheduler, meglio nasconderlo o gestirlo */}
-									<SelectItem
-										value={TournamentType.Elimination.toString()}
-										disabled
-									>
+									<SelectItem value={TournamentType.elimination.toString()} disabled>
 										Eliminazione (WIP)
 									</SelectItem>
 								</SelectContent>
@@ -104,9 +99,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							<Label>Formato</Label>
 							<Select
 								value={formData.teamSize.toString()}
-								onValueChange={(v) =>
-									setFormData({ ...formData, teamSize: parseInt(v, 10) })
-								}
+								onValueChange={(v) => setFormData({ ...formData, teamSize: parseInt(v, 10) })}
 							>
 								<SelectTrigger>
 									<SelectValue />
@@ -123,9 +116,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							<Textarea
 								placeholder="Regole speciali, premi in palio..."
 								value={formData.notes}
-								onChange={(e) =>
-									setFormData({ ...formData, notes: e.target.value })
-								}
+								onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
 							/>
 						</div>
 					</div>
@@ -136,9 +127,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							id="returnMatches"
 							className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 							checked={formData.hasReturnMatches}
-							onChange={(e) =>
-								setFormData({ ...formData, hasReturnMatches: e.target.checked })
-							}
+							onChange={(e) => setFormData({ ...formData, hasReturnMatches: e.target.checked })}
 						/>
 						<Label htmlFor="returnMatches">Andata e Ritorno</Label>
 					</div>
@@ -148,14 +137,8 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 			{/* Sezione Avanzate (Punteggi) */}
 			<Card>
 				<CardContent className="pt-6">
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={() => setShowAdvanced(!showAdvanced)}
-					>
-						{showAdvanced
-							? "Nascondi Regole Punteggio"
-							: "Configura Punteggi Personalizzati"}
+					<Button type="button" variant="ghost" onClick={() => setShowAdvanced(!showAdvanced)}>
+						{showAdvanced ? "Nascondi Regole Punteggio" : "Configura Punteggi Personalizzati"}
 					</Button>
 					{showAdvanced && (
 						<div className="mt-4 space-y-4">
@@ -213,9 +196,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 										onChange={(e) =>
 											setFormData({
 												...formData,
-												goalThreshold: e.target.value
-													? parseInt(e.target.value, 10)
-													: undefined,
+												goalThreshold: e.target.value ? parseInt(e.target.value, 10) : undefined,
 											})
 										}
 									/>
@@ -239,9 +220,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 								<Checkbox
 									id="tenZero"
 									checked={formData.enableTenZeroBonus}
-									onCheckedChange={(c) =>
-										setFormData({ ...formData, enableTenZeroBonus: !!c })
-									}
+									onCheckedChange={(c) => setFormData({ ...formData, enableTenZeroBonus: !!c })}
 								/>
 								<Label htmlFor="tenZero">Bonus 10-0 (Cappotto)</Label>
 							</div>

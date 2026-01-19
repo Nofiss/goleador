@@ -1,17 +1,15 @@
 export const TournamentStatus = {
-	Setup: 0,
-	Active: 1,
-	Finished: 2,
+	setup: 0,
+	active: 1,
+	finished: 2,
 } as const;
-export type TournamentStatus =
-	(typeof TournamentStatus)[keyof typeof TournamentStatus];
+export type TournamentStatus = (typeof TournamentStatus)[keyof typeof TournamentStatus];
 
 export const TournamentType = {
-	RoundRobin: 0,
-	Elimination: 1,
+	roundRobin: 0,
+	elimination: 1,
 } as const;
-export type TournamentType =
-	(typeof TournamentType)[keyof typeof TournamentType];
+export type TournamentType = (typeof TournamentType)[keyof typeof TournamentType];
 
 export interface Tournament {
 	id: string;
@@ -49,14 +47,14 @@ export interface CreateTournamentRequest {
 }
 
 export interface TournamentTeamPlayer {
-    id: string;
-    nickname: string;
+	id: string;
+	nickname: string;
 }
 
 export interface TournamentTeam {
-    id: string;
-    name: string;
-    players: TournamentTeamPlayer[];
+	id: string;
+	name: string;
+	players: TournamentTeamPlayer[];
 }
 
 export interface TournamentMatch {
@@ -68,7 +66,7 @@ export interface TournamentMatch {
 	awayTeamName: string;
 	tableId?: number;
 	tableName?: string;
-  players: TournamentTeamPlayer[];
+	players: TournamentTeamPlayer[];
 }
 
 export interface TournamentDetail extends Tournament {
