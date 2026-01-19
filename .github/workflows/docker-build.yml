@@ -43,7 +43,7 @@ jobs:
 
       # 3. Build & Push BACKEND
       - name: Build and push Backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./src/backend
           file: ./src/backend/Dockerfile
@@ -52,7 +52,7 @@ jobs:
 
       # 4. Build & Push FRONTEND
       - name: Build and push Frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./src/frontend
           file: ./src/frontend/Dockerfile
