@@ -62,7 +62,7 @@ jobs:
 
       # 1. Installa e configura PNPM
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 9 # Usa la major version che stai usando in locale
           run_install: false
