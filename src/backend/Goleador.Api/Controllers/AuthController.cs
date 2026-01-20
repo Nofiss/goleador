@@ -1,8 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Goleador.Application.Auth.Commands.ForgotPassword;
 using Goleador.Application.Auth.Commands.Register;
+using Goleador.Application.Auth.Commands.RegisterUser;
+using Goleador.Application.Auth.Commands.ResetPassword;
 using Goleador.Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -64,6 +68,20 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
         await Mediator.Send(command);
         return Ok(new { message = "Registrazione completata! Ora puoi fare login." });
     }
-}
 
-public record LoginModel(string Email, string Password);
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        await Mediator.Send(new ForgotPasswordCommand(request.Email));
+        return Ok(new { message = "Se l'email esiste, riceverai un link di reset." });
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        await Mediator.Send(command);
+        return Ok(new { message = "Password aggiornata con successo." });
+    }
+}

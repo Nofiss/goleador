@@ -1,7 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import { CheckCircle2, ChevronLeft, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "@/api/axios";
+import { forgotPassword } from "@/api/auth";
 import { AppLogo } from "@/components/AppLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,23 +10,16 @@ import { Label } from "@/components/ui/label";
 
 export const ForgotPasswordPage = () => {
 	const [email, setEmail] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [error, setError] = useState("");
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const mutation = useMutation({
+		mutationFn: forgotPassword,
+		onSuccess: () => setIsSubmitted(true),
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setIsLoading(true);
-		setError("");
-
-		try {
-			await api.post("/auth/forgot-password", { email });
-			setIsSubmitted(true);
-		} catch (err) {
-			setError("Impossibile trovare un account con questa email.");
-		} finally {
-			setIsLoading(false);
-		}
+		mutation.mutate(email);
 	};
 
 	return (
@@ -68,14 +62,8 @@ export const ForgotPasswordPage = () => {
 									</div>
 								</div>
 
-								{error && (
-									<div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm font-medium">
-										{error}
-									</div>
-								)}
-
-								<Button type="submit" className="w-full h-11" disabled={isLoading}>
-									{isLoading ? "Invio in corso..." : "Invia Link di Reset"}
+								<Button type="submit" className="w-full h-11" disabled={mutation.isPending}>
+									{mutation.isPending ? "Invio in corso..." : "Invia Link di Reset"}
 								</Button>
 							</form>
 						</>

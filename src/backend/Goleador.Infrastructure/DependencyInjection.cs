@@ -32,6 +32,8 @@ public static class DependencyInjection
 
         services.AddScoped<ITeamGeneratorService, OpenAiTeamGeneratorService>();
 
+        services.AddSingleton<IEmailService, GraphEmailService>();
+
         return services;
     }
 }

@@ -1,16 +1,17 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layouts/AppLayout";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
+import { LoginPage } from "@/pages/auth/LoginPage";
+import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { DashboardPage } from "@/pages/DashboardPage";
-import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
-import { LoginPage } from "@/pages/LoginPage";
 import { MatchCreatePage } from "@/pages/matches/MatchCreatePage";
 import { MatchesListPage } from "@/pages/matches/MatchesListPage";
 import { PlayerCreatePage } from "@/pages/players/PlayerCreatePage";
 import { PlayersListPage } from "@/pages/players/PlayersListPage";
-import { RegisterPage } from "@/pages/RegisterPage";
 import { TournamentCreatePage } from "@/pages/tournaments/TournamentCreatePage";
 import { TournamentDetailPage } from "@/pages/tournaments/TournamentDetailPage";
 import { TournamentsListPage } from "@/pages/tournaments/TournamentsListPage";
+import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import { TablesPage } from "./pages/tables/TablesPage";
 import { UsersPage } from "./pages/users/UsersPage";
 
@@ -21,6 +22,7 @@ function App() {
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/register" element={<RegisterPage />} />
 				<Route path="/forgot-password" element={<ForgotPasswordPage />} />
+				<Route path="/reset-password" element={<ResetPasswordPage />} />
 
 				{/* Rotte Protette dal Layout */}
 				<Route element={<AppLayout />}>

@@ -48,7 +48,7 @@ export const PlayerStatsDialog = ({
 						</div>
 
 						<div className="grid grid-cols-3 gap-4 text-center">
-							<div className="p-3 bg-green-50 rounded-lg">
+							<div className="p-3 bg-green-100 rounded-lg">
 								<div className="text-2xl font-bold text-green-700">
 									{stats.wins}
 								</div>
@@ -56,7 +56,7 @@ export const PlayerStatsDialog = ({
 									Vittorie
 								</div>
 							</div>
-							<div className="p-3 bg-gray-50 rounded-lg">
+							<div className="p-3 bg-gray-100 rounded-lg">
 								<div className="text-2xl font-bold text-gray-700">
 									{stats.draws}
 								</div>
@@ -64,7 +64,7 @@ export const PlayerStatsDialog = ({
 									Pareggi
 								</div>
 							</div>
-							<div className="p-3 bg-red-50 rounded-lg">
+							<div className="p-3 bg-red-100 rounded-lg">
 								<div className="text-2xl font-bold text-red-700">
 									{stats.losses}
 								</div>
@@ -99,7 +99,7 @@ export const PlayerStatsDialog = ({
 							</div>
 						</div>
 
-						<div className="bg-gray-50 p-4 rounded-lg">
+						<div className="bg-secondary p-4 rounded-lg">
 							<div className="flex items-center gap-2 mb-2">
 								<Activity className="h-4 w-4 text-gray-400" />
 								<span className="text-xs font-semibold uppercase text-gray-500">

@@ -11,7 +11,7 @@ public static class DbSeeder
         UserManager<ApplicationUser> userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         // Crea Ruoli
-        string[] roleNames = ["Admin", "Referee"];
+        string[] roleNames = ["Admin", "Referee", "Player"];
         foreach (var roleName in roleNames)
         {
             if (!await roleManager.RoleExistsAsync(roleName))

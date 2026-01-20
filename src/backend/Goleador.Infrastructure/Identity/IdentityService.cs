@@ -84,4 +84,37 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
 
         return (true, Array.Empty<string>());
     }
+
+    public async Task<string?> GeneratePasswordResetTokenAsync(string email)
+    {
+        ApplicationUser? user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return await userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<(bool Success, string[] Errors)> ResetPasswordAsync(
+        string email,
+        string token,
+        string newPassword
+    )
+    {
+        ApplicationUser? user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return (false, new[] { "Invalid request." });
+        }
+
+        IdentityResult result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        if (!result.Succeeded)
+        {
+            return (false, result.Errors.Select(e => e.Description).ToArray());
+        }
+
+        return (true, Array.Empty<string>());
+    }
 }
