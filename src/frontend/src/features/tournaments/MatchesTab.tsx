@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import {
-	type TournamentDetail,
-	type TournamentMatch,
-	TournamentStatus,
-} from "@/types";
+import { type TournamentDetail, type TournamentMatch, TournamentStatus } from "@/types";
 
 interface Props {
 	tournament: TournamentDetail;
@@ -28,11 +24,11 @@ export const MatchesTab = ({ tournament }: Props) => {
 	}
 
 	const sortedMatches = [...tournament.matches].sort((a, b) => a.round - b.round);
-	const maxRound = Math.max(...sortedMatches.map(m => m.round), 0);
+	const maxRound = Math.max(...sortedMatches.map((m) => m.round), 0);
 	const roundsInFirstLeg = tournament.hasReturnMatches ? maxRound / 2 : maxRound;
 
-	const firstLegMatches = sortedMatches.filter(m => m.round <= roundsInFirstLeg);
-	const secondLegMatches = sortedMatches.filter(m => m.round > roundsInFirstLeg);
+	const firstLegMatches = sortedMatches.filter((m) => m.round <= roundsInFirstLeg);
+	const secondLegMatches = sortedMatches.filter((m) => m.round > roundsInFirstLeg);
 
 	const renderMatchGrid = (matches: typeof tournament.matches, title: string) => (
 		<div className="mb-10">
@@ -54,26 +50,28 @@ export const MatchesTab = ({ tournament }: Props) => {
 							"bg-card hover:shadow-md hover:border-accent-foreground/20",
 							match.status === 1
 								? "opacity-90 bg-muted/30" // Partite terminate leggermente più opache
-								: "border-primary/10 shadow-sm"
+								: "border-primary/10 shadow-sm",
 						)}
 					>
 						{/* Status Bar laterale */}
 						<div
 							className={cn(
 								"absolute top-0 left-0 w-1 h-full transition-colors",
-								match.status === 1 ? "bg-muted-foreground/30" : "bg-primary"
+								match.status === 1 ? "bg-muted-foreground/30" : "bg-primary",
 							)}
 						/>
 
 						<div className="p-4 pl-5">
 							{/* Header Card */}
 							<div className="flex justify-between items-start mb-4">
-								<span className={cn(
-									"text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
-									match.status === 0
-										? "text-primary border-primary/20 bg-primary/5"
-										: "text-muted-foreground border-muted-foreground/20 bg-muted"
-								)}>
+								<span
+									className={cn(
+										"text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
+										match.status === 0
+											? "text-primary border-primary/20 bg-primary/5"
+											: "text-muted-foreground border-muted-foreground/20 bg-muted",
+									)}
+								>
 									{match.status === 0 ? "Da Giocare" : "Terminata"}
 								</span>
 
@@ -100,35 +98,47 @@ export const MatchesTab = ({ tournament }: Props) => {
 							{/* Squadre e Punteggio */}
 							<div className="space-y-3">
 								<div className="flex justify-between items-center group/team">
-									<span className={cn(
-										"text-sm transition-colors",
-										match.status === 1 && match.scoreHome > match.scoreAway
-											? "font-bold text-foreground"
-											: "text-muted-foreground"
-									)}>
+									<span
+										className={cn(
+											"text-sm transition-colors",
+											match.status === 1 && match.scoreHome > match.scoreAway
+												? "font-bold text-foreground"
+												: "text-muted-foreground",
+										)}
+									>
 										{match.homeTeamName}
 									</span>
-									<span className={cn(
-										"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
-										match.status === 1 && match.scoreHome > match.scoreAway && "text-primary font-bold"
-									)}>
+									<span
+										className={cn(
+											"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+											match.status === 1 &&
+												match.scoreHome > match.scoreAway &&
+												"text-primary font-bold",
+										)}
+									>
 										{match.status === 1 ? match.scoreHome : "-"}
 									</span>
 								</div>
 
 								<div className="flex justify-between items-center group/team">
-									<span className={cn(
-										"text-sm transition-colors",
-										match.status === 1 && match.scoreAway > match.scoreHome
-											? "font-bold text-foreground"
-											: "text-muted-foreground"
-									)}>
+									<span
+										className={cn(
+											"text-sm transition-colors",
+											match.status === 1 && match.scoreAway > match.scoreHome
+												? "font-bold text-foreground"
+												: "text-muted-foreground",
+										)}
+									>
 										{match.awayTeamName}
 									</span>
-									<span className={cn(
-										"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
-										match.status === 1 && match.scoreAway > match.scoreHome && "text-primary font-bold"
-									)}>
+									<span
+										className={cn(
+											"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+											match.status === 1 &&
+												match.scoreAway > match.scoreHome &&
+												"text-primary font-bold",
+										)}
+									>
 										{match.status === 1 ? match.scoreAway : "-"}
 									</span>
 								</div>

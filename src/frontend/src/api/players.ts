@@ -6,11 +6,7 @@ export const getPlayers = async (): Promise<Player[]> => {
 	return response.data;
 };
 
-export const getPlayerStatistics = async (
-	id: string,
-): Promise<PlayerStatistics> => {
-	const response = await api.get<PlayerStatistics>(
-		`/players/${id}/statistics`,
-	);
+export const getPlayerStatistics = async (id: string): Promise<PlayerStatistics> => {
+	const response = await api.get<PlayerStatistics>(`/players/${id}/statistics`);
 	return response.data;
 };

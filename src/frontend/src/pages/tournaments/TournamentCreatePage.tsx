@@ -15,9 +15,7 @@ export const TournamentCreatePage = () => {
 					</Link>
 				</Button>
 				<div>
-					<h1 className="text-2xl font-bold tracking-tight">
-						Crea Nuovo Torneo
-					</h1>
+					<h1 className="text-2xl font-bold tracking-tight">Crea Nuovo Torneo</h1>
 					<p className="text-muted-foreground text-sm">
 						Configura le regole, i punteggi e il formato.
 					</p>

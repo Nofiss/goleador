@@ -47,10 +47,7 @@ export const CreateTableDialog = () => {
 					</div>
 					<div>
 						<Label>Posizione (es. "Sala Relax")</Label>
-						<Input
-							value={location}
-							onChange={(e) => setLocation(e.target.value)}
-						/>
+						<Input value={location} onChange={(e) => setLocation(e.target.value)} />
 					</div>
 					<Button
 						className="w-full"

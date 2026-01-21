@@ -1,11 +1,17 @@
-import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { updateUserRoles } from "@/api/users";
-import type { User } from "@/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import type { User } from "@/types";
 
 interface Props {
 	user: User | null;
@@ -28,12 +34,12 @@ export const UserRolesDialog = ({ user, onClose }: Props) => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			onClose();
 		},
-		onError: (err: any) => alert(err.response?.data?.detail || "Errore aggiornamento ruoli")
+		onError: (err: any) => alert(err.response?.data?.detail || "Errore aggiornamento ruoli"),
 	});
 
 	const toggleRole = (role: string) => {
-		setSelectedRoles(prev =>
-			prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+		setSelectedRoles((prev) =>
+			prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
 		);
 	};
 
@@ -52,7 +58,7 @@ export const UserRolesDialog = ({ user, onClose }: Props) => {
 					</p>
 
 					<div className="flex flex-col gap-3">
-						{AVAILABLE_ROLES.map(role => (
+						{AVAILABLE_ROLES.map((role) => (
 							<div key={role} className="flex items-center space-x-2">
 								<Checkbox
 									id={role}
@@ -66,7 +72,9 @@ export const UserRolesDialog = ({ user, onClose }: Props) => {
 				</div>
 
 				<DialogFooter>
-					<Button variant="outline" onClick={onClose}>Annulla</Button>
+					<Button variant="outline" onClick={onClose}>
+						Annulla
+					</Button>
 					<Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
 						Salva Modifiche
 					</Button>

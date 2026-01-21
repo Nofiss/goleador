@@ -54,7 +54,7 @@ export const RegisterTeamForm = ({
 
 	const togglePlayer = (id: string) => {
 		setSelectedPlayers((prev) =>
-			prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+			prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
 		);
 	};
 

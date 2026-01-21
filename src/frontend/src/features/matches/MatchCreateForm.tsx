@@ -41,7 +41,10 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 		},
 	});
 
-	const isSamePlayer = formData.playerHomeId && formData.playerAwayId && formData.playerHomeId === formData.playerAwayId;
+	const isSamePlayer =
+		formData.playerHomeId &&
+		formData.playerAwayId &&
+		formData.playerHomeId === formData.playerAwayId;
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -60,9 +63,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						</Label>
 						<Select
 							value={formData.playerHomeId}
-							onValueChange={(v) =>
-								setFormData({ ...formData, playerHomeId: v })
-							}
+							onValueChange={(v) => setFormData({ ...formData, playerHomeId: v })}
 						>
 							<SelectTrigger id="playerHome" className="w-full text-center font-medium h-12">
 								<SelectValue placeholder="Seleziona..." />
@@ -108,9 +109,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						</Label>
 						<Select
 							value={formData.playerAwayId}
-							onValueChange={(v) =>
-								setFormData({ ...formData, playerAwayId: v })
-							}
+							onValueChange={(v) => setFormData({ ...formData, playerAwayId: v })}
 						>
 							<SelectTrigger id="playerAway" className="w-full text-center font-medium h-12">
 								<SelectValue placeholder="Seleziona..." />
@@ -145,7 +144,10 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 
 			<div className="flex flex-col items-center gap-4 pt-4">
 				{isSamePlayer && (
-					<p className="text-destructive text-sm font-medium animate-in fade-in slide-in-from-top-1" role="alert">
+					<p
+						className="text-destructive text-sm font-medium animate-in fade-in slide-in-from-top-1"
+						role="alert"
+					>
 						Seleziona due giocatori diversi per registrare la partita.
 					</p>
 				)}
@@ -153,7 +155,9 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 					size="lg"
 					className="w-full md:w-1/3 text-lg h-12"
 					type="submit"
-					disabled={mutation.isPending || isSamePlayer || !formData.playerHomeId || !formData.playerAwayId}
+					disabled={
+						mutation.isPending || isSamePlayer || !formData.playerHomeId || !formData.playerAwayId
+					}
 				>
 					{mutation.isPending ? "Salvataggio..." : "Registra Risultato"}
 				</Button>

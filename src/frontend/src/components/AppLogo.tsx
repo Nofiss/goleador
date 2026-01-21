@@ -13,9 +13,8 @@ export const AppLogo = ({
 	className,
 	variant = "horizontal",
 	size = "md",
-	showText = true
+	showText = true,
 }: LogoProps) => {
-
 	const sizes = {
 		sm: "w-10 h-10",
 		md: "w-16 h-16",
@@ -50,10 +49,12 @@ export const AppLogo = ({
 			</div>
 
 			{showText && (
-				<span className={cn(
-					"font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-primary to-blue-600",
-					textSizes[size]
-				)}>
+				<span
+					className={cn(
+						"font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-primary to-blue-600",
+						textSizes[size],
+					)}
+				>
 					GOLEADOR
 				</span>
 			)}

@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-export const JoinTournamentButton = ({
-	tournamentId,
-}: {
-	tournamentId: string;
-}) => {
+export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string }) => {
 	const [open, setOpen] = useState(false);
 	const [teamName, setTeamName] = useState("");
 	const queryClient = useQueryClient();
@@ -45,8 +41,8 @@ export const JoinTournamentButton = ({
 				</DialogHeader>
 				<div className="space-y-4 py-4">
 					<p className="text-sm text-gray-500">
-						Inserisci il nome con cui vuoi apparire in classifica (es. il tuo
-						Nickname o nome di battaglia).
+						Inserisci il nome con cui vuoi apparire in classifica (es. il tuo Nickname o nome di
+						battaglia).
 					</p>
 					<Input
 						placeholder="Nome Squadra"

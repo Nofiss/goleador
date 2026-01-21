@@ -11,9 +11,7 @@ export const MatchesListPage = () => {
 		<div className="space-y-6">
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight text-foreground">
-						Partite
-					</h1>
+					<h1 className="text-3xl font-bold tracking-tight text-foreground">Partite</h1>
 					<p className="text-muted-foreground mt-1">
 						Lo storico delle sfide amichevoli e di torneo.
 					</p>

@@ -2,13 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Trash2 } from "lucide-react";
 import { deleteTable, getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateTableDialog } from "@/features/tables/CreateTableDialog";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -24,8 +18,7 @@ export const TablesPage = () => {
 	const deleteMutation = useMutation({
 		mutationFn: deleteTable,
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
-		onError: () =>
-			alert("Impossibile eliminare: il tavolo è usato in alcune partite."),
+		onError: () => alert("Impossibile eliminare: il tavolo è usato in alcune partite."),
 	});
 
 	if (isLoading) return <div>Caricamento...</div>;
@@ -35,9 +28,7 @@ export const TablesPage = () => {
 			<div className="flex justify-between items-center border-b pb-4">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Tavoli</h1>
-					<p className="text-muted-foreground">
-						Gestisci le postazioni di gioco.
-					</p>
+					<p className="text-muted-foreground">Gestisci le postazioni di gioco.</p>
 				</div>
 				{isAdmin && <CreateTableDialog />}
 			</div>
@@ -69,8 +60,7 @@ export const TablesPage = () => {
 										size="icon"
 										className="text-red-500 hover:text-red-700 hover:bg-red-50"
 										onClick={() => {
-											if (confirm("Sei sicuro?"))
-												deleteMutation.mutate(table.id);
+											if (confirm("Sei sicuro?")) deleteMutation.mutate(table.id);
 										}}
 									>
 										<Trash2 className="h-4 w-4" />
