@@ -5,7 +5,7 @@ services:
     container_name: goleador_db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
     volumes:
       - mssql-prod-data:/var/opt/mssql
     restart: always
@@ -15,8 +15,8 @@ services:
     image: ghcr.io/nofiss/goleador/goleador-api:latest
     container_name: goleador_api
     environment:
-      - ConnectionStrings__DefaultConnection=Server=db;Database=GoleadorDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
-      - Jwt__Key=GoleadorSecretKey_MustBeVeryLongAndSecure_AtLeast32Chars!
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GoleadorDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=GoleadorApi
       - Jwt__Audience=GoleadorClient
     ports:
