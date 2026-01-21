@@ -33,6 +33,23 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             return true; // Errore gestito
         }
 
+        if (exception is ConcurrencyException concurrencyException)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Concurrency Conflict",
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+                Detail = concurrencyException.Message,
+            };
+
+            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+
+            return true;
+        }
+
         // Se è un'altra eccezione (es. Database down), la lasciamo gestire al framework (o a un altro handler 500)
         return false;
     }

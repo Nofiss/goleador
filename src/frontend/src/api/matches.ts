@@ -22,6 +22,7 @@ export const setMatchResult = async (
 		scoreHome: number;
 		scoreAway: number;
 		tableId: number | null;
+		rowVersion: string;
 	},
 ) => {
 	return api.put(`/matches/${matchId}`, data);

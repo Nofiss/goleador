@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using MediatR;
@@ -22,6 +23,11 @@ public class UpdateMatchResultCommandHandler(IApplicationDbContext context, IMem
         // 2. Aggiorna tramite metodo di dominio
         match.SetResult(request.ScoreHome, request.ScoreAway);
 
+        // Impostiamo il valore originale per il controllo di concorrenza
+        context.Entry(match).Property(x => x.RowVersion).OriginalValue = Convert.FromBase64String(
+            request.RowVersion
+        );
+
         // Aggiorna tavolo (Se passato, altrimenti lascia quello che c'era o null)
         if (request.TableId.HasValue)
         {
@@ -29,7 +35,17 @@ public class UpdateMatchResultCommandHandler(IApplicationDbContext context, IMem
         }
 
         // 3. Salva
-        await context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyException(
+                "La partita è stata modificata da un altro utente.",
+                ex
+            );
+        }
 
         // 4. Invalida cache classifica
         if (match.TournamentId.HasValue)

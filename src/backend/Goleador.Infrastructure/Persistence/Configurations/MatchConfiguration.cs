@@ -16,5 +16,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
             .WithOne(p => p.Match)
             .HasForeignKey(p => p.MatchId)
             .OnDelete(DeleteBehavior.Cascade); // Se cancello la partita, cancello i partecipanti
+
+        builder.Property(m => m.RowVersion).IsRowVersion();
     }
 }

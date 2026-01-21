@@ -18,6 +18,8 @@ public class Match : BaseEntity
     public int? TableId { get; private set; }
     public Table? Table { get; private set; }
 
+    public byte[] RowVersion { get; set; } = [];
+
     readonly List<MatchParticipant> _participants = [];
     public IReadOnlyCollection<MatchParticipant> Participants => _participants.AsReadOnly();
 
