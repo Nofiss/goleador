@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { memo } from "react";
 import { getTournamentStandings } from "@/api/tournaments";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -81,7 +82,62 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 	}
 
 	if (isLoading) {
-		return <div className="text-center p-4 text-muted-foreground">Caricamento classifica...</div>;
+		return (
+			<div className="border rounded-md bg-card">
+				<Table>
+					<TableHeader>
+						<TableRow className="bg-muted/50">
+							<TableHead className="w-12.5">Pos</TableHead>
+							<TableHead>Squadra</TableHead>
+							<TableHead className="text-center font-bold">PT</TableHead>
+							<TableHead className="text-center text-muted-foreground">G</TableHead>
+							<TableHead className="text-center hidden md:table-cell">V</TableHead>
+							<TableHead className="text-center hidden md:table-cell">N</TableHead>
+							<TableHead className="text-center hidden md:table-cell">P</TableHead>
+							<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
+							<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
+							<TableHead className="text-center">DR</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{Array.from({ length: 8 }).map((_, i) => (
+							<TableRow key={i}>
+								<TableCell>
+									<Skeleton className="h-6 w-6 rounded-full" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-32" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-8 mx-auto" />
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
+		);
 	}
 
 	return (

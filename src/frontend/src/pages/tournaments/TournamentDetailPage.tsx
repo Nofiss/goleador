@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { getTournamentById } from "@/api/tournaments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MatchesTab } from "@/features/tournaments/MatchesTab";
+import { MatchesTab, MatchesTabSkeleton } from "@/features/tournaments/MatchesTab";
 import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TeamsTab } from "@/features/tournaments/TeamsTab";
-import { TournamentHeader } from "@/features/tournaments/TournamentHeader";
+import { TournamentHeader, TournamentHeaderSkeleton } from "@/features/tournaments/TournamentHeader";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
@@ -17,7 +17,23 @@ export const TournamentDetailPage = () => {
 		enabled: !!id,
 	});
 
-	if (isLoading || !tournament) return <div className="p-8 text-center">Caricamento Torneo...</div>;
+	if (isLoading || !tournament) {
+		return (
+			<div className="space-y-6 max-w-6xl mx-auto pb-20">
+				<TournamentHeaderSkeleton />
+				<Tabs defaultValue="matches" className="w-full">
+					<TabsList className="grid w-full grid-cols-3 lg:w-100">
+						<TabsTrigger value="teams" disabled>Squadre</TabsTrigger>
+						<TabsTrigger value="matches">Partite</TabsTrigger>
+						<TabsTrigger value="standings" disabled>Classifica</TabsTrigger>
+					</TabsList>
+					<div className="mt-6">
+						<MatchesTabSkeleton />
+					</div>
+				</Tabs>
+			</div>
+		);
+	}
 
 	// Default tab logic
 	const defaultTab = tournament.status === TournamentStatus.setup ? "teams" : "standings";
