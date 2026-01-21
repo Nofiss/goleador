@@ -23,7 +23,13 @@ public class Match : BaseEntity
 
     Match() { } // Per EF Core
 
-    public Match(int scoreHome, int scoreAway, Guid? tournamentId = null, int? tableId = null, int round = 1)
+    public Match(
+        int scoreHome,
+        int scoreAway,
+        Guid? tournamentId = null,
+        int? tableId = null,
+        int round = 1
+    )
     {
         DatePlayed = DateTime.UtcNow;
         ScoreHome = scoreHome;
