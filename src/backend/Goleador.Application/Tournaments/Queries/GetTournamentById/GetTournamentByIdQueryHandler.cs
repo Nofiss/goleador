@@ -18,6 +18,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         Tournament tournament =
             await context
                 .Tournaments.AsNoTracking()
+                .AsSplitQuery()
                 .Include(t => t.Registrations)
                     .ThenInclude(r => r.Player)
                 .Include(t => t.Teams)
@@ -32,33 +33,56 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         // 2. Mappa base con AutoMapper
         TournamentDetailDto dto = mapper.Map<TournamentDetailDto>(tournament);
 
-        // 3. ARRITCCHIMENTO DATI (Fix Nomi Squadre nelle Partite)
-        // Per ogni partita, dobbiamo capire chi sono "Home" e "Away" guardando i giocatori
+        var playerTeamMap = new Dictionary<Guid, (string Name, Guid Id)>();
+        foreach (TournamentTeam team in tournament.Teams)
+        {
+            foreach (Player player in team.Players)
+            {
+                if (!playerTeamMap.ContainsKey(player.Id))
+                {
+                    playerTeamMap[player.Id] = (team.Name, team.Id);
+                }
+            }
+        }
+
         foreach (TournamentMatchDto matchDto in dto.Matches)
         {
-            Match matchEntity = tournament.Matches.First(m => m.Id == matchDto.Id);
+            // Troviamo l'entità corrispondente in memoria (veloce perché hanno lo stesso indice o ID)
+            // Nota: Per sicurezza usiamo First, ma ottimizzabile se la lista è ordinata uguale.
+            Match? matchEntity = tournament.Matches.FirstOrDefault(m => m.Id == matchDto.Id);
+            if (matchEntity == null)
+            {
+                continue;
+            }
 
-            // Trova gli ID dei giocatori Home e Away
-            var homePlayerIds = matchEntity
-                .Participants.Where(p => p.Side == Domain.Enums.Side.Home)
-                .Select(p => p.PlayerId)
-                .ToList();
-            var awayPlayerIds = matchEntity
-                .Participants.Where(p => p.Side == Domain.Enums.Side.Away)
-                .Select(p => p.PlayerId)
-                .ToList();
-
-            // Trova il Team che contiene questi giocatori
-            TournamentTeam? homeTeam = tournament.Teams.FirstOrDefault(t =>
-                t.Players.Select(p => p.Id).Intersect(homePlayerIds).Any()
+            // Estraiamo i partecipanti
+            MatchParticipant? homeParticipant = matchEntity.Participants.FirstOrDefault(p =>
+                p.Side == Domain.Enums.Side.Home
             );
-            TournamentTeam? awayTeam = tournament.Teams.FirstOrDefault(t =>
-                t.Players.Select(p => p.Id).Intersect(awayPlayerIds).Any()
+            MatchParticipant? awayParticipant = matchEntity.Participants.FirstOrDefault(p =>
+                p.Side == Domain.Enums.Side.Away
             );
 
-            matchDto.HomeTeamName = homeTeam?.Name ?? "TBD";
-            matchDto.AwayTeamName = awayTeam?.Name ?? "TBD";
+            // Lookup istantaneo dal Dizionario
+            matchDto.HomeTeamName =
+                homeParticipant != null
+                && playerTeamMap.TryGetValue(
+                    homeParticipant.PlayerId,
+                    out (string Name, Guid Id) homeTeam
+                )
+                    ? homeTeam.Name
+                    : "N/A";
 
+            matchDto.AwayTeamName =
+                awayParticipant != null
+                && playerTeamMap.TryGetValue(
+                    awayParticipant.PlayerId,
+                    out (string Name, Guid Id) awayTeam
+                )
+                    ? awayTeam.Name
+                    : "N/A";
+
+            // Mapping Tavolo
             matchDto.TableId = matchEntity.TableId;
             matchDto.TableName = matchEntity.Table?.Name ?? string.Empty;
         }
@@ -73,7 +97,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         ];
 
         // 4. Ordinamento Partite (Prima quelle da giocare, poi per data)
-        dto.Matches = [.. dto.Matches];
+        dto.Matches = [.. dto.Matches.OrderBy(m => m.Round)];
 
         return dto;
     }
