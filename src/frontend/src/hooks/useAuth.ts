@@ -4,9 +4,7 @@ const TOKEN_KEY = "goleador_token";
 const ROLES_KEY = "goleador_roles";
 
 export const useAuth = () => {
-	const [token, setTokenState] = useState<string | null>(
-		localStorage.getItem(TOKEN_KEY),
-	);
+	const [token, setTokenState] = useState<string | null>(localStorage.getItem(TOKEN_KEY));
 	const [roles, setRolesState] = useState<string[]>(
 		JSON.parse(localStorage.getItem(ROLES_KEY) || "[]"),
 	);

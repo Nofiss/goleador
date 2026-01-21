@@ -10,7 +10,9 @@ const queryClient = new QueryClient();
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-	throw new Error("Impossibile trovare l'elemento root. Assicurati che sia presente nell'index.html");
+	throw new Error(
+		"Impossibile trovare l'elemento root. Assicurati che sia presente nell'index.html",
+	);
 }
 
 createRoot(rootElement).render(

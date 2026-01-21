@@ -1,13 +1,20 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link, Loader2, Shield, ShieldAlert, UserCog, User as UserIcon } from "lucide-react";
+import { useState } from "react";
 import { getUsers } from "@/api/users";
-import type { User } from "@/types";
-import { UserRolesDialog } from "@/features/users/UserRolesDialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldAlert, UserCog, Loader2, User as UserIcon, Link } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { LinkPlayerDialog } from "@/features/users/LinkPlayerDialog";
+import { UserRolesDialog } from "@/features/users/UserRolesDialog";
+import type { User } from "@/types";
 
 export const UsersPage = () => {
 	const { data: users, isLoading } = useQuery({ queryKey: ["users"], queryFn: getUsers });
@@ -46,9 +53,7 @@ export const UsersPage = () => {
 		<div className="space-y-6">
 			{/* Header */}
 			<div className="flex flex-col gap-1 border-b border-border pb-6">
-				<h1 className="text-3xl font-bold tracking-tight text-foreground">
-					Utenti e Permessi
-				</h1>
+				<h1 className="text-3xl font-bold tracking-tight text-foreground">Utenti e Permessi</h1>
 				<p className="text-muted-foreground">
 					Visualizza gli utenti registrati e gestisci i loro privilegi di amministrazione.
 				</p>
@@ -85,9 +90,7 @@ export const UsersPage = () => {
 						) : (
 							users?.map((user) => (
 								<TableRow key={user.id} className="hover:bg-muted/30 transition-colors">
-									<TableCell className="font-medium text-foreground">
-										{user.email}
-									</TableCell>
+									<TableCell className="font-medium text-foreground">{user.email}</TableCell>
 									<TableCell className="text-muted-foreground hidden md:table-cell">
 										{user.username}
 									</TableCell>
@@ -115,7 +118,6 @@ export const UsersPage = () => {
 										<Button variant="ghost" size="sm" onClick={() => setLinkingUser(user)}>
 											<Link className="mr-2 h-4 w-4" /> Collega
 										</Button>
-
 									</TableCell>
 								</TableRow>
 							))

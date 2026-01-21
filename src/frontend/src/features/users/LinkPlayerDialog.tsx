@@ -1,12 +1,24 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { linkUserToPlayer } from "@/api/users";
+import { useState } from "react";
 import { getPlayers } from "@/api/players";
-import type { User } from "@/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { linkUserToPlayer } from "@/api/users";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import type { User } from "@/types";
 
 interface Props {
 	user: User | null;
@@ -26,13 +38,14 @@ export const LinkPlayerDialog = ({ user, onClose }: Props) => {
 	}
 
 	const mutation = useMutation({
-		mutationFn: () => linkUserToPlayer(user!.id, selectedPlayerId === "no_link" ? null : selectedPlayerId),
+		mutationFn: () =>
+			linkUserToPlayer(user!.id, selectedPlayerId === "no_link" ? null : selectedPlayerId),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			onClose();
 			setSelectedPlayerId("no_link");
 		},
-		onError: (err: any) => alert(err.response?.data?.detail || "Errore collegamento")
+		onError: (err: any) => alert(err.response?.data?.detail || "Errore collegamento"),
 	});
 
 	if (!user) return null;
@@ -46,21 +59,19 @@ export const LinkPlayerDialog = ({ user, onClose }: Props) => {
 
 				<div className="py-4 space-y-4">
 					<p className="text-sm text-gray-500">
-						Associa l'account <strong>{user.username}</strong> a un profilo giocatore esistente per permettergli di iscriversi ai tornei.
+						Associa l'account <strong>{user.username}</strong> a un profilo giocatore esistente per
+						permettergli di iscriversi ai tornei.
 					</p>
 
 					<div className="space-y-2">
 						<Label>Profilo Giocatore</Label>
-						<Select
-							value={selectedPlayerId}
-							onValueChange={setSelectedPlayerId}
-						>
+						<Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleziona..." />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="no_link">-- Nessun Collegamento --</SelectItem>
-								{players?.map(p => (
+								{players?.map((p) => (
 									<SelectItem key={p.id} value={p.id}>
 										{p.nickname} {p.fullName && `(${p.fullName})`}
 									</SelectItem>
@@ -71,7 +82,9 @@ export const LinkPlayerDialog = ({ user, onClose }: Props) => {
 				</div>
 
 				<DialogFooter>
-					<Button variant="outline" onClick={onClose}>Annulla</Button>
+					<Button variant="outline" onClick={onClose}>
+						Annulla
+					</Button>
 					<Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
 						Salva Collegamento
 					</Button>

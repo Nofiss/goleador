@@ -15,9 +15,7 @@ export const MatchCreatePage = () => {
 					</Link>
 				</Button>
 				<div>
-					<h1 className="text-2xl font-bold tracking-tight">
-						Registra Partita Rapida
-					</h1>
+					<h1 className="text-2xl font-bold tracking-tight">Registra Partita Rapida</h1>
 					<p className="text-muted-foreground text-sm">
 						Inserisci il risultato di un'amichevole 1 vs 1.
 					</p>

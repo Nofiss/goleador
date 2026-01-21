@@ -14,9 +14,7 @@ export const PlayerCreatePage = () => {
 						<ChevronLeft className="h-5 w-5" />
 					</Link>
 				</Button>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Registra Nuovo Giocatore
-				</h1>
+				<h1 className="text-2xl font-bold tracking-tight">Registra Nuovo Giocatore</h1>
 			</div>
 
 			{/* Passiamo una callback per tornare alla lista dopo il salvataggio */}

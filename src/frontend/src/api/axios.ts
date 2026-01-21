@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -39,3 +39,17 @@ api.interceptors.response.use(
 		return Promise.reject(error);
 	},
 );
+
+/**
+ * Funzione mutator personalizzata per Orval.
+ * Utilizza l'istanza axios `api` pre-configurata con interceptors.
+ */
+export const customInstance = <T>(
+	config: AxiosRequestConfig,
+	options?: AxiosRequestConfig,
+): Promise<T> => {
+	return api({
+		...config,
+		...options,
+	}).then((response) => response.data);
+};
