@@ -68,6 +68,7 @@ export interface TournamentMatch {
 	tableId?: number;
 	tableName?: string;
 	datePlayed?: string;
+	rowVersion: string;
 	players: TournamentTeamPlayer[];
 }
 

@@ -31,7 +31,11 @@ public class TournamentDetailDto
             CreateMap<Match, TournamentMatchDto>()
                 // Mappiamo i nomi dei partecipanti per visualizzarli facilmente
                 .ForMember(d => d.HomeTeamName, opt => opt.MapFrom(s => GetTeamName(s, Side.Home)))
-                .ForMember(d => d.AwayTeamName, opt => opt.MapFrom(s => GetTeamName(s, Side.Away)));
+                .ForMember(d => d.AwayTeamName, opt => opt.MapFrom(s => GetTeamName(s, Side.Away)))
+                .ForMember(
+                    d => d.RowVersion,
+                    opt => opt.MapFrom(s => Convert.ToBase64String(s.RowVersion))
+                );
             CreateMap<TournamentScoringRules, ScoringRulesDto>();
         }
 
@@ -67,6 +71,7 @@ public class TournamentMatchDto
     public int? TableId { get; set; }
     public string TableName { get; set; } = string.Empty;
     public DateTime DatePlayed { get; set; }
+    public string RowVersion { get; set; } = string.Empty;
 }
 
 public class ScoringRulesDto
