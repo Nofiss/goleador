@@ -7,7 +7,9 @@ using Goleador.Application.Common.Interfaces;
 using Goleador.Infrastructure;
 using Goleador.Infrastructure.Identity;
 using Goleador.Infrastructure.Persistence;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -71,6 +73,13 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        healthQuery: "SELECT 1;",
+        name: "sqlserver",
+        timeout: TimeSpan.FromSeconds(3));
+
 WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
@@ -99,6 +108,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
