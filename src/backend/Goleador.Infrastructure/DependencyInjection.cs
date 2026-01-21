@@ -15,6 +15,8 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
+        services.AddMemoryCache();
+
         // Configurazione DB (SQL Server)
         // La connection string verrà letta dall'appsettings.json dell'API
         services.AddDbContext<ApplicationDbContext>(options =>
