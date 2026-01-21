@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
 import { getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
@@ -62,7 +64,10 @@ export const MatchResultDialog = ({
 			if (!match) return;
 			await setMatchResult(match.id, {
 				id: match.id,
-				...variables,
+				scoreHome,
+				scoreAway,
+				tableId: tableId ? parseInt(tableId, 10) : null,
+				rowVersion: match.rowVersion,
 			});
 		},
 		onMutate: async (newResult) => {
@@ -102,6 +107,18 @@ export const MatchResultDialog = ({
 			// Invalida per sincronizzare con il server
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
+		},
+		onError: (error: AxiosError) => {
+			if (error.response?.status === 409) {
+				toast.error(
+					"Attenzione: il risultato è stato modificato da un altro utente. La pagina verrà ricaricata.",
+				);
+				queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+				queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
+				onClose();
+			} else {
+				toast.error("Si è verificato un errore durante il salvataggio.");
+			}
 		},
 	});
 
