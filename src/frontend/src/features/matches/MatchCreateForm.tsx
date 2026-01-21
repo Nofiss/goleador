@@ -41,9 +41,11 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 		},
 	});
 
+	const isSamePlayer = formData.playerHomeId && formData.playerAwayId && formData.playerHomeId === formData.playerAwayId;
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (formData.playerHomeId === formData.playerAwayId) return; // Basic validation
+		if (isSamePlayer || !formData.playerHomeId || !formData.playerAwayId) return;
 		mutation.mutate(formData);
 	};
 
@@ -53,7 +55,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 				{/* TEAM CASA */}
 				<Card className="w-full md:w-1/3 border-t-4 border-t-blue-500 shadow-sm">
 					<CardContent className="pt-6 text-center space-y-4">
-						<Label className="text-blue-700 font-bold uppercase tracking-wide">
+						<Label htmlFor="playerHome" className="text-blue-700 font-bold uppercase tracking-wide">
 							Squadra Casa
 						</Label>
 						<Select
@@ -62,7 +64,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 								setFormData({ ...formData, playerHomeId: v })
 							}
 						>
-							<SelectTrigger className="w-full text-center font-medium h-12">
+							<SelectTrigger id="playerHome" className="w-full text-center font-medium h-12">
 								<SelectValue placeholder="Seleziona..." />
 							</SelectTrigger>
 							<SelectContent>
@@ -78,6 +80,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 							<Input
 								type="number"
 								min="0"
+								aria-label="Punteggio Squadra Casa"
 								className="text-5xl font-mono text-center h-20 w-full border-blue-100 bg-blue-50/50 focus:ring-blue-500"
 								value={formData.scoreHome}
 								onChange={(e) =>
@@ -100,7 +103,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 				{/* TEAM OSPITE */}
 				<Card className="w-full md:w-1/3 border-t-4 border-t-red-500 shadow-sm">
 					<CardContent className="pt-6 text-center space-y-4">
-						<Label className="text-red-700 font-bold uppercase tracking-wide">
+						<Label htmlFor="playerAway" className="text-red-700 font-bold uppercase tracking-wide">
 							Squadra Ospite
 						</Label>
 						<Select
@@ -109,7 +112,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 								setFormData({ ...formData, playerAwayId: v })
 							}
 						>
-							<SelectTrigger className="w-full text-center font-medium h-12">
+							<SelectTrigger id="playerAway" className="w-full text-center font-medium h-12">
 								<SelectValue placeholder="Seleziona..." />
 							</SelectTrigger>
 							<SelectContent>
@@ -125,6 +128,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 							<Input
 								type="number"
 								min="0"
+								aria-label="Punteggio Squadra Ospite"
 								className="text-5xl font-mono text-center h-20 w-full border-red-100 bg-red-50/50 focus:ring-red-500"
 								value={formData.scoreAway}
 								onChange={(e) =>
@@ -139,12 +143,17 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 				</Card>
 			</div>
 
-			<div className="flex justify-center pt-4">
+			<div className="flex flex-col items-center gap-4 pt-4">
+				{isSamePlayer && (
+					<p className="text-destructive text-sm font-medium animate-in fade-in slide-in-from-top-1" role="alert">
+						Seleziona due giocatori diversi per registrare la partita.
+					</p>
+				)}
 				<Button
 					size="lg"
 					className="w-full md:w-1/3 text-lg h-12"
 					type="submit"
-					disabled={mutation.isPending}
+					disabled={mutation.isPending || isSamePlayer || !formData.playerHomeId || !formData.playerAwayId}
 				>
 					{mutation.isPending ? "Salvataggio..." : "Registra Risultato"}
 				</Button>
