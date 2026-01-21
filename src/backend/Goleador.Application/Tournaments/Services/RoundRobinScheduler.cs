@@ -24,6 +24,8 @@ public static class RoundRobinScheduler
         // Immagina le squadre in cerchio. Una sta ferma, le altre ruotano.
         for (var round = 0; round < numRounds; round++)
         {
+            var currentRoundNumber = round + 1;
+
             for (var i = 0; i < matchesPerRound; i++)
             {
                 TournamentTeam teamHome = teams[i];
@@ -39,11 +41,11 @@ public static class RoundRobinScheduler
                 // Alterniamo casa/trasferta in base al round per bilanciare (algoritmo standard)
                 if (round % 2 == 0)
                 {
-                    matches.Add(CreateMatch(tournament.Id, teamHome, teamAway));
+                    matches.Add(CreateMatch(tournament.Id, teamHome, teamAway, currentRoundNumber));
                 }
                 else
                 {
-                    matches.Add(CreateMatch(tournament.Id, teamAway, teamHome));
+                    matches.Add(CreateMatch(tournament.Id, teamAway, teamHome, currentRoundNumber));
                 }
             }
 
@@ -69,12 +71,13 @@ public static class RoundRobinScheduler
                 // PER QUESTO ESEMPIO: Semplifichiamo. Se c'è ritorno, 
                 // assumiamo che per ogni match A vs B, ne creiamo uno B vs A.
                 // Ma ci servono gli ID dei giocatori.
+                var returnRoundNumber = m.Round + numRounds;
 
                 // Recuperiamo i player Home e Away dal match appena creato
                 var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
                 var awayPlayers = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
 
-                var returnMatch = new Match(0, 0, tournament.Id); // Score 0-0
+                var returnMatch = new Match(0, 0, tournament.Id, null, returnRoundNumber); // Score 0-0
                 // Impostiamo lo stato come Scheduled (0)
                 // (Assumiamo che il costruttore o default lo metta a Scheduled, e score a 0)
 
@@ -96,9 +99,9 @@ public static class RoundRobinScheduler
         return matches;
     }
 
-    static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away)
+    static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
     {
-        var match = new Match(0, 0, tournamentId); // Score iniziale 0-0
+        var match = new Match(0, 0, tournamentId, null, round); // Score iniziale 0-0
 
         // Aggiungiamo i giocatori della squadra Home
         foreach (Player player in home.Players)

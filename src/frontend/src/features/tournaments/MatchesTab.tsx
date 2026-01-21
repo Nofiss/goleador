@@ -8,7 +8,6 @@ import {
 	type TournamentDetail,
 	type TournamentMatch,
 	TournamentStatus,
-	TournamentType,
 } from "@/types";
 
 interface Props {
@@ -21,154 +20,134 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	if (tournament.status === TournamentStatus.setup) {
 		return (
-			<div className="text-center py-12 bg-muted/30 border border-dashed rounded-lg text-muted-foreground">
-				Il calendario verrà generato all'avvio del torneo.
+			<div className="text-center py-12 bg-muted/20 border border-dashed border-border rounded-xl text-muted-foreground">
+				<CalendarClock className="w-10 h-10 mx-auto mb-3 opacity-20" />
+				<p>Il calendario verrà generato all'avvio del torneo.</p>
 			</div>
 		);
 	}
 
-	const teamCount = tournament.teams.length;
-	const isRoundRobin = tournament.type === TournamentType.roundRobin;
+	const sortedMatches = [...tournament.matches].sort((a, b) => a.round - b.round);
+	const maxRound = Math.max(...sortedMatches.map(m => m.round), 0);
+	const roundsInFirstLeg = tournament.hasReturnMatches ? maxRound / 2 : maxRound;
 
-	const matchesPerLeg = (teamCount * (teamCount - 1)) / 2;
-
-	let firstLegMatches = tournament.matches;
-	let secondLegMatches: typeof tournament.matches = [];
-
-	if (
-		isRoundRobin &&
-		tournament.hasReturnMatches &&
-		tournament.matches.length >= matchesPerLeg * 2
-	) {
-		firstLegMatches = tournament.matches.slice(0, matchesPerLeg);
-		secondLegMatches = tournament.matches.slice(matchesPerLeg);
-	}
+	const firstLegMatches = sortedMatches.filter(m => m.round <= roundsInFirstLeg);
+	const secondLegMatches = sortedMatches.filter(m => m.round > roundsInFirstLeg);
 
 	const renderMatchGrid = (matches: typeof tournament.matches, title: string) => (
-		<div className="mb-8">
-			<h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-700">
-				{title === "Ritorno" ? (
-					<ArrowRightLeft className="w-5 h-5 text-orange-500" />
+		<div className="mb-10">
+			<h3 className="text-lg font-semibold mb-5 flex items-center gap-2 text-foreground/90">
+				{title === "Girone di Ritorno" ? (
+					<ArrowRightLeft className="w-5 h-5 text-orange-500 dark:text-orange-400" />
 				) : (
-					<MapPin className="w-5 h-5 text-blue-500" />
+					<MapPin className="w-5 h-5 text-blue-500 dark:text-blue-400" />
 				)}
 				{title}
 			</h3>
 
-			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{matches.map((match) => (
 					<div
 						key={match.id}
 						className={cn(
-							"border rounded-xl p-4 shadow-sm bg-white flex flex-col justify-between h-full relative overflow-hidden transition-all hover:shadow-md",
+							"group relative overflow-hidden rounded-xl border transition-all duration-200",
+							"bg-card hover:shadow-md hover:border-accent-foreground/20",
 							match.status === 1
-								? "border-gray-200 bg-gray-50/50"
-								: "border-blue-200 ring-1 ring-blue-50 bg-white",
+								? "opacity-90 bg-muted/30" // Partite terminate leggermente più opache
+								: "border-primary/10 shadow-sm"
 						)}
 					>
 						{/* Status Bar laterale */}
 						<div
 							className={cn(
-								"absolute top-0 left-0 w-1 h-full",
-								match.status === 1 ? "bg-gray-300" : "bg-blue-500",
+								"absolute top-0 left-0 w-1 h-full transition-colors",
+								match.status === 1 ? "bg-muted-foreground/30" : "bg-primary"
 							)}
 						/>
 
-						<div className="pl-3 mb-3">
+						<div className="p-4 pl-5">
 							{/* Header Card */}
-							<div className="flex justify-between items-start text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
-								<span className="font-bold">{match.status === 0 ? "Da Giocare" : "Terminata"}</span>
+							<div className="flex justify-between items-start mb-4">
+								<span className={cn(
+									"text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
+									match.status === 0
+										? "text-primary border-primary/20 bg-primary/5"
+										: "text-muted-foreground border-muted-foreground/20 bg-muted"
+								)}>
+									{match.status === 0 ? "Da Giocare" : "Terminata"}
+								</span>
 
-								{match.status === 1 && match.datePlayed && (
-									<span
-										className="flex items-center gap-1 text-[10px] font-medium text-slate-500"
-										title={new Date(match.datePlayed).toLocaleString()}
-									>
-										<CalendarClock className="h-3 w-3" />
-										{new Date(match.datePlayed).toLocaleDateString("it-IT", {
-											day: "2-digit",
-											month: "short",
-											hour: "2-digit",
-											minute: "2-digit",
-										})}
-									</span>
-								)}
-
-								{match.tableName && (
-									<span className="flex items-center gap-1 bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 normal-case border">
-										<MapPin className="h-3 w-3" /> {match.tableName}
-									</span>
-								)}
+								<div className="flex flex-col items-end gap-1">
+									{match.status === 1 && match.datePlayed && (
+										<span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+											<CalendarClock className="h-3 w-3" />
+											{new Date(match.datePlayed).toLocaleDateString("it-IT", {
+												day: "2-digit",
+												month: "short",
+												hour: "2-digit",
+												minute: "2-digit",
+											})}
+										</span>
+									)}
+									{match.tableName && (
+										<span className="flex items-center gap-1 text-[10px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
+											<MapPin className="h-3 w-3" /> {match.tableName}
+										</span>
+									)}
+								</div>
 							</div>
 
 							{/* Squadre e Punteggio */}
-							<div className="space-y-2">
-								{/* Casa */}
-								<div className="flex justify-between items-center">
-									<span
-										className={cn(
-											"font-medium truncate text-sm",
-											match.status === 1 && match.scoreHome > match.scoreAway
-												? "text-black font-bold"
-												: "text-gray-600",
-										)}
-									>
+							<div className="space-y-3">
+								<div className="flex justify-between items-center group/team">
+									<span className={cn(
+										"text-sm transition-colors",
+										match.status === 1 && match.scoreHome > match.scoreAway
+											? "font-bold text-foreground"
+											: "text-muted-foreground"
+									)}>
 										{match.homeTeamName}
 									</span>
-									<span
-										className={cn(
-											"font-mono text-base w-6 text-center",
-											match.status === 1 &&
-												match.scoreHome > match.scoreAway &&
-												"font-bold text-black",
-										)}
-									>
+									<span className={cn(
+										"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+										match.status === 1 && match.scoreHome > match.scoreAway && "text-primary font-bold"
+									)}>
 										{match.status === 1 ? match.scoreHome : "-"}
 									</span>
 								</div>
 
-								{/* Ospite */}
-								<div className="flex justify-between items-center">
-									<span
-										className={cn(
-											"font-medium truncate text-sm",
-											match.status === 1 && match.scoreAway > match.scoreHome
-												? "text-black font-bold"
-												: "text-gray-600",
-										)}
-									>
+								<div className="flex justify-between items-center group/team">
+									<span className={cn(
+										"text-sm transition-colors",
+										match.status === 1 && match.scoreAway > match.scoreHome
+											? "font-bold text-foreground"
+											: "text-muted-foreground"
+									)}>
 										{match.awayTeamName}
 									</span>
-									<span
-										className={cn(
-											"font-mono text-base w-6 text-center",
-											match.status === 1 &&
-												match.scoreAway > match.scoreHome &&
-												"font-bold text-black",
-										)}
-									>
+									<span className={cn(
+										"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+										match.status === 1 && match.scoreAway > match.scoreHome && "text-primary font-bold"
+									)}>
 										{match.status === 1 ? match.scoreAway : "-"}
 									</span>
 								</div>
 							</div>
-						</div>
 
-						{/* Azione (Solo Referee) */}
-						{isReferee && (
-							<div className="pl-3 pt-2 border-t mt-auto">
-								<Button
-									variant={match.status === 0 ? "default" : "ghost"}
-									size="sm"
-									className={cn(
-										"w-full h-7 text-xs",
-										match.status === 0 ? "bg-blue-600 hover:bg-blue-700" : "text-muted-foreground",
-									)}
-									onClick={() => setSelectedMatch(match)}
-								>
-									{match.status === 0 ? "Inserisci Risultato" : "Modifica"}
-								</Button>
-							</div>
-						)}
+							{/* Azione (Solo Referee) */}
+							{isReferee && (
+								<div className="mt-4 pt-3 border-t border-border/50">
+									<Button
+										variant={match.status === 0 ? "default" : "secondary"}
+										size="sm"
+										className="w-full h-8 text-xs font-semibold"
+										onClick={() => setSelectedMatch(match)}
+									>
+										{match.status === 0 ? "Inserisci Risultato" : "Modifica Risultato"}
+									</Button>
+								</div>
+							)}
+						</div>
 					</div>
 				))}
 			</div>
@@ -176,15 +155,14 @@ export const MatchesTab = ({ tournament }: Props) => {
 	);
 
 	return (
-		<>
-			{/* Se c'è ritorno, mostra due griglie, altrimenti una sola generica */}
+		<div className="animate-in fade-in duration-500">
 			{secondLegMatches.length > 0 ? (
 				<>
 					{renderMatchGrid(firstLegMatches, "Girone di Andata")}
 					{renderMatchGrid(secondLegMatches, "Girone di Ritorno")}
 				</>
 			) : (
-				renderMatchGrid(firstLegMatches, "Partite")
+				renderMatchGrid(firstLegMatches, "Calendario Partite")
 			)}
 
 			<MatchResultDialog
@@ -193,6 +171,6 @@ export const MatchesTab = ({ tournament }: Props) => {
 				onClose={() => setSelectedMatch(null)}
 				tournamentId={tournament.id}
 			/>
-		</>
+		</div>
 	);
 };

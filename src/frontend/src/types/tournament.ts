@@ -61,6 +61,7 @@ export interface TournamentMatch {
 	id: string;
 	scoreHome: number;
 	scoreAway: number;
+	round: number;
 	status: number;
 	homeTeamName: string;
 	awayTeamName: string;

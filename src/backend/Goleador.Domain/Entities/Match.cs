@@ -8,6 +8,7 @@ public class Match : BaseEntity
     public DateTime DatePlayed { get; private set; }
     public int ScoreHome { get; private set; }
     public int ScoreAway { get; private set; }
+    public int Round { get; private set; }
 
     public MatchStatus Status { get; private set; }
 
@@ -22,11 +23,12 @@ public class Match : BaseEntity
 
     Match() { } // Per EF Core
 
-    public Match(int scoreHome, int scoreAway, Guid? tournamentId = null, int? tableId = null)
+    public Match(int scoreHome, int scoreAway, Guid? tournamentId = null, int? tableId = null, int round = 1)
     {
         DatePlayed = DateTime.UtcNow;
         ScoreHome = scoreHome;
         ScoreAway = scoreAway;
+        Round = round;
         Status = tournamentId.HasValue ? MatchStatus.Scheduled : MatchStatus.Played;
         TournamentId = tournamentId;
         TableId = tableId;

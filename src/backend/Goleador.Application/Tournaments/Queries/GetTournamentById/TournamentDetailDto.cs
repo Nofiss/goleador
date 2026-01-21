@@ -60,6 +60,7 @@ public class TournamentMatchDto
     public Guid Id { get; set; }
     public int ScoreHome { get; set; }
     public int ScoreAway { get; set; }
+    public int Round { get; set; }
     public MatchStatus Status { get; set; }
     public string HomeTeamName { get; set; } = string.Empty;
     public string AwayTeamName { get; set; } = string.Empty;
