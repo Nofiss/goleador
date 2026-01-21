@@ -21,7 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import type { TournamentMatch } from "@/types";
+import type { TournamentDetail, TournamentMatch } from "@/types";
 
 interface MatchResultDialogProps {
 	match: TournamentMatch | null;
@@ -56,7 +56,11 @@ export const MatchResultDialog = ({
 	}, [match]);
 
 	const mutation = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (variables: {
+			scoreHome: number;
+			scoreAway: number;
+			tableId: number | null;
+		}) => {
 			if (!match) return;
 			await setMatchResult(match.id, {
 				id: match.id,
@@ -66,11 +70,43 @@ export const MatchResultDialog = ({
 				rowVersion: match.rowVersion,
 			});
 		},
-		onSuccess: () => {
-			// Aggiorna sia le partite che la classifica del torneo!
+		onMutate: async (newResult) => {
+			// Cancella eventuali query in corso per evitare sovrascritture
+			await queryClient.cancelQueries({ queryKey: ["tournament", tournamentId] });
+
+			// Snapshot dei dati precedenti
+			const previousTournament = queryClient.getQueryData<TournamentDetail>([
+				"tournament",
+				tournamentId,
+			]);
+
+			// Aggiorna manualmente la cache
+			if (previousTournament) {
+				queryClient.setQueryData<TournamentDetail>(["tournament", tournamentId], {
+					...previousTournament,
+					matches: previousTournament.matches.map((m) =>
+						m.id === match?.id
+							? { ...m, scoreHome: newResult.scoreHome, scoreAway: newResult.scoreAway, status: 1 }
+							: m,
+					),
+				});
+			}
+
+			// Chiudi il dialog immediatamente
+			onClose();
+
+			return { previousTournament };
+		},
+		onError: (_err, _newResult, context) => {
+			if (context?.previousTournament) {
+				queryClient.setQueryData(["tournament", tournamentId], context.previousTournament);
+			}
+			alert("Errore durante l'aggiornamento del risultato. I dati sono stati ripristinati.");
+		},
+		onSettled: () => {
+			// Invalida per sincronizzare con il server
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
-			onClose();
 		},
 		onError: (error: AxiosError) => {
 			if (error.response?.status === 409) {
@@ -156,8 +192,16 @@ export const MatchResultDialog = ({
 					<Button variant="outline" onClick={onClose}>
 						Annulla
 					</Button>
-					<Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-						{mutation.isPending ? "Salvataggio..." : "Conferma Risultato"}
+					<Button
+						onClick={() =>
+							mutation.mutate({
+								scoreHome,
+								scoreAway,
+								tableId: tableId ? parseInt(tableId, 10) : null,
+							})
+						}
+					>
+						Conferma Risultato
 					</Button>
 				</DialogFooter>
 			</DialogContent>
