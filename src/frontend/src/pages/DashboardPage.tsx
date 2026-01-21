@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
 import { ArrowRight, CalendarDays, Flame, Gamepad2, Sparkles, Trophy } from "lucide-react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getTournaments } from "@/api/tournaments";
 import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
@@ -37,8 +38,14 @@ export const DashboardPage = () => {
 	});
 	const { theme } = useTheme(); // Ottieni il tema corrente
 
-	const activeTournaments = tournaments?.filter((t) => t.status === TournamentStatus.active) || [];
-	const setupTournaments = tournaments?.filter((t) => t.status === TournamentStatus.setup) || [];
+	const activeTournaments = useMemo(
+		() => tournaments?.filter((t) => t.status === TournamentStatus.active) || [],
+		[tournaments],
+	);
+	const setupTournaments = useMemo(
+		() => tournaments?.filter((t) => t.status === TournamentStatus.setup) || [],
+		[tournaments],
+	);
 
 	return (
 		<div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">

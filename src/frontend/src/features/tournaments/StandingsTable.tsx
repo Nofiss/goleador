@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { memo } from "react";
 import { getTournamentStandings } from "@/api/tournaments";
 import {
 	Table,
@@ -9,12 +10,61 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { TournamentStatus } from "@/types";
+import { type TournamentStandingDto, TournamentStatus } from "@/types";
 
 interface StandingsTableProps {
 	tournamentId: string;
 	status: TournamentStatus;
 }
+
+/**
+ * Componente per la riga della classifica, ottimizzato con React.memo.
+ */
+const StandingRow = memo(({ row, index }: { row: TournamentStandingDto; index: number }) => {
+	return (
+		<TableRow className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}>
+			<TableCell className="font-medium">
+				<div
+					className={cn(
+						"w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold",
+						index === 0
+							? "bg-yellow-400 text-yellow-950"
+							: index === 1
+								? "bg-slate-300 text-slate-900"
+								: index === 2
+									? "bg-amber-600 text-white"
+									: "bg-muted text-muted-foreground",
+					)}
+				>
+					{row.position}
+				</div>
+			</TableCell>
+			<TableCell className="font-semibold text-foreground">{row.teamName}</TableCell>
+			<TableCell className="text-center font-bold text-lg text-primary">{row.points}</TableCell>
+			<TableCell className="text-center text-muted-foreground">{row.played}</TableCell>
+			<TableCell className="text-center hidden md:table-cell text-green-600 dark:text-green-500">
+				{row.won}
+			</TableCell>
+			<TableCell className="text-center hidden md:table-cell text-muted-foreground/70">
+				{row.drawn}
+			</TableCell>
+			<TableCell className="text-center hidden md:table-cell text-red-500 dark:text-red-400">
+				{row.lost}
+			</TableCell>
+			<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
+				{row.goalsFor}
+			</TableCell>
+			<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
+				{row.goalsAgainst}
+			</TableCell>
+			<TableCell className="text-center font-mono text-sm">
+				{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+			</TableCell>
+		</TableRow>
+	);
+});
+
+StandingRow.displayName = "StandingRow";
 
 export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
 	const { data: standings, isLoading } = useQuery({
@@ -59,52 +109,7 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 							</TableCell>
 						</TableRow>
 					) : (
-						standings?.map((row, index) => (
-							<TableRow
-								key={row.teamId}
-								className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}
-							>
-								<TableCell className="font-medium">
-									<div
-										className={cn(
-											"w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold",
-											index === 0
-												? "bg-yellow-400 text-yellow-950"
-												: index === 1
-													? "bg-slate-300 text-slate-900"
-													: index === 2
-														? "bg-amber-600 text-white"
-														: "bg-muted text-muted-foreground",
-										)}
-									>
-										{row.position}
-									</div>
-								</TableCell>
-								<TableCell className="font-semibold text-foreground">{row.teamName}</TableCell>
-								<TableCell className="text-center font-bold text-lg text-primary">
-									{row.points}
-								</TableCell>
-								<TableCell className="text-center text-muted-foreground">{row.played}</TableCell>
-								<TableCell className="text-center hidden md:table-cell text-green-600 dark:text-green-500">
-									{row.won}
-								</TableCell>
-								<TableCell className="text-center hidden md:table-cell text-muted-foreground/70">
-									{row.drawn}
-								</TableCell>
-								<TableCell className="text-center hidden md:table-cell text-red-500 dark:text-red-400">
-									{row.lost}
-								</TableCell>
-								<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
-									{row.goalsFor}
-								</TableCell>
-								<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
-									{row.goalsAgainst}
-								</TableCell>
-								<TableCell className="text-center font-mono text-sm">
-									{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-								</TableCell>
-							</TableRow>
-						))
+						standings?.map((row, index) => <StandingRow key={row.teamId} row={row} index={index} />)
 					)}
 				</TableBody>
 			</Table>
