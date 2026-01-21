@@ -1,6 +1,7 @@
 import { ArrowRightLeft, CalendarClock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,32 @@ import {
 interface Props {
 	tournament: TournamentDetail;
 }
+
+export const MatchesTabSkeleton = () => (
+	<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+		{Array.from({ length: 6 }).map((_, i) => (
+			<div
+				key={i}
+				className="h-32 rounded-xl border bg-card p-4 pl-5 flex flex-col justify-between"
+			>
+				<div className="flex justify-between items-start">
+					<Skeleton className="h-4 w-20 rounded-full" />
+					<Skeleton className="h-3 w-24" />
+				</div>
+				<div className="space-y-3">
+					<div className="flex justify-between items-center">
+						<Skeleton className="h-4 w-32" />
+						<Skeleton className="h-6 w-8 rounded" />
+					</div>
+					<div className="flex justify-between items-center">
+						<Skeleton className="h-4 w-32" />
+						<Skeleton className="h-6 w-8 rounded" />
+					</div>
+				</div>
+			</div>
+		))}
+	</div>
+);
 
 export const MatchesTab = ({ tournament }: Props) => {
 	const { isReferee } = useAuth();

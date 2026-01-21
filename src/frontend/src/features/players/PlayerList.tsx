@@ -3,6 +3,7 @@ import { BarChart2, RefreshCcw, User } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { getPlayers } from "@/api/players";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -77,9 +78,52 @@ export const PlayerList = () => {
 
 	if (isLoading)
 		return (
-			<div className="flex flex-col items-center justify-center p-12 text-muted-foreground animate-pulse">
-				<RefreshCcw className="h-8 w-8 mb-4 animate-spin opacity-20" />
-				<p className="text-sm font-medium tracking-wide uppercase">Caricamento giocatori...</p>
+			<div className="w-full max-w-4xl mx-auto mt-8 p-6 bg-card rounded-xl border border-border shadow-sm">
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+					<div className="space-y-2">
+						<Skeleton className="h-8 w-48" />
+						<Skeleton className="h-4 w-64" />
+					</div>
+					<Skeleton className="h-9 w-28" />
+				</div>
+
+				<div className="rounded-lg border border-border overflow-hidden bg-background/30">
+					<Table>
+						<TableHeader className="bg-muted/50">
+							<TableRow>
+								<TableHead className="font-bold text-foreground">Nickname</TableHead>
+								<TableHead className="hidden md:table-cell">Nome Completo</TableHead>
+								<TableHead className="hidden sm:table-cell">Email</TableHead>
+								<TableHead className="text-right">Iscritto il</TableHead>
+								<TableHead className="w-20" />
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{Array.from({ length: 6 }).map((_, i) => (
+								<TableRow key={i}>
+									<TableCell>
+										<div className="flex items-center gap-2">
+											<Skeleton className="h-7 w-7 rounded-full" />
+											<Skeleton className="h-4 w-24" />
+										</div>
+									</TableCell>
+									<TableCell className="hidden md:table-cell">
+										<Skeleton className="h-4 w-32" />
+									</TableCell>
+									<TableCell className="hidden sm:table-cell">
+										<Skeleton className="h-4 w-48" />
+									</TableCell>
+									<TableCell className="text-right">
+										<Skeleton className="h-4 w-20 ml-auto" />
+									</TableCell>
+									<TableCell className="text-right">
+										<Skeleton className="h-8 w-16 ml-auto" />
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
 			</div>
 		);
 

@@ -7,6 +7,7 @@ import { getTournaments } from "@/api/tournaments";
 import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { TournamentStatus } from "@/types";
@@ -32,7 +33,7 @@ const itemVariants = {
 export const DashboardPage = () => {
 	const { isAuthenticated } = useAuth();
 
-	const { data: tournaments } = useQuery({
+	const { data: tournaments, isLoading } = useQuery({
 		queryKey: ["tournaments"],
 		queryFn: getTournaments,
 	});
@@ -151,7 +152,17 @@ export const DashboardPage = () => {
 							</div>
 
 							<div className="space-y-3 flex-1">
-								{activeTournaments.length === 0 ? (
+								{isLoading ? (
+									Array.from({ length: 3 }).map((_, i) => (
+										<div key={i} className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50">
+											<div className="space-y-2">
+												<Skeleton className="h-5 w-40" />
+												<Skeleton className="h-3 w-20" />
+											</div>
+											<Skeleton className="h-5 w-5" />
+										</div>
+									))
+								) : activeTournaments.length === 0 ? (
 									<div className="h-full flex items-center justify-center text-muted-foreground italic border border-dashed border-border rounded-lg min-h-30">
 										Nessun torneo attivo. Accendi la miccia!
 									</div>
@@ -196,7 +207,17 @@ export const DashboardPage = () => {
 							</div>
 
 							<div className="space-y-3 flex-1">
-								{setupTournaments.length === 0 ? (
+								{isLoading ? (
+									Array.from({ length: 3 }).map((_, i) => (
+										<div key={i} className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50">
+											<div className="space-y-2">
+												<Skeleton className="h-5 w-40" />
+												<Skeleton className="h-4 w-24 rounded-full" />
+											</div>
+											{isAuthenticated && <Skeleton className="h-9 w-24 rounded-md" />}
+										</div>
+									))
+								) : setupTournaments.length === 0 ? (
 									<div className="h-full flex items-center justify-center text-muted-foreground italic border border-dashed border-border rounded-lg min-h-30">
 										Tutto tranquillo... Troppo tranquillo.
 									</div>

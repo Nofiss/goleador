@@ -3,6 +3,7 @@ import { PlayCircle } from "lucide-react";
 import { startTournament } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { type TournamentDetail, TournamentStatus } from "@/types";
 import { GenerateTeamsButton } from "./actions/GenerateTeamsButton";
@@ -11,6 +12,25 @@ import { JoinTournamentButton } from "./actions/JoinTournamentButton";
 interface Props {
 	tournament: TournamentDetail;
 }
+
+export const TournamentHeaderSkeleton = () => (
+	<div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-6">
+		<div className="space-y-3">
+			<div className="flex items-center gap-3">
+				<Skeleton className="h-9 w-64" />
+				<Skeleton className="h-6 w-20 rounded-full" />
+			</div>
+			<div className="flex gap-4">
+				<Skeleton className="h-4 w-24" />
+				<Skeleton className="h-4 w-24" />
+			</div>
+		</div>
+		<div className="flex gap-2">
+			<Skeleton className="h-10 w-32" />
+			<Skeleton className="h-10 w-32" />
+		</div>
+	</div>
+);
 
 export const TournamentHeader = ({ tournament }: Props) => {
 	const { isAdmin, isAuthenticated } = useAuth();
