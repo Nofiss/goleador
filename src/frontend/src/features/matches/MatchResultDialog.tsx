@@ -56,16 +56,19 @@ export const MatchResultDialog = ({
 	}, [match]);
 
 	const mutation = useMutation({
-		mutationFn: async (_variables: {
+		mutationFn: async (variables: {
+			matchId: string;
+			rowVersion: string;
 			scoreHome: number;
 			scoreAway: number;
 			tableId: number | null;
 		}) => {
-			if (!match) return;
-			await setMatchResult(match.id, {
-				id: match.id,
-				rowVersion: match.rowVersion,
-				...variables,
+			await setMatchResult(variables.matchId, {
+				id: variables.matchId,
+				rowVersion: variables.rowVersion,
+				scoreHome: variables.scoreHome,
+				scoreAway: variables.scoreAway,
+				tableId: variables.tableId,
 			});
 		},
 		onMutate: async (newResult) => {
@@ -83,7 +86,7 @@ export const MatchResultDialog = ({
 				queryClient.setQueryData<TournamentDetail>(["tournament", tournamentId], {
 					...previousTournament,
 					matches: previousTournament.matches.map((m) =>
-						m.id === match?.id
+						m.id === newResult.matchId
 							? { ...m, scoreHome: newResult.scoreHome, scoreAway: newResult.scoreAway, status: 1 }
 							: m,
 					),
@@ -94,11 +97,6 @@ export const MatchResultDialog = ({
 			onClose();
 
 			return { previousTournament };
-		},
-		onSettled: () => {
-			// Invalida per sincronizzare con il server
-			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
-			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
 		},
 		onError: (error: AxiosError) => {
 			if (error.response?.status === 409) {
@@ -190,13 +188,16 @@ export const MatchResultDialog = ({
 						Annulla
 					</Button>
 					<Button
-						onClick={() =>
+						onClick={() => {
+							if (!match) return;
 							mutation.mutate({
+								matchId: match.id,
+								rowVersion: match.rowVersion,
 								scoreHome,
 								scoreAway,
 								tableId: tableId ? parseInt(tableId, 10) : null,
-							})
-						}
+							});
+						}}
 					>
 						Conferma Risultato
 					</Button>

@@ -1,6 +1,6 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
+
 import { ArrowRightLeft, CalendarClock, MapPin } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
@@ -76,24 +76,22 @@ const MatchCard = ({
 }) => (
 	<div
 		className={cn(
-			"group relative overflow-hidden rounded-xl border transition-all duration-200",
-			"bg-card hover:shadow-md hover:border-accent-foreground/20",
-			match.status === 1
-				? "opacity-90 bg-muted/30" // Partite terminate leggermente più opache
-				: "border-primary/10 shadow-sm",
+			"group relative overflow-hidden rounded-lg border border-border/40 bg-card shadow-sm transition-all",
+			"hover:shadow-md hover:-translate-y-0.5",
+			match.status === 1 ? "bg-muted/30" : "border-primary/20",
 		)}
 	>
 		{/* Status Bar laterale */}
 		<div
 			className={cn(
-				"absolute top-0 left-0 w-1 h-full transition-colors",
+				"absolute top-0 left-0 w-0.5 sm:w-1 h-full transition-colors",
 				match.status === 1 ? "bg-muted-foreground/30" : "bg-primary",
 			)}
 		/>
 
-		<div className="p-4 pl-5">
+		<div className={cn("pl-5", match.status === 1 ? "p-3 sm:p-4" : "p-4 sm:p-5")}>
 			{/* Header Card */}
-			<div className="flex justify-between items-start mb-4">
+			<div className={cn("flex justify-between items-start", match.status === 1 ? "mb-3" : "mb-4")}>
 				<span
 					className={cn(
 						"text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
@@ -126,11 +124,11 @@ const MatchCard = ({
 			</div>
 
 			{/* Squadre e Punteggio */}
-			<div className="space-y-3">
+			<div className={cn(match.status === 1 ? "space-y-2" : "space-y-3")}>
 				<div className="flex justify-between items-center group/team">
 					<span
 						className={cn(
-							"text-sm transition-colors",
+							"text-sm transition-colors truncate",
 							match.status === 1 && match.scoreHome > match.scoreAway
 								? "font-bold text-foreground"
 								: "text-muted-foreground",
@@ -140,7 +138,7 @@ const MatchCard = ({
 					</span>
 					<span
 						className={cn(
-							"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+							"font-mono text-lg tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
 							match.status === 1 && match.scoreHome > match.scoreAway && "text-primary font-bold",
 						)}
 					>
@@ -151,7 +149,7 @@ const MatchCard = ({
 				<div className="flex justify-between items-center group/team">
 					<span
 						className={cn(
-							"text-sm transition-colors",
+							"text-sm transition-colors truncate",
 							match.status === 1 && match.scoreAway > match.scoreHome
 								? "font-bold text-foreground"
 								: "text-muted-foreground",
@@ -161,7 +159,7 @@ const MatchCard = ({
 					</span>
 					<span
 						className={cn(
-							"font-mono text-lg tabular-nums min-w-6 text-center rounded bg-muted/50 px-1",
+							"font-mono text-lg tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
 							match.status === 1 && match.scoreAway > match.scoreHome && "text-primary font-bold",
 						)}
 					>
@@ -171,8 +169,13 @@ const MatchCard = ({
 			</div>
 
 			{/* Azione (Solo Referee) */}
-			{isReferee && (
-				<div className="mt-4 pt-3 border-t border-border/50">
+			<div
+				className={cn(
+					"mt-4 pt-3 border-t min-h-9",
+					isReferee ? "border-border/50" : "border-transparent",
+				)}
+			>
+				{isReferee && (
 					<Button
 						variant={match.status === 0 ? "default" : "secondary"}
 						size="sm"
@@ -181,8 +184,8 @@ const MatchCard = ({
 					>
 						{match.status === 0 ? "Inserisci Risultato" : "Modifica Risultato"}
 					</Button>
-				</div>
-			)}
+				)}
+			</div>
 		</div>
 	</div>
 );
@@ -200,18 +203,10 @@ const MatchGrid = ({
 	isReferee: boolean;
 	onSelectMatch: (match: TournamentMatch) => void;
 }) => {
-	const parentRef = useRef<HTMLDivElement>(null);
-	const totalRows = Math.ceil(matches.length / numColumns);
 
-	const rowVirtualizer = useVirtualizer({
-		count: totalRows,
-		getScrollElement: () => parentRef.current,
-		estimateSize: () => 180,
-		overscan: 5,
-	});
 
 	return (
-		<div className="mb-10">
+		<div className="mb-12">
 			<h3 className="text-lg font-semibold mb-5 flex items-center gap-2 text-foreground/90">
 				{title === "Girone di Ritorno" ? (
 					<ArrowRightLeft className="w-5 h-5 text-orange-500 dark:text-orange-400" />
@@ -222,53 +217,21 @@ const MatchGrid = ({
 			</h3>
 
 			<div
-				ref={parentRef}
-				className="h-[600px] overflow-y-auto rounded-xl border border-border/50 bg-muted/5 p-4"
+				className={cn(
+					"grid gap-6 sm:gap-7",
+					numColumns === 1 && "grid-cols-1",
+					numColumns === 2 && "grid-cols-2",
+					numColumns === 3 && "grid-cols-3",
+				)}
 			>
-				<div
-					style={{
-						height: `${rowVirtualizer.getTotalSize()}px`,
-						width: "100%",
-						position: "relative",
-					}}
-				>
-					{rowVirtualizer.getVirtualItems().map((virtualRow) => {
-						const startIndex = virtualRow.index * numColumns;
-						const rowMatches = matches.slice(startIndex, startIndex + numColumns);
-
-						return (
-							<div
-								key={virtualRow.key}
-								style={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: `${virtualRow.size}px`,
-									transform: `translateY(${virtualRow.start}px)`,
-								}}
-							>
-								<div
-									className={cn(
-										"grid gap-4",
-										numColumns === 1 && "grid-cols-1",
-										numColumns === 2 && "grid-cols-2",
-										numColumns === 3 && "grid-cols-3",
-									)}
-								>
-									{rowMatches.map((match) => (
-										<MatchCard
-											key={match.id}
-											match={match}
-											isReferee={isReferee}
-											onSelectMatch={onSelectMatch}
-										/>
-									))}
-								</div>
-							</div>
-						);
-					})}
-				</div>
+				{matches.map((match) => (
+					<MatchCard
+						key={match.id}
+						match={match}
+						isReferee={isReferee}
+						onSelectMatch={onSelectMatch}
+					/>
+				))}
 			</div>
 		</div>
 	);
