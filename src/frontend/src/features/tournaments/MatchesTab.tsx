@@ -1,4 +1,3 @@
-
 import { ArrowRightLeft, CalendarClock, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -203,8 +202,6 @@ const MatchGrid = ({
 	isReferee: boolean;
 	onSelectMatch: (match: TournamentMatch) => void;
 }) => {
-
-
 	return (
 		<div className="mb-12">
 			<h3 className="text-lg font-semibold mb-5 flex items-center gap-2 text-foreground/90">
