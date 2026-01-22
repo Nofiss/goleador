@@ -5,6 +5,7 @@ import { getTournaments } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { TournamentStatus } from "@/types";
 
@@ -46,7 +47,25 @@ export const TournamentsListPage = () => {
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 				{isLoading ? (
-					<p>Caricamento...</p>
+					Array.from({ length: 6 }).map((_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static and won't change order
+						<Card key={i}>
+							<CardHeader className="pb-2">
+								<div className="flex justify-between items-start">
+									<Skeleton className="h-6 w-32" />
+									<Skeleton className="h-5 w-16 rounded-full" />
+								</div>
+								<Skeleton className="h-4 w-24 mt-2" />
+							</CardHeader>
+							<CardContent>
+								<Skeleton className="h-9 w-full" />
+							</CardContent>
+						</Card>
+					))
+				) : tournaments?.length === 0 ? (
+					<div className="col-span-full py-12 text-center border-2 border-dashed rounded-xl">
+						<p className="text-muted-foreground">Nessun torneo trovato.</p>
+					</div>
 				) : (
 					tournaments?.map((t) => (
 						<Card key={t.id} className="hover:shadow-md transition-shadow">
