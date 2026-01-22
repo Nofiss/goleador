@@ -1,6 +1,14 @@
-import { ArrowRightLeft, CalendarClock, MapPin } from "lucide-react";
+import { ArrowRightLeft, CalendarClock, MapPin, Search } from "lucide-react";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +23,7 @@ export const MatchesTabSkeleton = () => (
 	<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 		{Array.from({ length: 6 }).map((_, i) => (
 			<div
+				// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
 				key={i}
 				className="h-32 rounded-xl border bg-card p-4 pl-5 flex flex-col justify-between"
 			>
@@ -264,20 +273,38 @@ MatchGrid.displayName = "MatchGrid";
 export const MatchesTab = ({ tournament }: Props) => {
 	const { isReferee } = useAuth();
 	const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [statusFilter, setStatusFilter] = useState("ALL");
 	const numColumns = useNumColumns();
 
 	// Ottimizzazione: useMemo per evitare ricalcoli costosi su ogni render
 	// Spostato prima dell'early return per seguire le regole degli Hooks
+	const filteredMatches = useMemo(() => {
+		return tournament.matches.filter((match) => {
+			const matchesSearch =
+				match.homeTeamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				match.awayTeamName.toLowerCase().includes(searchQuery.toLowerCase());
+
+			const matchesStatus =
+				statusFilter === "ALL" ||
+				(statusFilter === "TO_PLAY" && match.status === 0) ||
+				(statusFilter === "FINISHED" && match.status === 1);
+
+			return matchesSearch && matchesStatus;
+		});
+	}, [tournament.matches, searchQuery, statusFilter]);
+
 	const { firstLegMatches, secondLegMatches } = useMemo(() => {
-		const sorted = [...tournament.matches].sort((a, b) => a.round - b.round);
-		const max = Math.max(...sorted.map((m) => m.round), 0);
+		const sorted = [...filteredMatches].sort((a, b) => a.round - b.round);
+		const allMatchesSorted = [...tournament.matches].sort((a, b) => a.round - b.round);
+		const max = Math.max(...allMatchesSorted.map((m) => m.round), 0);
 		const roundsInFirstLeg = tournament.hasReturnMatches ? max / 2 : max;
 
 		return {
 			firstLegMatches: sorted.filter((m) => m.round <= roundsInFirstLeg),
 			secondLegMatches: sorted.filter((m) => m.round > roundsInFirstLeg),
 		};
-	}, [tournament.matches, tournament.hasReturnMatches]);
+	}, [filteredMatches, tournament.matches, tournament.hasReturnMatches]);
 
 	if (tournament.status === TournamentStatus.setup) {
 		return (
@@ -290,7 +317,47 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	return (
 		<div className="animate-in fade-in duration-500">
-			{secondLegMatches.length > 0 ? (
+			{/* Toolbar di Filtraggio */}
+			<div className="flex flex-col sm:flex-row gap-4 mb-6">
+				<div className="relative flex-1">
+					<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Input
+						placeholder="Cerca squadra..."
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="pl-9"
+					/>
+				</div>
+				<Select value={statusFilter} onValueChange={setStatusFilter}>
+					<SelectTrigger className="w-full sm:w-[180px]">
+						<SelectValue placeholder="Stato partita" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="ALL">Tutte le partite</SelectItem>
+						<SelectItem value="TO_PLAY">Da Giocare</SelectItem>
+						<SelectItem value="FINISHED">Terminate</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
+
+			{filteredMatches.length === 0 ? (
+				<div className="text-center py-20 bg-muted/10 border border-dashed border-border rounded-xl animate-in fade-in zoom-in duration-300">
+					<Search className="w-10 h-10 mx-auto mb-3 opacity-20 text-muted-foreground" />
+					<p className="text-muted-foreground font-medium">
+						Nessuna partita trovata con questi filtri.
+					</p>
+					<Button
+						variant="link"
+						onClick={() => {
+							setSearchQuery("");
+							setStatusFilter("ALL");
+						}}
+						className="mt-2 text-primary"
+					>
+						Resetta filtri
+					</Button>
+				</div>
+			) : secondLegMatches.length > 0 ? (
 				<>
 					<MatchGrid
 						matches={firstLegMatches}
