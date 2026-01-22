@@ -25,5 +25,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.Email).IsRequired().HasMaxLength(255);
 
         builder.Property(p => p.UserId).HasMaxLength(450);
+
+        builder.HasQueryFilter(p => !p.IsDeleted);
     }
 }

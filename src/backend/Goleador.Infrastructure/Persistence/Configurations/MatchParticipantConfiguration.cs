@@ -16,5 +16,7 @@ public class MatchParticipantConfiguration : IEntityTypeConfiguration<MatchParti
             .WithMany()
             .HasForeignKey(mp => mp.PlayerId)
             .OnDelete(DeleteBehavior.Restrict); // Non cancellare il giocatore se cancello la partecipazione
+
+        builder.HasQueryFilter(mp => !mp.Match.IsDeleted);
     }
 }

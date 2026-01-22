@@ -64,10 +64,8 @@ export const MatchResultDialog = ({
 			if (!match) return;
 			await setMatchResult(match.id, {
 				id: match.id,
-				scoreHome,
-				scoreAway,
-				tableId: tableId ? parseInt(tableId, 10) : null,
 				rowVersion: match.rowVersion,
+				...variables,
 			});
 		},
 		onMutate: async (newResult) => {
@@ -96,12 +94,6 @@ export const MatchResultDialog = ({
 			onClose();
 
 			return { previousTournament };
-		},
-		onError: (_err, _newResult, context) => {
-			if (context?.previousTournament) {
-				queryClient.setQueryData(["tournament", tournamentId], context.previousTournament);
-			}
-			alert("Errore durante l'aggiornamento del risultato. I dati sono stati ripristinati.");
 		},
 		onSettled: () => {
 			// Invalida per sincronizzare con il server
