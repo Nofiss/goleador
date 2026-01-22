@@ -9,6 +9,7 @@ public static class DbSeeder
     {
         RoleManager<IdentityRole> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         UserManager<ApplicationUser> userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
         // Crea Ruoli
         string[] roleNames = ["Admin", "Referee", "Player"];
@@ -26,8 +27,9 @@ public static class DbSeeder
 
         if (adminUser == null)
         {
+            var adminPassword = configuration["Seed:AdminPassword"] ?? "Admin123!"; // Default per dev
             var newAdmin = new ApplicationUser { UserName = adminEmail, Email = adminEmail };
-            IdentityResult result = await userManager.CreateAsync(newAdmin, "Admin123!"); // Password forte
+            IdentityResult result = await userManager.CreateAsync(newAdmin, adminPassword);
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(newAdmin, "Admin");
@@ -38,8 +40,9 @@ public static class DbSeeder
         var refEmail = "ref@goleador.com";
         if (await userManager.FindByEmailAsync(refEmail) == null)
         {
+            var refPassword = configuration["Seed:RefereePassword"] ?? "Referee123!"; // Default per dev
             var newRef = new ApplicationUser { UserName = refEmail, Email = refEmail };
-            await userManager.CreateAsync(newRef, "Referee123!");
+            await userManager.CreateAsync(newRef, refPassword);
             await userManager.AddToRoleAsync(newRef, "Referee");
         }
     }
