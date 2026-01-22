@@ -1,5 +1,5 @@
 import { ShieldPlus, Users } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { type TournamentDetail, TournamentStatus } from "@/types";
@@ -15,10 +15,12 @@ export const TeamsTab = ({ tournament }: Props) => {
 	const { isAdmin } = useAuth();
 	const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
 
-	const assignedPlayerIds = new Set(tournament.teams.flatMap((t) => t.players.map((p) => p.id)));
-	const availableCandidates = tournament.registeredPlayers.filter(
-		(p) => !assignedPlayerIds.has(p.id),
-	);
+	// Ottimizzazione: useMemo per evitare di ricalcolare i giocatori assegnati e disponibili ad ogni render
+	const { assignedPlayerIds, availableCandidates } = useMemo(() => {
+		const assignedIds = new Set(tournament.teams.flatMap((t) => t.players.map((p) => p.id)));
+		const available = tournament.registeredPlayers.filter((p) => !assignedIds.has(p.id));
+		return { assignedPlayerIds: Array.from(assignedIds), availableCandidates: available };
+	}, [tournament.teams, tournament.registeredPlayers]);
 
 	const isSetup = tournament.status === TournamentStatus.setup;
 
@@ -57,7 +59,7 @@ export const TeamsTab = ({ tournament }: Props) => {
 				<PlayerPool
 					tournamentId={tournament.id}
 					registeredPlayers={tournament.registeredPlayers || []}
-					assignedPlayerIds={Array.from(assignedPlayerIds)}
+					assignedPlayerIds={assignedPlayerIds}
 				/>
 			)}
 

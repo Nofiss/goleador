@@ -5,3 +5,7 @@
 ## 2025-05-21 - [Backend Test Environment Limitation]
 **Learning:** The current sandbox environment does not have `dotnet` installed, making it impossible to run or verify C# tests or builds directly.
 **Action:** Prioritize frontend performance optimizations when backend verification is not possible, or rely on manual code review for very safe backend changes.
+
+## 2026-01-22 - [Responsive Layout Optimization]
+**Learning:** Using 'window.matchMedia' instead of 'window.resize' listeners for responsive logic (like calculating grid columns) significantly reduces the number of re-renders and CPU usage during window resizing.
+**Action:** Prefer 'matchMedia' listeners for breakpoint-based state updates.
