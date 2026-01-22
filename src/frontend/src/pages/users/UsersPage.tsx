@@ -1,9 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link, Loader2, Shield, ShieldAlert, UserCog, User as UserIcon } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	Edit,
+	Link,
+	Loader2,
+	Plus,
+	Shield,
+	ShieldAlert,
+	Trash2,
+	UserCog,
+	User as UserIcon,
+} from "lucide-react";
 import { useState } from "react";
-import { getUsers } from "@/api/users";
+import { toast } from "sonner";
+import { deleteUser, getUsers } from "@/api/users";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Table,
 	TableBody,
@@ -13,13 +31,33 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { LinkPlayerDialog } from "@/features/users/LinkPlayerDialog";
+import { UserFormDialog } from "@/features/users/UserFormDialog";
 import { UserRolesDialog } from "@/features/users/UserRolesDialog";
 import type { User } from "@/types";
 
 export const UsersPage = () => {
+	const queryClient = useQueryClient();
 	const { data: users, isLoading } = useQuery({ queryKey: ["users"], queryFn: getUsers });
 	const [editingUser, setEditingUser] = useState<User | null>(null);
 	const [linkingUser, setLinkingUser] = useState<User | null>(null);
+	const [userFormState, setUserFormState] = useState<{ isOpen: boolean; user: User | null }>({
+		isOpen: false,
+		user: null,
+	});
+	const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+	const deleteMutation = useMutation({
+		mutationFn: (userId: string) => deleteUser(userId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			toast.success("Utente eliminato");
+			setUserToDelete(null);
+		},
+		onError: (err: unknown) => {
+			const error = err as { response?: { data?: { detail?: string } } };
+			toast.error(error.response?.data?.detail || "Errore eliminazione utente");
+		},
+	});
 
 	const getRoleBadge = (roles: string[]) => {
 		return (
@@ -52,11 +90,16 @@ export const UsersPage = () => {
 	return (
 		<div className="space-y-6">
 			{/* Header */}
-			<div className="flex flex-col gap-1 border-b border-border pb-6">
-				<h1 className="text-3xl font-bold tracking-tight text-foreground">Utenti e Permessi</h1>
-				<p className="text-muted-foreground">
-					Visualizza gli utenti registrati e gestisci i loro privilegi di amministrazione.
-				</p>
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-6">
+				<div className="flex flex-col gap-1">
+					<h1 className="text-3xl font-bold tracking-tight text-foreground">Utenti e Permessi</h1>
+					<p className="text-muted-foreground">
+						Visualizza gli utenti registrati e gestisci i loro privilegi di amministrazione.
+					</p>
+				</div>
+				<Button className="gap-2" onClick={() => setUserFormState({ isOpen: true, user: null })}>
+					<Plus className="h-4 w-4" /> Nuovo Utente
+				</Button>
 			</div>
 
 			{/* Table Container */}
@@ -106,18 +149,48 @@ export const UsersPage = () => {
 
 									<TableCell>{getRoleBadge(user.roles)}</TableCell>
 									<TableCell className="text-right">
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-8 gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
-											onClick={() => setEditingUser(user)}
-										>
-											<UserCog className="h-3.5 w-3.5" />
-											<span className="hidden sm:inline">Gestisci</span>
-										</Button>
-										<Button variant="ghost" size="sm" onClick={() => setLinkingUser(user)}>
-											<Link className="mr-2 h-4 w-4" /> Collega
-										</Button>
+										<div className="flex justify-end gap-2">
+											<Button
+												variant="outline"
+												size="sm"
+												className="h-8 gap-2 hover:bg-primary hover:text-primary-foreground transition-all"
+												onClick={() => setEditingUser(user)}
+												title="Gestisci Ruoli"
+											>
+												<UserCog className="h-3.5 w-3.5" />
+												<span className="hidden lg:inline">Ruoli</span>
+											</Button>
+
+											<Button
+												variant="outline"
+												size="sm"
+												className="h-8"
+												onClick={() => setUserFormState({ isOpen: true, user })}
+												title="Modifica Utente"
+											>
+												<Edit className="h-3.5 w-3.5" />
+											</Button>
+
+											<Button
+												variant="ghost"
+												size="sm"
+												className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+												onClick={() => setUserToDelete(user)}
+												title="Elimina Utente"
+											>
+												<Trash2 className="h-3.5 w-3.5" />
+											</Button>
+
+											<Button
+												variant="ghost"
+												size="sm"
+												className="h-8"
+												onClick={() => setLinkingUser(user)}
+												title="Collega a Giocatore"
+											>
+												<Link className="h-4 w-4" />
+											</Button>
+										</div>
 									</TableCell>
 								</TableRow>
 							))
@@ -126,8 +199,38 @@ export const UsersPage = () => {
 				</Table>
 			</div>
 
+			<UserFormDialog
+				user={userFormState.user}
+				isOpen={userFormState.isOpen}
+				onClose={() => setUserFormState({ isOpen: false, user: null })}
+			/>
 			<UserRolesDialog user={editingUser} onClose={() => setEditingUser(null)} />
 			<LinkPlayerDialog user={linkingUser} onClose={() => setLinkingUser(null)} />
+
+			{/* Delete Confirmation Dialog */}
+			<Dialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Conferma Eliminazione</DialogTitle>
+					</DialogHeader>
+					<div className="py-4">
+						Sei sicuro di voler eliminare l'utente <strong>{userToDelete?.email}</strong>? Questa
+						azione non può essere annullata.
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setUserToDelete(null)}>
+							Annulla
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={() => userToDelete && deleteMutation.mutate(userToDelete.id)}
+							disabled={deleteMutation.isPending}
+						>
+							{deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 };
