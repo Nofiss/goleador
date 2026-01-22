@@ -1,3 +1,4 @@
+import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import {
 	LayoutDashboard,
 	LogOut,
@@ -8,8 +9,10 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { AppLogo } from "@/components/AppLogo";
+import { GlobalErrorFallback } from "@/components/errors/GlobalErrorFallback";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -175,8 +178,14 @@ export const AppLayout = () => {
 			</header>
 
 			{/* Main Content Area */}
-			<main className="flex-1 container mx-auto p-4 md:p-8 max-w-7xl">
-				<Outlet />
+			<main className="flex-1 container mx-auto p-4 md:p-8 max-w-7xl flex flex-col">
+				<QueryErrorResetBoundary>
+					{({ reset }) => (
+						<ErrorBoundary onReset={reset} FallbackComponent={GlobalErrorFallback}>
+							<Outlet />
+						</ErrorBoundary>
+					)}
+				</QueryErrorResetBoundary>
 			</main>
 		</div>
 	);
