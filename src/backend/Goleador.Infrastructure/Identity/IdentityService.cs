@@ -26,6 +26,75 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
         return (true, user.Id, Array.Empty<string>());
     }
 
+    public async Task<(bool Success, string UserId, string[] Errors)> CreateUserByAdminAsync(
+        string email,
+        string username,
+        string password
+    )
+    {
+        var user = new ApplicationUser { UserName = username, Email = email };
+
+        IdentityResult result = await userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
+        {
+            return (false, string.Empty, result.Errors.Select(e => e.Description).ToArray());
+        }
+
+        // Assegna ruolo default
+        await userManager.AddToRoleAsync(user, "Player");
+
+        return (true, user.Id, Array.Empty<string>());
+    }
+
+    public async Task<(bool Success, string[] Errors)> UpdateUserDetailsAsync(
+        string userId,
+        string email,
+        string username
+    )
+    {
+        ApplicationUser? user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return (false, ["User not found"]);
+        }
+
+        user.Email = email;
+        user.UserName = username;
+
+        // Identity normalize Automatically on UpdateAsync usually,
+        // but manually setting them to be sure or using SetEmailAsync/SetUserNameAsync
+        // For simplicity and consistency with existing code, we use UpdateAsync.
+        // We ensure normalization is triggered by calling internal methods if needed or just trust UpdateAsync.
+
+        IdentityResult result = await userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return (false, result.Errors.Select(e => e.Description).ToArray());
+        }
+
+        return (true, Array.Empty<string>());
+    }
+
+    public async Task<(bool Success, string[] Errors)> DeleteUserAsync(string userId)
+    {
+        ApplicationUser? user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return (false, ["User not found"]);
+        }
+
+        IdentityResult result = await userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return (false, result.Errors.Select(e => e.Description).ToArray());
+        }
+
+        return (true, Array.Empty<string>());
+    }
+
     public async Task<
         List<(string Id, string Email, string Username, string[] Roles)>
     > GetAllUsersAsync()
