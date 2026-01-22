@@ -48,8 +48,11 @@ export const PlayerPool = ({
 	);
 
 	// Filtro per la visualizzazione dei badge
-	const filteredPlayers = registeredPlayers.filter((p) =>
-		p.nickname.toLowerCase().includes(searchQuery.toLowerCase()),
+	// Ottimizzazione: useMemo per evitare ricalcoli costosi durante il typing veloce
+	const filteredPlayers = useMemo(
+		() =>
+			registeredPlayers.filter((p) => p.nickname.toLowerCase().includes(searchQuery.toLowerCase())),
+		[registeredPlayers, searchQuery],
 	);
 
 	const enrollMutation = useMutation({
