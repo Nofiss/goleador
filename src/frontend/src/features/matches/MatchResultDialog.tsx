@@ -56,7 +56,7 @@ export const MatchResultDialog = ({
 	}, [match]);
 
 	const mutation = useMutation({
-		mutationFn: async (variables: {
+		mutationFn: async (_variables: {
 			scoreHome: number;
 			scoreAway: number;
 			tableId: number | null;
@@ -97,18 +97,11 @@ export const MatchResultDialog = ({
 
 			return { previousTournament };
 		},
-		onError: (_err, _newResult, context) => {
+		onError: (error: AxiosError, _variables, context) => {
 			if (context?.previousTournament) {
 				queryClient.setQueryData(["tournament", tournamentId], context.previousTournament);
 			}
-			alert("Errore durante l'aggiornamento del risultato. I dati sono stati ripristinati.");
-		},
-		onSettled: () => {
-			// Invalida per sincronizzare con il server
-			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
-			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
-		},
-		onError: (error: AxiosError) => {
+
 			if (error.response?.status === 409) {
 				toast.error(
 					"Attenzione: il risultato è stato modificato da un altro utente. La pagina verrà ricaricata.",
@@ -119,6 +112,11 @@ export const MatchResultDialog = ({
 			} else {
 				toast.error("Si è verificato un errore durante il salvataggio.");
 			}
+		},
+		onSettled: () => {
+			// Invalida per sincronizzare con il server
+			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
 		},
 	});
 

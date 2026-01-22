@@ -11,7 +11,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { type TournamentStandingDto, TournamentStatus } from "@/types";
+import { type TournamentStanding, TournamentStatus } from "@/types";
 
 interface StandingsTableProps {
 	tournamentId: string;
@@ -21,7 +21,7 @@ interface StandingsTableProps {
 /**
  * Componente per la riga della classifica, ottimizzato con React.memo.
  */
-const StandingRow = memo(({ row, index }: { row: TournamentStandingDto; index: number }) => {
+const StandingRow = memo(({ row, index }: { row: TournamentStanding; index: number }) => {
 	return (
 		<TableRow className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}>
 			<TableCell className="font-medium">
@@ -68,7 +68,7 @@ const StandingRow = memo(({ row, index }: { row: TournamentStandingDto; index: n
 StandingRow.displayName = "StandingRow";
 
 export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
-	const { data: standings, isLoading } = useQuery({
+	const { data: standings, isLoading } = useQuery<TournamentStanding[]>({
 		queryKey: ["standings", tournamentId],
 		queryFn: () => getTournamentStandings(tournamentId),
 	});

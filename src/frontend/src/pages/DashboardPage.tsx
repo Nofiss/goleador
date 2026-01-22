@@ -154,7 +154,10 @@ export const DashboardPage = () => {
 							<div className="space-y-3 flex-1">
 								{isLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
-										<div key={i} className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50">
+										<div
+											key={i}
+											className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50"
+										>
 											<div className="space-y-2">
 												<Skeleton className="h-5 w-40" />
 												<Skeleton className="h-3 w-20" />
@@ -209,7 +212,10 @@ export const DashboardPage = () => {
 							<div className="space-y-3 flex-1">
 								{isLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
-										<div key={i} className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50">
+										<div
+											key={i}
+											className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50"
+										>
 											<div className="space-y-2">
 												<Skeleton className="h-5 w-40" />
 												<Skeleton className="h-4 w-24 rounded-full" />
