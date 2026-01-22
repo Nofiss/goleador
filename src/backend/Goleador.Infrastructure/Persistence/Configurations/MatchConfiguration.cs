@@ -18,5 +18,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
             .OnDelete(DeleteBehavior.Cascade); // Se cancello la partita, cancello i partecipanti
 
         builder.Property(m => m.RowVersion).IsRowVersion();
+
+        builder.HasQueryFilter(m => !m.IsDeleted);
     }
 }

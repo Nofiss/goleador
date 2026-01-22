@@ -17,5 +17,7 @@ public class TournamentRegistrationConfiguration : IEntityTypeConfiguration<Tour
             .HasForeignKey(tr => tr.TournamentId);
 
         builder.HasOne(tr => tr.Player).WithMany().HasForeignKey(tr => tr.PlayerId);
+
+        builder.HasQueryFilter(tr => !tr.Player.IsDeleted);
     }
 }

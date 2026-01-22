@@ -1,6 +1,7 @@
 using Goleador.Application.Common.Interfaces;
 using Goleador.Infrastructure.Identity;
 using Goleador.Infrastructure.Persistence;
+using Goleador.Infrastructure.Persistence.Interceptors;
 using Goleador.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,14 +18,19 @@ public static class DependencyInjection
     {
         services.AddMemoryCache();
 
+        services.AddScoped<SoftDeleteInterceptor>();
+
         // Configurazione DB (SQL Server)
         // La connection string verrà letta dall'appsettings.json dell'API
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
-            )
-        );
+            );
+
+            options.AddInterceptors(sp.GetRequiredService<SoftDeleteInterceptor>());
+        });
 
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>()

@@ -2,6 +2,7 @@ using System.Reflection;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using Goleador.Infrastructure.Identity;
+using Goleador.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // e applica tutte le configurazioni che implementano IEntityTypeConfiguration (come PlayerConfiguration).
         // Così non dobbiamo aggiungerle una per una manualmente.
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        modelBuilder.ApplySoftDeleteQueryFilter();
 
         base.OnModelCreating(modelBuilder);
     }
