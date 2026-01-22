@@ -56,7 +56,7 @@ export const MatchResultDialog = ({
 	}, [match]);
 
 	const mutation = useMutation({
-		mutationFn: async (variables: {
+		mutationFn: async (_variables: {
 			scoreHome: number;
 			scoreAway: number;
 			tableId: number | null;
@@ -111,6 +111,11 @@ export const MatchResultDialog = ({
 			} else {
 				toast.error("Si è verificato un errore durante il salvataggio.");
 			}
+		},
+		onSettled: () => {
+			// Invalida per sincronizzare con il server
+			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
 		},
 	});
 

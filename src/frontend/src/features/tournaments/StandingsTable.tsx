@@ -68,7 +68,7 @@ const StandingRow = memo(({ row, index }: { row: TournamentStanding; index: numb
 StandingRow.displayName = "StandingRow";
 
 export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
-	const { data: standings, isLoading } = useQuery({
+	const { data: standings, isLoading } = useQuery<TournamentStanding[]>({
 		queryKey: ["standings", tournamentId],
 		queryFn: () => getTournamentStandings(tournamentId),
 	});

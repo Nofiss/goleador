@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchesTab, MatchesTabSkeleton } from "@/features/tournaments/MatchesTab";
 import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TeamsTab } from "@/features/tournaments/TeamsTab";
-import { TournamentHeader, TournamentHeaderSkeleton } from "@/features/tournaments/TournamentHeader";
+import {
+	TournamentHeader,
+	TournamentHeaderSkeleton,
+} from "@/features/tournaments/TournamentHeader";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
@@ -23,9 +26,13 @@ export const TournamentDetailPage = () => {
 				<TournamentHeaderSkeleton />
 				<Tabs defaultValue="matches" className="w-full">
 					<TabsList className="grid w-full grid-cols-3 lg:w-100">
-						<TabsTrigger value="teams" disabled>Squadre</TabsTrigger>
+						<TabsTrigger value="teams" disabled>
+							Squadre
+						</TabsTrigger>
 						<TabsTrigger value="matches">Partite</TabsTrigger>
-						<TabsTrigger value="standings" disabled>Classifica</TabsTrigger>
+						<TabsTrigger value="standings" disabled>
+							Classifica
+						</TabsTrigger>
 					</TabsList>
 					<div className="mt-6">
 						<MatchesTabSkeleton />
