@@ -94,23 +94,41 @@ WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 
-app.MapOpenApi();
-app.MapScalarApiReference(options =>
-    options
-        .WithTitle("Goleador API")
-        .WithTheme(ScalarTheme.BluePlanet)
-        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-        .AddPreferredSecuritySchemes("Bearer")
-        .AddHttpAuthentication(
-            "Bearer",
-            auth =>
-            {
-                auth.Token = "";
-            }
-        )
-);
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+        options
+            .WithTitle("Goleador API")
+            .WithTheme(ScalarTheme.BluePlanet)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+            .AddPreferredSecuritySchemes("Bearer")
+            .AddHttpAuthentication(
+                "Bearer",
+                auth =>
+                {
+                    auth.Token = "";
+                }
+            )
+    );
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
+
+// Basic Security Headers
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none';");
+    await next();
+});
 
 app.UseCors(MyAllowSpecificOrigins);
 

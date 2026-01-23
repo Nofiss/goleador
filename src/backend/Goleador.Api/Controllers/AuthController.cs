@@ -29,6 +29,7 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
             var authClaims = new List<Claim>
             {
                 new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.NameIdentifier, user.Id),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
@@ -44,7 +45,7 @@ public class AuthController(UserManager<ApplicationUser> userManager, IConfigura
             var token = new JwtSecurityToken(
                 issuer: configuration["Jwt:Issuer"],
                 audience: configuration["Jwt:Audience"],
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.UtcNow.AddHours(3),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(
                     authSigningKey,
