@@ -3,6 +3,7 @@ import { Activity, ShieldAlert, Trophy } from "lucide-react";
 import { getPlayerStatistics } from "@/api/players";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface PlayerStatsDialogProps {
 	playerId: string | null;
@@ -29,7 +30,14 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 					<div className="space-y-6 py-4">
 						{/* Win Rate Circle (simulato con CSS) */}
 						<div className="flex flex-col items-center">
-							<div className="relative flex items-center justify-center w-24 h-24 rounded-full border-4 border-blue-100 bg-blue-50">
+							<div
+								className="relative flex items-center justify-center w-24 h-24 rounded-full border-4 border-blue-100 bg-blue-50"
+								role="progressbar"
+								aria-valuenow={stats.winRate}
+								aria-valuemin={0}
+								aria-valuemax={100}
+								aria-label={`Percentuale di vittorie: ${stats.winRate}%`}
+							>
 								<span className="text-xl font-bold text-blue-700">{stats.winRate}%</span>
 							</div>
 							<span className="text-sm text-gray-500 mt-2 font-medium">Win Rate</span>
@@ -78,17 +86,29 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 								{stats.recentForm.length === 0 && (
 									<span className="text-sm text-gray-400">Nessuna partita recente</span>
 								)}
-								{stats.recentForm.map((result, idx) => (
-									<div
-										key={idx}
-										className={`
-                            w-8 h-8 flex items-center justify-center rounded font-bold text-white text-sm
-                            ${result === "W" ? "bg-green-500" : result === "L" ? "bg-red-500" : "bg-gray-400"}
-                        `}
-									>
-										{result}
-									</div>
-								))}
+								{stats.recentForm.map((result, idx) => {
+									const label =
+										result === "W" ? "Vittoria" : result === "L" ? "Sconfitta" : "Pareggio";
+									return (
+										<div
+											// biome-ignore lint/suspicious/noArrayIndexKey: recent form is a short stable list
+											key={idx}
+											role="img"
+											aria-label={label}
+											title={label}
+											className={cn(
+												"w-8 h-8 flex items-center justify-center rounded font-bold text-white text-sm transition-transform hover:scale-110 cursor-default",
+												result === "W"
+													? "bg-green-500"
+													: result === "L"
+														? "bg-red-500"
+														: "bg-gray-400",
+											)}
+										>
+											{result}
+										</div>
+									);
+								})}
 							</div>
 						</div>
 					</div>
