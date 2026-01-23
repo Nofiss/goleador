@@ -1,7 +1,13 @@
+using Goleador.Application.Common.Models;
+
 namespace Goleador.Application.Common.Interfaces;
 
 public interface IIdentityService
 {
+    Task<TokenResponse?> LoginAsync(string email, string password);
+
+    Task<TokenResponse?> RefreshTokenAsync(string accessToken, string refreshToken);
+
     Task<(bool Success, string UserId, string[] Errors)> CreateUserAsync(
         string email,
         string password

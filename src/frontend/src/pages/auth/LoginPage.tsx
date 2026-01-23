@@ -23,7 +23,7 @@ export const LoginPage = () => {
 
 		try {
 			const res = await api.post("/auth/login", { email, password });
-			login(res.data.token, res.data.roles);
+			login(res.data.token, res.data.refreshToken, res.data.roles);
 			navigate("/");
 		} catch {
 			setError("Credenziali non valide. Riprova.");
