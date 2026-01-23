@@ -13,3 +13,11 @@
 ## 2025-05-15 - [Aria-label for Icon-only Navigation Buttons]
 **Learning:** Mobile menu triggers using only icons are completely inaccessible to screen readers without an explicit aria-label.
 **Action:** Ensure every icon-only button, especially for navigation, has a descriptive `aria-label`.
+
+## 2025-05-16 - [Keyboard Accessibility for Hover-only Actions]
+**Learning:** Buttons that only appear on parent hover (e.g., in a table row) are unreachable for keyboard users. Adding `focus-visible:opacity-100` ensures they become visible when tabbed into.
+**Action:** Always pair `group-hover:opacity-100` with `focus-visible:opacity-100` for action buttons.
+
+## 2025-05-16 - [Semantic ARIA for Visual Data]
+**Learning:** Purely visual data indicators like color-coded form dots or progress circles are invisible to screen readers. Using `role="progressbar"` or `role="img"` with descriptive `aria-label` makes this data accessible.
+**Action:** Enhance visual-only data representations with semantic ARIA roles and labels.

@@ -43,10 +43,11 @@ const PlayerRow = memo(
 					<Button
 						variant="secondary"
 						size="sm"
-						className="h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+						className="h-8 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
 						onClick={() => onShowStats(player.id)}
+						aria-label={`Visualizza statistiche di ${player.nickname}`}
 					>
-						<BarChart2 className="h-3.5 w-3.5 mr-1.5" />
+						<BarChart2 className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
 						<span className="text-xs">Stats</span>
 					</Button>
 				</TableCell>
