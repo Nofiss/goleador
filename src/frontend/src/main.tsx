@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "sonner";
 import App from "./App.tsx";
 import { GlobalErrorFallback } from "./components/errors/GlobalErrorFallback.tsx";
+import { PwaUpdater } from "./components/PwaUpdater.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ createRoot(rootElement).render(
 					>
 						<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
 							<App />
+							<PwaUpdater />
 							<Toaster position="top-center" richColors />
 						</ThemeProvider>
 					</ErrorBoundary>
