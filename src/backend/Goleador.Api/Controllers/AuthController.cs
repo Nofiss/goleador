@@ -9,10 +9,12 @@ using Goleador.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Goleador.Api.Controllers;
 
+[EnableRateLimiting("AuthPolicy")]
 public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
     : ApiControllerBase
 {
