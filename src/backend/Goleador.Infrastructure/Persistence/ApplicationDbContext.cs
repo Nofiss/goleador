@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Tournament> Tournaments { get; set; }
     public DbSet<TournamentTeam> TournamentTeams { get; set; }
     public DbSet<Table> Tables { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

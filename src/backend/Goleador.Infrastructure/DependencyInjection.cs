@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddMemoryCache();
 
         services.AddScoped<SoftDeleteInterceptor>();
+        services.AddScoped<AuditLogInterceptor>();
 
         // Configurazione DB (SQL Server)
         // La connection string verrà letta dall'appsettings.json dell'API
@@ -29,7 +30,10 @@ public static class DependencyInjection
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
             );
 
-            options.AddInterceptors(sp.GetRequiredService<SoftDeleteInterceptor>());
+            options.AddInterceptors(
+                sp.GetRequiredService<SoftDeleteInterceptor>(),
+                sp.GetRequiredService<AuditLogInterceptor>()
+            );
         });
 
         services.AddScoped<IApplicationDbContext>(provider =>
