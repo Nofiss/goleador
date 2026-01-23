@@ -11,6 +11,7 @@ public interface IApplicationDbContext
     DbSet<Tournament> Tournaments { get; }
     DbSet<TournamentTeam> TournamentTeams { get; }
     DbSet<Table> Tables { get; }
+    DbSet<AuditLog> AuditLogs { get; }
 
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
 
