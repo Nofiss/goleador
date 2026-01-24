@@ -75,6 +75,9 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
                     continue;
                 }
 
+                if (IsSensitive(propertyName))
+                    continue;
+
                 switch (entry.State)
                 {
                     case EntityState.Added:
@@ -104,6 +107,9 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
 
         return auditEntries.Where(_ => _.HasTemporaryProperties).ToList();
     }
+
+    private static bool IsSensitive(string propertyName) =>
+        propertyName is "PasswordHash" or "SecurityStamp" or "RefreshToken";
 
     private async Task OnAfterSaveChanges(DbContext context, List<AuditEntry> auditEntries, CancellationToken cancellationToken)
     {
