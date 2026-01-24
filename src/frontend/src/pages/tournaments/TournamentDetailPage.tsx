@@ -16,16 +16,16 @@ export const TournamentDetailPage = () => {
 
 	const { data: tournament, isLoading } = useQuery({
 		queryKey: ["tournament", id],
-		queryFn: () => getTournamentById(id!),
+		queryFn: () => getTournamentById(id as string),
 		enabled: !!id,
 	});
 
 	if (isLoading || !tournament) {
 		return (
-			<div className="space-y-6 max-w-6xl mx-auto pb-20">
+			<div className="container mx-auto max-w-7xl p-4 md:p-8 space-y-8 pb-20">
 				<TournamentHeaderSkeleton />
 				<Tabs defaultValue="matches" className="w-full">
-					<TabsList className="grid w-full grid-cols-3 lg:w-100">
+					<TabsList className="grid w-full grid-cols-3 md:w-[400px]">
 						<TabsTrigger value="teams" disabled>
 							Squadre
 						</TabsTrigger>
@@ -46,12 +46,12 @@ export const TournamentDetailPage = () => {
 	const defaultTab = tournament.status === TournamentStatus.setup ? "teams" : "standings";
 
 	return (
-		<div className="space-y-6 max-w-6xl mx-auto pb-20">
+		<div className="container mx-auto max-w-7xl p-4 md:p-8 space-y-8 pb-20">
 			{/* Componente Header estratto */}
 			<TournamentHeader tournament={tournament} />
 
 			<Tabs defaultValue={defaultTab} className="w-full">
-				<TabsList className="grid w-full grid-cols-3 lg:w-100">
+				<TabsList className="grid w-full grid-cols-3 md:w-[400px]">
 					<TabsTrigger value="teams">Squadre</TabsTrigger>
 					<TabsTrigger value="matches">Partite</TabsTrigger>
 					<TabsTrigger value="standings">Classifica</TabsTrigger>

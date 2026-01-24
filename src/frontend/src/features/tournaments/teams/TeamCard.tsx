@@ -18,15 +18,15 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 
 	return (
 		<>
-			<Card className="overflow-hidden border-border bg-card/50 backdrop-blur-sm transition-all hover:shadow-md hover:border-primary/30 group">
+			<Card className="overflow-hidden border rounded-xl shadow-sm bg-card transition-all hover:shadow-md hover:border-primary/30 group">
 				{/* Header */}
-				<div className="p-4 border-b bg-muted/20 flex items-center justify-between">
+				<div className="p-5 border-b bg-muted/20 flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary">
 							<Users className="h-4 w-4" />
 						</div>
 						<div>
-							<h3 className="font-bold text-sm uppercase tracking-tight">{team.name}</h3>
+							<h3 className="font-semibold text-base tracking-tight">{team.name}</h3>
 							{isAdmin && (
 								<p className="text-[10px] font-mono text-muted-foreground opacity-60">
 									#{team.id.split("-")[0]}
@@ -59,7 +59,7 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 				</div>
 
 				{/* Players List */}
-				<div className="p-3 space-y-1">
+				<div className="p-5 space-y-1">
 					{team.players.map((player) => (
 						<div
 							key={player.id}
