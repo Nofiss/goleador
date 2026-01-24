@@ -5,9 +5,10 @@ using Goleador.Application.Auth.Commands.ForgotPassword;
 using Goleador.Application.Auth.Commands.Register;
 using Goleador.Application.Auth.Commands.RegisterUser;
 using Goleador.Application.Auth.Commands.ResetPassword;
+using Goleador.Application.Common.Interfaces;
+using Goleador.Application.Common.Models;
 using Goleador.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
@@ -15,54 +16,45 @@ using Microsoft.IdentityModel.Tokens;
 namespace Goleador.Api.Controllers;
 
 [EnableRateLimiting("AuthPolicy")]
-public class AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
-    : ApiControllerBase
+public class AuthController(IIdentityService identityService) : ApiControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        ApplicationUser? user = await userManager.FindByEmailAsync(model.Email);
-        if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+        var result = await identityService.LoginAsync(model.Email, model.Password);
+        if (result != null)
         {
-            IList<string> userRoles = await userManager.GetRolesAsync(user);
-
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.Name, user.UserName!),
-                new(ClaimTypes.NameIdentifier, user.Id),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            foreach (var role in userRoles)
-            {
-                authClaims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var authSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
-            );
-
-            var token = new JwtSecurityToken(
-                issuer: configuration["Jwt:Issuer"],
-                audience: configuration["Jwt:Audience"],
-                expires: DateTime.UtcNow.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(
-                    authSigningKey,
-                    SecurityAlgorithms.HmacSha256
-                )
-            );
-
             return Ok(
                 new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo,
-                    roles = userRoles, // Restituiamo i ruoli al frontend
+                    token = result.AccessToken,
+                    refreshToken = result.RefreshToken,
+                    roles = result.Roles,
                 }
             );
         }
         return Unauthorized();
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+    {
+        var result = await identityService.RefreshTokenAsync(
+            request.AccessToken,
+            request.RefreshToken
+        );
+        if (result != null)
+        {
+            return Ok(
+                new
+                {
+                    token = result.AccessToken,
+                    refreshToken = result.RefreshToken,
+                    roles = result.Roles,
+                }
+            );
+        }
+        return BadRequest("Invalid token or refresh token.");
     }
 
     [HttpPost("register")]

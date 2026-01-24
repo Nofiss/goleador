@@ -1,11 +1,149 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using Goleador.Application.Common.Interfaces;
+using Goleador.Application.Common.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Goleador.Infrastructure.Identity;
 
-public class IdentityService(UserManager<ApplicationUser> userManager) : IIdentityService
+public class IdentityService(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+    : IIdentityService
 {
+    public async Task<TokenResponse?> LoginAsync(string email, string password)
+    {
+        ApplicationUser? user = await userManager.FindByEmailAsync(email);
+        if (user != null && await userManager.CheckPasswordAsync(user, password))
+        {
+            IList<string> userRoles = await userManager.GetRolesAsync(user);
+            JwtSecurityToken accessToken = CreateToken(user, userRoles);
+            string refreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await userManager.UpdateAsync(user);
+
+            return new TokenResponse(
+                new JwtSecurityTokenHandler().WriteToken(accessToken),
+                refreshToken,
+                userRoles.ToArray()
+            );
+        }
+        return null;
+    }
+
+    public async Task<TokenResponse?> RefreshTokenAsync(string accessToken, string refreshToken)
+    {
+        ClaimsPrincipal? principal = GetPrincipalFromExpiredToken(accessToken);
+        if (principal == null)
+        {
+            return null;
+        }
+
+        string? userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return null;
+        }
+
+        ApplicationUser? user = await userManager.FindByIdAsync(userId);
+
+        if (
+            user == null
+            || user.RefreshToken != refreshToken
+            || user.RefreshTokenExpiryTime <= DateTime.UtcNow
+        )
+        {
+            return null;
+        }
+
+        IList<string> userRoles = await userManager.GetRolesAsync(user);
+        JwtSecurityToken newAccessToken = CreateToken(user, userRoles);
+        string newRefreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await userManager.UpdateAsync(user);
+
+        return new TokenResponse(
+            new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+            newRefreshToken,
+            userRoles.ToArray()
+        );
+    }
+
+    private JwtSecurityToken CreateToken(ApplicationUser user, IList<string> roles)
+    {
+        var authClaims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.UserName!),
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        };
+
+        foreach (string role in roles)
+        {
+            authClaims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var authSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
+        );
+
+        return new JwtSecurityToken(
+            issuer: configuration["Jwt:Issuer"],
+            audience: configuration["Jwt:Audience"],
+            expires: DateTime.UtcNow.AddMinutes(15),
+            claims: authClaims,
+            signingCredentials: new SigningCredentials(
+                authSigningKey,
+                SecurityAlgorithms.HmacSha256
+            )
+        );
+    }
+
+    private static string GenerateRefreshToken()
+    {
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    }
+
+    private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
+    {
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
+            ),
+            ValidateLifetime = false,
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        ClaimsPrincipal principal = tokenHandler.ValidateToken(
+            token,
+            tokenValidationParameters,
+            out SecurityToken securityToken
+        );
+        if (
+            securityToken is not JwtSecurityToken jwtSecurityToken
+            || !jwtSecurityToken.Header.Alg.Equals(
+                SecurityAlgorithms.HmacSha256,
+                StringComparison.InvariantCultureIgnoreCase
+            )
+        )
+        {
+            return null;
+        }
+
+        return principal;
+    }
+
     public async Task<(bool Success, string UserId, string[] Errors)> CreateUserAsync(
         string email,
         string password

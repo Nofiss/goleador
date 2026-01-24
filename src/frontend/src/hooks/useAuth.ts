@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 const TOKEN_KEY = "goleador_token";
+const REFRESH_TOKEN_KEY = "goleador_refresh_token";
 const ROLES_KEY = "goleador_roles";
 
 export const useAuth = () => {
@@ -9,8 +10,9 @@ export const useAuth = () => {
 		JSON.parse(localStorage.getItem(ROLES_KEY) || "[]"),
 	);
 
-	const login = (newToken: string, newRoles: string[]) => {
+	const login = (newToken: string, newRefreshToken: string, newRoles: string[]) => {
 		localStorage.setItem(TOKEN_KEY, newToken);
+		localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
 		localStorage.setItem(ROLES_KEY, JSON.stringify(newRoles));
 		setTokenState(newToken);
 		setRolesState(newRoles);
@@ -18,6 +20,7 @@ export const useAuth = () => {
 
 	const logout = () => {
 		localStorage.removeItem(TOKEN_KEY);
+		localStorage.removeItem(REFRESH_TOKEN_KEY);
 		localStorage.removeItem(ROLES_KEY);
 		setTokenState(null);
 		setRolesState([]);
