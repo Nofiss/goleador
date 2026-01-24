@@ -45,12 +45,13 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
             }
         }
 
+        // Ottimizzazione Bolt ⚡: Usiamo un dizionario per evitare una ricerca O(N) dentro un loop O(N),
+        // portando la complessità totale da O(N^2) a O(N).
+        var matchMap = tournament.Matches.ToDictionary(m => m.Id);
+
         foreach (TournamentMatchDto matchDto in dto.Matches)
         {
-            // Troviamo l'entità corrispondente in memoria (veloce perché hanno lo stesso indice o ID)
-            // Nota: Per sicurezza usiamo First, ma ottimizzabile se la lista è ordinata uguale.
-            Match? matchEntity = tournament.Matches.FirstOrDefault(m => m.Id == matchDto.Id);
-            if (matchEntity == null)
+            if (!matchMap.TryGetValue(matchDto.Id, out var matchEntity))
             {
                 continue;
             }
