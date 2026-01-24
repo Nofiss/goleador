@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Trophy } from "lucide-react";
 import { getGlobalRanking } from "@/api/players";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -9,7 +10,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const GlobalRankingPage = () => {
 	const { data: ranking, isLoading } = useQuery({
@@ -82,9 +82,7 @@ export const GlobalRankingPage = () => {
 									<TableCell className="text-right font-mono text-sm">
 										{player.totalMatches}
 									</TableCell>
-									<TableCell className="text-right font-mono text-sm">
-										{player.winRate}%
-									</TableCell>
+									<TableCell className="text-right font-mono text-sm">{player.winRate}%</TableCell>
 								</TableRow>
 							))
 						)}
