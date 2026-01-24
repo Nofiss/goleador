@@ -8,6 +8,7 @@ public class Player : BaseEntity
     public string FirstName { get; private set; } = string.Empty;
     public string LastName { get; private set; } = string.Empty;
     public string Email { get; private set; } = string.Empty;
+    public int EloRating { get; private set; } = 1200;
     public DateTime CreatedAt { get; private set; }
 
     public string? UserId { get; private set; }
@@ -80,4 +81,9 @@ public class Player : BaseEntity
     public void SetUser(string userId) => UserId = userId;
 
     public void RemoveUserLink() => UserId = null;
+
+    public void UpdateElo(int pointsChange)
+    {
+        EloRating += pointsChange;
+    }
 }

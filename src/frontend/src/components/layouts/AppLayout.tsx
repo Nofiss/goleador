@@ -5,6 +5,7 @@ import {
 	Map as MapIcon,
 	Menu,
 	ShieldCheck,
+	TrendingUp,
 	Trophy,
 	Users,
 } from "lucide-react";
@@ -43,6 +44,7 @@ export const AppLayout = () => {
 
 	const navigation = [
 		{ name: "Dashboard", href: "/", icon: LayoutDashboard },
+		{ name: "Ranking", href: "/ranking", icon: TrendingUp },
 		//		{ name: "Partite", href: "/matches", icon: Gamepad2},
 		{ name: "Tornei", href: "/tournaments", icon: Trophy },
 		{ name: "Giocatori", href: "/players", icon: Users },
