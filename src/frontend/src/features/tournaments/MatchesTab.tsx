@@ -1,5 +1,5 @@
 import { ArrowRightLeft, CalendarClock, MapPin, Search } from "lucide-react";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,12 +20,12 @@ interface Props {
 }
 
 export const MatchesTabSkeleton = () => (
-	<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+	<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 		{Array.from({ length: 6 }).map((_, i) => (
 			<div
 				// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
 				key={i}
-				className="h-32 rounded-xl border bg-card p-4 pl-5 flex flex-col justify-between"
+				className="h-32 rounded-xl border bg-card p-5 flex flex-col justify-between"
 			>
 				<div className="flex justify-between items-start">
 					<Skeleton className="h-4 w-20 rounded-full" />
@@ -46,43 +46,6 @@ export const MatchesTabSkeleton = () => (
 	</div>
 );
 
-const useNumColumns = () => {
-	const [numColumns, setNumColumns] = useState(() => {
-		if (typeof window === "undefined") return 1;
-		if (window.innerWidth >= 1280) return 3;
-		if (window.innerWidth >= 768) return 2;
-		return 1;
-	});
-
-	useEffect(() => {
-		const xlQuery = window.matchMedia("(min-width: 1280px)");
-		const mdQuery = window.matchMedia("(min-width: 768px)");
-
-		const updateColumns = () => {
-			if (xlQuery.matches) {
-				setNumColumns(3);
-			} else if (mdQuery.matches) {
-				setNumColumns(2);
-			} else {
-				setNumColumns(1);
-			}
-		};
-
-		// Inizializzazione e ascolto cambiamenti breakpoint
-		// Molto più efficiente di window.resize perché scatta solo al superamento dei breakpoint
-		updateColumns();
-		xlQuery.addEventListener("change", updateColumns);
-		mdQuery.addEventListener("change", updateColumns);
-
-		return () => {
-			xlQuery.removeEventListener("change", updateColumns);
-			mdQuery.removeEventListener("change", updateColumns);
-		};
-	}, []);
-
-	return numColumns;
-};
-
 /**
  * Componente per la card della partita, ottimizzato con React.memo.
  * Previene re-render quando cambia lo stato del genitore ma i dati della partita sono invariati.
@@ -99,7 +62,7 @@ const MatchCard = memo(
 	}) => (
 		<div
 			className={cn(
-				"group relative overflow-hidden rounded-lg border border-border/40 bg-card shadow-sm transition-all",
+				"group relative overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all",
 				"hover:shadow-md hover:-translate-y-0.5",
 				match.status === 1 ? "bg-muted/30" : "border-primary/20",
 			)}
@@ -107,19 +70,19 @@ const MatchCard = memo(
 			{/* Status Bar laterale */}
 			<div
 				className={cn(
-					"absolute top-0 left-0 w-0.5 sm:w-1 h-full transition-colors",
+					"absolute left-0 top-0 bottom-0 w-1 transition-colors",
 					match.status === 1 ? "bg-muted-foreground/30" : "bg-primary",
 				)}
 			/>
 
-			<div className={cn("pl-5", match.status === 1 ? "p-3 sm:p-4" : "p-4 sm:p-5")}>
+			<div className="pl-5 p-5">
 				{/* Header Card */}
 				<div
 					className={cn("flex justify-between items-start", match.status === 1 ? "mb-3" : "mb-4")}
 				>
 					<span
 						className={cn(
-							"text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
+							"text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
 							match.status === 0
 								? "text-primary border-primary/20 bg-primary/5"
 								: "text-muted-foreground border-muted-foreground/20 bg-muted",
@@ -130,7 +93,7 @@ const MatchCard = memo(
 
 					<div className="flex flex-col items-end gap-1">
 						{match.status === 1 && match.datePlayed && (
-							<span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+							<span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
 								<CalendarClock className="h-3 w-3" />
 								{new Date(match.datePlayed).toLocaleDateString("it-IT", {
 									day: "2-digit",
@@ -141,7 +104,7 @@ const MatchCard = memo(
 							</span>
 						)}
 						{match.tableName && (
-							<span className="flex items-center gap-1 text-[10px] font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
+							<span className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
 								<MapPin className="h-3 w-3" /> {match.tableName}
 							</span>
 						)}
@@ -153,9 +116,9 @@ const MatchCard = memo(
 					<div className="flex justify-between items-center group/team">
 						<span
 							className={cn(
-								"text-sm transition-colors truncate",
+								"text-base font-semibold transition-colors truncate",
 								match.status === 1 && match.scoreHome > match.scoreAway
-									? "font-bold text-foreground"
+									? "text-foreground"
 									: "text-muted-foreground",
 							)}
 						>
@@ -163,7 +126,7 @@ const MatchCard = memo(
 						</span>
 						<span
 							className={cn(
-								"font-mono text-lg tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
+								"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
 								match.status === 1 && match.scoreHome > match.scoreAway && "text-primary font-bold",
 							)}
 						>
@@ -174,9 +137,9 @@ const MatchCard = memo(
 					<div className="flex justify-between items-center group/team">
 						<span
 							className={cn(
-								"text-sm transition-colors truncate",
+								"text-base font-semibold transition-colors truncate",
 								match.status === 1 && match.scoreAway > match.scoreHome
-									? "font-bold text-foreground"
+									? "text-foreground"
 									: "text-muted-foreground",
 							)}
 						>
@@ -184,7 +147,7 @@ const MatchCard = memo(
 						</span>
 						<span
 							className={cn(
-								"font-mono text-lg tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
+								"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
 								match.status === 1 && match.scoreAway > match.scoreHome && "text-primary font-bold",
 							)}
 						>
@@ -225,19 +188,17 @@ const MatchGrid = memo(
 	({
 		matches,
 		title,
-		numColumns,
 		isReferee,
 		onSelectMatch,
 	}: {
 		matches: TournamentMatch[];
 		title: string;
-		numColumns: number;
 		isReferee: boolean;
 		onSelectMatch: (match: TournamentMatch) => void;
 	}) => {
 		return (
 			<div className="mb-12">
-				<h3 className="text-lg font-semibold mb-5 flex items-center gap-2 text-foreground/90">
+				<h3 className="text-lg font-semibold mt-8 mb-4 flex items-center gap-2 text-foreground/90">
 					{title === "Girone di Ritorno" ? (
 						<ArrowRightLeft className="w-5 h-5 text-orange-500 dark:text-orange-400" />
 					) : (
@@ -246,14 +207,7 @@ const MatchGrid = memo(
 					{title}
 				</h3>
 
-				<div
-					className={cn(
-						"grid gap-6 sm:gap-7",
-						numColumns === 1 && "grid-cols-1",
-						numColumns === 2 && "grid-cols-2",
-						numColumns === 3 && "grid-cols-3",
-					)}
-				>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 					{matches.map((match) => (
 						<MatchCard
 							key={match.id}
@@ -275,7 +229,6 @@ export const MatchesTab = ({ tournament }: Props) => {
 	const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
-	const numColumns = useNumColumns();
 
 	// Ottimizzazione: useMemo per evitare ricalcoli costosi su ogni render
 	// Spostato prima dell'early return per seguire le regole degli Hooks
@@ -362,14 +315,12 @@ export const MatchesTab = ({ tournament }: Props) => {
 					<MatchGrid
 						matches={firstLegMatches}
 						title="Girone di Andata"
-						numColumns={numColumns}
 						isReferee={isReferee}
 						onSelectMatch={setSelectedMatch}
 					/>
 					<MatchGrid
 						matches={secondLegMatches}
 						title="Girone di Ritorno"
-						numColumns={numColumns}
 						isReferee={isReferee}
 						onSelectMatch={setSelectedMatch}
 					/>
@@ -378,7 +329,6 @@ export const MatchesTab = ({ tournament }: Props) => {
 				<MatchGrid
 					matches={firstLegMatches}
 					title="Calendario Partite"
-					numColumns={numColumns}
 					isReferee={isReferee}
 					onSelectMatch={setSelectedMatch}
 				/>

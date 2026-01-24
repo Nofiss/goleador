@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const TournamentHeaderSkeleton = () => (
-	<div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-6">
+	<div className="flex flex-col md:flex-row justify-between items-start gap-4">
 		<div className="space-y-3">
 			<div className="flex items-center gap-3">
 				<Skeleton className="h-9 w-64" />
@@ -45,10 +45,10 @@ export const TournamentHeader = ({ tournament }: Props) => {
 	});
 
 	return (
-		<div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b pb-6">
+		<div className="flex flex-col md:flex-row justify-between items-start gap-4">
 			<div>
 				<div className="flex items-center gap-3 mb-2">
-					<h1 className="text-3xl font-bold">{tournament.name}</h1>
+					<h1 className="text-3xl font-bold tracking-tight">{tournament.name}</h1>
 					{tournament.status === TournamentStatus.setup && (
 						<Badge variant="secondary">Iscrizioni</Badge>
 					)}
