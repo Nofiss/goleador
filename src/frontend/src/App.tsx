@@ -6,6 +6,7 @@ import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { MatchCreatePage } from "@/pages/matches/MatchCreatePage";
 import { MatchesListPage } from "@/pages/matches/MatchesListPage";
+import { GlobalRankingPage } from "@/pages/players/GlobalRankingPage";
 import { PlayerCreatePage } from "@/pages/players/PlayerCreatePage";
 import { PlayersListPage } from "@/pages/players/PlayersListPage";
 import { TournamentCreatePage } from "@/pages/tournaments/TournamentCreatePage";
@@ -31,6 +32,7 @@ function App() {
 					{/* Players Routes */}
 					<Route path="/players" element={<PlayersListPage />} />
 					<Route path="/players/new" element={<PlayerCreatePage />} />
+					<Route path="/ranking" element={<GlobalRankingPage />} />
 
 					{/* Tournaments Routes */}
 					<Route path="/tournaments" element={<TournamentsListPage />} />

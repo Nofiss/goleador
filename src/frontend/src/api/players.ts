@@ -1,4 +1,4 @@
-import type { Player, PlayerStatistics } from "@/types";
+import type { Player, PlayerRanking, PlayerStatistics } from "@/types";
 import { api } from "./axios";
 
 export const getPlayers = async (): Promise<Player[]> => {
@@ -8,5 +8,10 @@ export const getPlayers = async (): Promise<Player[]> => {
 
 export const getPlayerStatistics = async (id: string): Promise<PlayerStatistics> => {
 	const response = await api.get<PlayerStatistics>(`/players/${id}/statistics`);
+	return response.data;
+};
+
+export const getGlobalRanking = async (): Promise<PlayerRanking[]> => {
+	const response = await api.get<PlayerRanking[]>("/players/ranking");
 	return response.data;
 };

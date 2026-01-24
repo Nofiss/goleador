@@ -1,4 +1,5 @@
 using Goleador.Application.Players.Commands.CreatePlayer;
+using Goleador.Application.Players.Queries.GetGlobalRanking;
 using Goleador.Application.Players.Queries.GetPlayers;
 using Goleador.Application.Players.Queries.GetPlayerStatistics;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +19,11 @@ public class PlayersController : ApiControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<PlayerStatisticsDto>> GetStatistics(Guid id) =>
         await Mediator.Send(new GetPlayerStatisticsQuery(id));
+
+    [HttpGet("ranking")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<PlayerRankingDto>>> GetRanking() =>
+        await Mediator.Send(new GetGlobalRankingQuery());
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreatePlayerCommand command)

@@ -19,3 +19,11 @@ export interface PlayerStatistics {
 	winRate: number;
 	recentForm: string[]; // ["W", "L", "D"...]
 }
+
+export interface PlayerRanking {
+	id: string;
+	nickname: string;
+	eloRating: number;
+	totalMatches: number;
+	winRate: number;
+}
