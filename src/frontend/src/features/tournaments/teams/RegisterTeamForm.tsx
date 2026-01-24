@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import { registerTeam } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,9 +37,11 @@ export const RegisterTeamForm = ({
 		mutationFn: registerTeam,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+			toast.success("Squadra creata con successo! 🏆");
 			setTeamName("");
 			setSelectedPlayers([]);
 		},
+		onError: () => toast.error("Errore durante la creazione della squadra."),
 	});
 
 	const handleSubmit = (e: React.FormEvent) => {

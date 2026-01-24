@@ -35,13 +35,14 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 						</div>
 					</div>
 
-					<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+					<div className="flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
 						{isAdmin && (
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 text-muted-foreground hover:text-primary"
+								className="h-8 w-8 text-muted-foreground hover:text-primary focus-visible:opacity-100"
 								onClick={() => setIsRenameOpen(true)}
+								aria-label="Modifica nome squadra"
 							>
 								<Edit2 className="h-4 w-4" />
 							</Button>
@@ -50,7 +51,8 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 text-destructive hover:bg-destructive/10"
+								className="h-8 w-8 text-destructive hover:bg-destructive/10 focus-visible:opacity-100"
+								aria-label="Elimina squadra"
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, User, UserPlus, Users2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { getPlayers } from "@/api/players";
 import { registerPlayer } from "@/api/tournaments"; // Assumendo esista un'api per rimuovere
 import { Badge } from "@/components/ui/badge";
@@ -59,8 +60,10 @@ export const PlayerPool = ({
 		mutationFn: registerPlayer,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+			toast.success("Giocatore iscritto con successo! ⚽");
 			setSelectedPlayerId("");
 		},
+		onError: () => toast.error("Errore durante l'iscrizione del giocatore."),
 	});
 
 	return (

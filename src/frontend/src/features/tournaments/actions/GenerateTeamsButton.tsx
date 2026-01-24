@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/api/axios";
 import { Button } from "@/components/ui/button";
 
@@ -10,9 +11,9 @@ export const GenerateTeamsButton = ({ tournamentId }: { tournamentId: string }) 
 		mutationFn: () => api.post(`/api/tournaments/${tournamentId}/generate-teams`),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
-			alert("Squadre generate con successo dall'AI! 🤖");
+			toast.success("Squadre generate con successo dall'AI! 🤖");
 		},
-		onError: () => alert("Errore generazione squadre. Controlla che i giocatori siano pari!"),
+		onError: () => toast.error("Errore generazione squadre. Controlla che i giocatori siano pari!"),
 	});
 
 	return (

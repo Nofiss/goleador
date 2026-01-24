@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { renameTeam } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +32,10 @@ export const RenameTeamDialog = ({ team, tournamentId, onClose }: Props) => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			queryClient.invalidateQueries({ queryKey: ["standings", tournamentId] });
+			toast.success("Squadra rinominata con successo!");
 			onClose();
 		},
-		onError: () => alert("Errore durante la rinomina."),
+		onError: () => toast.error("Errore durante la rinomina."),
 	});
 
 	if (!team) return null;

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { joinTournament } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +22,11 @@ export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string })
 		mutationFn: () => joinTournament(tournamentId, teamName),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
+			toast.success("Ti sei iscritto al torneo! 🎉");
 			setOpen(false);
 		},
 		onError: () => {
-			alert("Errore durante l'iscrizione");
+			toast.error("Errore durante l'iscrizione");
 		},
 	});
 
