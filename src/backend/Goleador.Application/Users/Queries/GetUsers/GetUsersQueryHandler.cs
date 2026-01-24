@@ -23,9 +23,12 @@ public class GetUsersQueryHandler(IIdentityService identityService, IApplication
 
         var result = new List<UserDto>();
 
+        // Ottimizzazione Bolt ⚡: Usiamo un dizionario per evitare una ricerca O(N) dentro un loop O(N).
+        var playerMap = linkedPlayers.ToDictionary(p => p.UserId!);
+
         foreach ((var id, var email, var username, var roles) in identityUsers)
         {
-            Player? player = linkedPlayers.FirstOrDefault(p => p.UserId == id);
+            playerMap.TryGetValue(id, out var player);
 
             result.Add(
                 new UserDto
