@@ -44,6 +44,7 @@ export const MatchResultDialog = ({
 	const { data: tables } = useQuery({
 		queryKey: ["tables"],
 		queryFn: getTables,
+		enabled: isOpen,
 	});
 
 	// Aggiorna lo stato quando cambia il match selezionato

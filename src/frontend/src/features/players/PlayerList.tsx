@@ -101,7 +101,10 @@ export const PlayerList = () => {
 						</TableHeader>
 						<TableBody>
 							{Array.from({ length: 6 }).map((_, i) => (
-								<TableRow key={i}>
+								<TableRow
+									// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
+									key={i}
+								>
 									<TableCell>
 										<div className="flex items-center gap-2">
 											<Skeleton className="h-7 w-7 rounded-full" />

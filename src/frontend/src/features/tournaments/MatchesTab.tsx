@@ -247,17 +247,21 @@ export const MatchesTab = ({ tournament }: Props) => {
 		});
 	}, [tournament.matches, searchQuery, statusFilter]);
 
-	const { firstLegMatches, secondLegMatches } = useMemo(() => {
-		const sorted = [...filteredMatches].sort((a, b) => a.round - b.round);
+	// Ottimizzazione: isola le derivazioni costanti (split point delle leg) dai dati dinamici (filtri)
+	const roundsInFirstLeg = useMemo(() => {
 		const allMatchesSorted = [...tournament.matches].sort((a, b) => a.round - b.round);
 		const max = Math.max(...allMatchesSorted.map((m) => m.round), 0);
-		const roundsInFirstLeg = tournament.hasReturnMatches ? max / 2 : max;
+		return tournament.hasReturnMatches ? max / 2 : max;
+	}, [tournament.matches, tournament.hasReturnMatches]);
+
+	const { firstLegMatches, secondLegMatches } = useMemo(() => {
+		const sorted = [...filteredMatches].sort((a, b) => a.round - b.round);
 
 		return {
 			firstLegMatches: sorted.filter((m) => m.round <= roundsInFirstLeg),
 			secondLegMatches: sorted.filter((m) => m.round > roundsInFirstLeg),
 		};
-	}, [filteredMatches, tournament.matches, tournament.hasReturnMatches]);
+	}, [filteredMatches, roundsInFirstLeg]);
 
 	if (tournament.status === TournamentStatus.setup) {
 		return (
