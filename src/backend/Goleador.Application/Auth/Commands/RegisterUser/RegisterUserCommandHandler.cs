@@ -3,7 +3,7 @@ using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Goleador.Application.Auth.Commands.Register;
+namespace Goleador.Application.Auth.Commands.RegisterUser;
 
 public class RegisterUserCommandHandler(
     IApplicationDbContext context,
@@ -15,21 +15,36 @@ public class RegisterUserCommandHandler(
         CancellationToken cancellationToken
     )
     {
+        // 1. Generazione Username Univoco
+        string baseUsername =
+            $"{char.ToUpper(request.FirstName[0])}{char.ToUpper(request.LastName[0])}{request.LastName[1..]}";
+        string username = baseUsername;
+        int counter = 1;
+
+        while (await identityService.ExistsByUsernameAsync(username))
+        {
+            username = $"{baseUsername}{counter++}";
+        }
+
+        // Verifichiamo se esiste già un Player con questo nickname (che ora coincide con lo username generato)
         Player? existingPlayer = await context.Players.FirstOrDefaultAsync(
-            p => p.Nickname == request.Nickname,
+            p => p.Nickname == username,
             cancellationToken
         );
 
         if (existingPlayer != null && !string.IsNullOrEmpty(existingPlayer.UserId))
         {
+            // Questo scenario è improbabile se identityService.ExistsByUsernameAsync funziona correttamente,
+            // ma lo gestiamo per sicurezza.
             throw new InvalidOperationException(
-                $"Il nickname '{request.Nickname}' è già in uso da un altro utente registrato."
+                $"Lo username generato '{username}' è già associato a un altro utente."
             );
         }
 
-        // 1. Crea Utente su Identity
+        // 2. Crea Utente su Identity
         (var success, var userId, var errors) = await identityService.CreateUserAsync(
             request.Email,
+            username,
             request.Password
         );
 
@@ -46,7 +61,7 @@ public class RegisterUserCommandHandler(
         else
         {
             var player = new Player(
-                request.Nickname,
+                username,
                 request.FirstName,
                 request.LastName,
                 request.Email,

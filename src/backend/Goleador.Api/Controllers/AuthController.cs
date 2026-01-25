@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Goleador.Application.Auth.Commands.ForgotPassword;
-using Goleador.Application.Auth.Commands.Register;
 using Goleador.Application.Auth.Commands.RegisterUser;
 using Goleador.Application.Auth.Commands.ResetPassword;
 using Goleador.Application.Common.Interfaces;

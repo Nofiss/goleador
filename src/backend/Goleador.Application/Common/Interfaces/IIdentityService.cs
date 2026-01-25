@@ -8,8 +8,11 @@ public interface IIdentityService
 
     Task<TokenResponse?> RefreshTokenAsync(string accessToken, string refreshToken);
 
+    Task<bool> ExistsByUsernameAsync(string username);
+
     Task<(bool Success, string UserId, string[] Errors)> CreateUserAsync(
         string email,
+        string username,
         string password
     );
 
