@@ -27,3 +27,32 @@ export interface PlayerRanking {
 	totalMatches: number;
 	winRate: number;
 }
+
+export interface RelatedPlayerDto {
+	playerId: string;
+	nickname: string;
+	count: number;
+}
+
+export interface MatchBriefDto {
+	id: string;
+	datePlayed: string;
+	scoreHome: number;
+	scoreAway: number;
+	homeTeamName: string;
+	awayTeamName: string;
+	result: string; // "W", "L", "D"
+}
+
+export interface PlayerProfile {
+	fullName: string;
+	nickname: string;
+	eloRating: number;
+	totalMatches: number;
+	wins: number;
+	losses: number;
+	winRate: number;
+	nemesis?: RelatedPlayerDto;
+	bestPartner?: RelatedPlayerDto;
+	recentMatches: MatchBriefDto[];
+}
