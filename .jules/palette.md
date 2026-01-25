@@ -21,3 +21,7 @@
 ## 2025-05-16 - [Semantic ARIA for Visual Data]
 **Learning:** Purely visual data indicators like color-coded form dots or progress circles are invisible to screen readers. Using `role="progressbar"` or `role="img"` with descriptive `aria-label` makes this data accessible.
 **Action:** Enhance visual-only data representations with semantic ARIA roles and labels.
+
+## 2025-05-17 - [Password Visibility Toggles and Input Consistency]
+**Learning:** Inconsistent placement of icons in authentication forms can lead to a disjointed user experience. Moving semantic icons (like Lock) to the left ensures they don't clash with functional icons (like Password Visibility Toggles) on the right. Toggles must have clear `aria-label` for screen readers.
+**Action:** Always place decorative/semantic icons on the left and interactive toggles on the right. Provide `aria-label` for all icon-only buttons.
