@@ -23,13 +23,14 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
             JwtSecurityToken accessToken = CreateToken(user, userRoles);
             string refreshToken = GenerateRefreshToken();
 
-            user.RefreshToken = refreshToken;
+            // Store the hashed refresh token in the database (Defense in Depth)
+            user.RefreshToken = HashToken(refreshToken);
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await userManager.UpdateAsync(user);
 
             return new TokenResponse(
                 new JwtSecurityTokenHandler().WriteToken(accessToken),
-                refreshToken,
+                refreshToken, // Return the plaintext token to the client
                 userRoles.ToArray()
             );
         }
@@ -54,7 +55,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
 
         if (
             user == null
-            || user.RefreshToken != refreshToken
+            || user.RefreshToken != HashToken(refreshToken)
             || user.RefreshTokenExpiryTime <= DateTime.UtcNow
         )
         {
@@ -65,7 +66,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         JwtSecurityToken newAccessToken = CreateToken(user, userRoles);
         string newRefreshToken = GenerateRefreshToken();
 
-        user.RefreshToken = newRefreshToken;
+        // Rotate and hash the new refresh token
+        user.RefreshToken = HashToken(newRefreshToken);
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
@@ -111,8 +113,28 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     }
 
+    /// <summary>
+    /// Hashes a token string using SHA256.
+    /// Used for "Defense in Depth" to protect refresh tokens stored in the database.
+    /// </summary>
+    private static string HashToken(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+            return string.Empty;
+        }
+
+        var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToBase64String(hashedBytes);
+    }
+
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
     {
+        if (string.IsNullOrEmpty(token))
+        {
+            return null;
+        }
+
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false,
@@ -124,24 +146,33 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
             ValidateLifetime = false,
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        ClaimsPrincipal principal = tokenHandler.ValidateToken(
-            token,
-            tokenValidationParameters,
-            out SecurityToken securityToken
-        );
-        if (
-            securityToken is not JwtSecurityToken jwtSecurityToken
-            || !jwtSecurityToken.Header.Alg.Equals(
-                SecurityAlgorithms.HmacSha256,
-                StringComparison.InvariantCultureIgnoreCase
-            )
-        )
+        try
         {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            ClaimsPrincipal principal = tokenHandler.ValidateToken(
+                token,
+                tokenValidationParameters,
+                out SecurityToken securityToken
+            );
+
+            if (
+                securityToken is not JwtSecurityToken jwtSecurityToken
+                || !jwtSecurityToken.Header.Alg.Equals(
+                    SecurityAlgorithms.HmacSha256,
+                    StringComparison.InvariantCultureIgnoreCase
+                )
+            )
+            {
+                return null;
+            }
+
+            return principal;
+        }
+        catch
+        {
+            // Fail gracefully if token is malformed or invalid
             return null;
         }
-
-        return principal;
     }
 
     public async Task<(bool Success, string UserId, string[] Errors)> CreateUserAsync(
