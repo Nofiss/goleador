@@ -1,8 +1,7 @@
 using FluentValidation;
-using Goleador.Application.Auth.Commands.Register;
 using Microsoft.Extensions.Configuration;
 
-namespace Goleador.Application.Auth.Commands.ResetPassword;
+namespace Goleador.Application.Auth.Commands.RegisterUser;
 
 public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
@@ -19,7 +18,6 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
             .MinimumLength(6)
             .WithMessage("La password deve essere di almeno 6 caratteri.");
 
-        RuleFor(v => v.Nickname).NotEmpty();
         RuleFor(v => v.FirstName).NotEmpty();
         RuleFor(v => v.LastName).NotEmpty();
 

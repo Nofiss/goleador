@@ -1,4 +1,4 @@
-import { AtSign, ChevronLeft, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/axios";
@@ -11,7 +11,6 @@ export const RegisterPage = () => {
 	const [formData, setFormData] = useState({
 		firstName: "",
 		lastName: "",
-		nickname: "",
 		email: "",
 		password: "",
 		confirmPassword: "",
@@ -98,20 +97,6 @@ export const RegisterPage = () => {
 									/>
 									<User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
 								</div>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="nickname">NickName</Label>
-							<div className="relative">
-								<Input
-									id="nickname"
-									placeholder="SuperMario"
-									className="bg-background pl-9"
-									onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-									required
-								/>
-								<AtSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
 							</div>
 						</div>
 

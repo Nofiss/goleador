@@ -175,12 +175,19 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         }
     }
 
+    public async Task<bool> ExistsByUsernameAsync(string username)
+    {
+        ApplicationUser? user = await userManager.FindByNameAsync(username);
+        return user != null;
+    }
+
     public async Task<(bool Success, string UserId, string[] Errors)> CreateUserAsync(
         string email,
+        string username,
         string password
     )
     {
-        var user = new ApplicationUser { UserName = email, Email = email };
+        var user = new ApplicationUser { UserName = username, Email = email };
 
         IdentityResult result = await userManager.CreateAsync(user, password);
 

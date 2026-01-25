@@ -1,11 +1,10 @@
 using MediatR;
 
-namespace Goleador.Application.Auth.Commands.Register;
+namespace Goleador.Application.Auth.Commands.RegisterUser;
 
 public record RegisterUserCommand(
     string Email,
     string Password,
     string FirstName,
-    string LastName,
-    string Nickname
+    string LastName
 ) : IRequest<string>;
