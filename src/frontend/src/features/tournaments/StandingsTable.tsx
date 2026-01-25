@@ -71,6 +71,7 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 	const { data: standings, isLoading } = useQuery<TournamentStanding[]>({
 		queryKey: ["standings", tournamentId],
 		queryFn: () => getTournamentStandings(tournamentId),
+		enabled: status !== TournamentStatus.setup,
 	});
 
 	if (status === TournamentStatus.setup) {
@@ -101,7 +102,10 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 					</TableHeader>
 					<TableBody>
 						{Array.from({ length: 8 }).map((_, i) => (
-							<TableRow key={i}>
+							<TableRow
+								// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
+								key={i}
+							>
 								<TableCell>
 									<Skeleton className="h-6 w-6 rounded-full" />
 								</TableCell>

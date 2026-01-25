@@ -5,7 +5,6 @@ import {
 	Map as MapIcon,
 	Menu,
 	ShieldCheck,
-	TrendingUp,
 	Trophy,
 	Users,
 } from "lucide-react";

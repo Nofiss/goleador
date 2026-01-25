@@ -155,6 +155,7 @@ export const DashboardPage = () => {
 								{isLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
 										<div
+											// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
 											key={i}
 											className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50"
 										>
@@ -213,6 +214,7 @@ export const DashboardPage = () => {
 								{isLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
 										<div
+											// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
 											key={i}
 											className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/50"
 										>
