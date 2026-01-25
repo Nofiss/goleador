@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import { getPlayers } from "@/api/players";
 import { linkUserToPlayer } from "@/api/users";
 import { Button } from "@/components/ui/button";
@@ -39,13 +40,20 @@ export const LinkPlayerDialog = ({ user, onClose }: Props) => {
 
 	const mutation = useMutation({
 		mutationFn: () =>
-			linkUserToPlayer(user!.id, selectedPlayerId === "no_link" ? null : selectedPlayerId),
+			linkUserToPlayer(
+				user?.id as string,
+				selectedPlayerId === "no_link" ? null : selectedPlayerId,
+			),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			onClose();
 			setSelectedPlayerId("no_link");
+			toast.success("Giocatore collegato con successo");
 		},
-		onError: (err: any) => alert(err.response?.data?.detail || "Errore collegamento"),
+		onError: (err: unknown) => {
+			const error = err as { response?: { data?: { detail?: string } } };
+			toast.error(error.response?.data?.detail || "Errore collegamento");
+		},
 	});
 
 	if (!user) return null;

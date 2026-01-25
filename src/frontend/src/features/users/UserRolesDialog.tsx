@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { updateUserRoles } from "@/api/users";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,12 +30,16 @@ export const UserRolesDialog = ({ user, onClose }: Props) => {
 	}, [user]);
 
 	const mutation = useMutation({
-		mutationFn: () => updateUserRoles(user!.id, selectedRoles),
+		mutationFn: () => updateUserRoles(user?.id as string, selectedRoles),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
 			onClose();
+			toast.success("Ruoli aggiornati con successo");
 		},
-		onError: (err: any) => alert(err.response?.data?.detail || "Errore aggiornamento ruoli"),
+		onError: (err: unknown) => {
+			const error = err as { response?: { data?: { detail?: string } } };
+			toast.error(error.response?.data?.detail || "Errore aggiornamento ruoli");
+		},
 	});
 
 	const toggleRole = (role: string) => {

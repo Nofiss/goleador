@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { deleteTable, getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +18,11 @@ export const TablesPage = () => {
 
 	const deleteMutation = useMutation({
 		mutationFn: deleteTable,
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
-		onError: () => alert("Impossibile eliminare: il tavolo è usato in alcune partite."),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["tables"] });
+			toast.success("Tavolo eliminato");
+		},
+		onError: () => toast.error("Impossibile eliminare: il tavolo è usato in alcune partite."),
 	});
 
 	if (isLoading) return <div>Caricamento...</div>;

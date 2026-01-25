@@ -1,4 +1,4 @@
-import { AtSign, ChevronLeft, Lock, Mail, User } from "lucide-react";
+import { AtSign, ChevronLeft, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/axios";
@@ -16,6 +16,8 @@ export const RegisterPage = () => {
 		password: "",
 		confirmPassword: "",
 	});
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
@@ -32,8 +34,9 @@ export const RegisterPage = () => {
 		try {
 			await api.post("/auth/register", formData);
 			navigate("/login"); // Reindirizza al login dopo il successo
-		} catch (err: any) {
-			setError(err.response?.data?.message || "Errore durante la registrazione");
+		} catch (err: unknown) {
+			const error = err as { response?: { data?: { message?: string } } };
+			setError(error.response?.data?.message || "Errore durante la registrazione");
 		} finally {
 			setIsLoading(false);
 		}
@@ -132,24 +135,46 @@ export const RegisterPage = () => {
 							<div className="relative">
 								<Input
 									id="password"
-									type="password"
-									className="bg-background pl-9"
+									type={showPassword ? "text" : "password"}
+									className="bg-background pl-9 pr-10"
 									onChange={(e) => setFormData({ ...formData, password: e.target.value })}
 									required
 								/>
 								<Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+								<button
+									type="button"
+									onClick={() => setShowPassword(!showPassword)}
+									className="absolute right-3 top-2.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+									aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+								>
+									{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+								</button>
 							</div>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="confirmPassword">Conferma Password</Label>
-							<Input
-								id="confirmPassword"
-								type="password"
-								className="bg-background"
-								onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-								required
-							/>
+							<div className="relative">
+								<Input
+									id="confirmPassword"
+									type={showConfirmPassword ? "text" : "password"}
+									className="bg-background pr-10"
+									onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+									required
+								/>
+								<button
+									type="button"
+									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+									className="absolute right-3 top-2.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+									aria-label={showConfirmPassword ? "Nascondi password" : "Mostra password"}
+								>
+									{showConfirmPassword ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</button>
+							</div>
 						</div>
 
 						{error && (
@@ -163,7 +188,14 @@ export const RegisterPage = () => {
 							className="w-full h-11 text-base font-semibold"
 							disabled={isLoading}
 						>
-							{isLoading ? "Creazione account..." : "Registrati"}
+							{isLoading ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Creazione account...
+								</>
+							) : (
+								"Registrati"
+							)}
 						</Button>
 					</form>
 				</div>

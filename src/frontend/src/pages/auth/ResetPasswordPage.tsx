@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { resetPassword } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,16 +18,20 @@ export const ResetPasswordPage = () => {
 
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [error, setError] = useState("");
 
 	const mutation = useMutation({
 		mutationFn: resetPassword,
 		onSuccess: () => {
-			alert("Password aggiornata! Ora puoi accedere.");
+			toast.success("Password aggiornata! Ora puoi accedere.");
 			navigate("/login");
 		},
-		onError: (err: any) =>
-			setError(err.response?.data?.message || "Errore nel reset della password."),
+		onError: (err: unknown) => {
+			const error = err as { response?: { data?: { message?: string } } };
+			setError(error.response?.data?.message || "Errore nel reset della password.");
+		},
 	});
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -54,27 +60,60 @@ export const ResetPasswordPage = () => {
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="space-y-2">
 							<Label>Nuova Password</Label>
-							<Input
-								type="password"
-								required
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-							/>
+							<div className="relative">
+								<Input
+									type={showPassword ? "text" : "password"}
+									required
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									className="pr-10"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword(!showPassword)}
+									className="absolute right-3 top-2.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+									aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+								>
+									{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+								</button>
+							</div>
 						</div>
 						<div className="space-y-2">
 							<Label>Conferma Password</Label>
-							<Input
-								type="password"
-								required
-								value={confirmPassword}
-								onChange={(e) => setConfirmPassword(e.target.value)}
-							/>
+							<div className="relative">
+								<Input
+									type={showConfirmPassword ? "text" : "password"}
+									required
+									value={confirmPassword}
+									onChange={(e) => setConfirmPassword(e.target.value)}
+									className="pr-10"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+									className="absolute right-3 top-2.5 text-muted-foreground/50 hover:text-foreground transition-colors"
+									aria-label={showConfirmPassword ? "Nascondi password" : "Mostra password"}
+								>
+									{showConfirmPassword ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</button>
+							</div>
 						</div>
 
 						{error && <p className="text-red-500 text-sm">{error}</p>}
 
 						<Button type="submit" className="w-full" disabled={mutation.isPending}>
-							Aggiorna Password
+							{mutation.isPending ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Aggiornamento in corso...
+								</>
+							) : (
+								"Aggiorna Password"
+							)}
 						</Button>
 					</form>
 				</CardContent>
