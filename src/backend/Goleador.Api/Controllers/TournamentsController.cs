@@ -5,6 +5,7 @@ using Goleador.Application.Tournaments.Commands.JoinTournament;
 using Goleador.Application.Tournaments.Commands.RegisterPlayer;
 using Goleador.Application.Tournaments.Commands.RegisterTeam;
 using Goleador.Application.Tournaments.Commands.StartTournament;
+using Goleador.Application.Tournaments.Commands.BulkAssignTable;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
 using Goleador.Application.Tournaments.Queries.GetTournaments;
 using Goleador.Application.Tournaments.Queries.GetTournamentStandings;
@@ -80,6 +81,17 @@ public class TournamentsController : ApiControllerBase
     public async Task<IActionResult> GenerateTeams(Guid id)
     {
         await Mediator.Send(new GenerateBalancedTeamsCommand(id));
+        return NoContent();
+    }
+
+    [HttpPut("{id}/tables/bulk-assign")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> BulkAssignTable(
+        Guid id,
+        [FromBody] BulkAssignTableRequest request
+    )
+    {
+        await Mediator.Send(new BulkAssignTableCommand(id, request.TableId, request.Phase));
         return NoContent();
     }
 }

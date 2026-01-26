@@ -2,6 +2,7 @@ import type {
 	CreateTournamentRequest,
 	Tournament,
 	TournamentDetail,
+	TournamentPhase,
 	TournamentStanding,
 } from "@/types";
 import { api } from "./axios";
@@ -48,4 +49,15 @@ export const getTournamentStandings = async (id: string): Promise<TournamentStan
 
 export const joinTournament = async (tournamentId: string, teamName: string) => {
 	return api.post(`/tournaments/${tournamentId}/join`, { teamName });
+};
+
+export const bulkAssignTable = async (params: {
+	tournamentId: string;
+	tableId: number | null;
+	phase: TournamentPhase;
+}) => {
+	return api.put(`/tournaments/${params.tournamentId}/tables/bulk-assign`, {
+		tableId: params.tableId,
+		phase: params.phase,
+	});
 };

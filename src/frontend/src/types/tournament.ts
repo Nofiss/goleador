@@ -11,6 +11,13 @@ export const TournamentType = {
 } as const;
 export type TournamentType = (typeof TournamentType)[keyof typeof TournamentType];
 
+export const TournamentPhase = {
+	all: 0,
+	firstLeg: 1,
+	secondLeg: 2,
+} as const;
+export type TournamentPhase = (typeof TournamentPhase)[keyof typeof TournamentPhase];
+
 export interface Tournament {
 	id: string;
 	name: string;
