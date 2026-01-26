@@ -59,15 +59,19 @@ export const GlobalRankingPage = () => {
 									<TableCell className="font-medium">
 										<div className="flex items-center justify-center">
 											{index < 3 ? (
-												<Trophy
-													className={`h-5 w-5 ${
-														index === 0
-															? "text-yellow-500"
-															: index === 1
-																? "text-slate-400"
-																: "text-amber-600"
-													}`}
-												/>
+												<>
+													<span className="sr-only">{index + 1}° posto</span>
+													<Trophy
+														aria-hidden="true"
+														className={`h-5 w-5 ${
+															index === 0
+																? "text-yellow-500"
+																: index === 1
+																	? "text-slate-400"
+																	: "text-amber-600"
+														}`}
+													/>
+												</>
 											) : (
 												<span className="text-muted-foreground">{index + 1}</span>
 											)}
