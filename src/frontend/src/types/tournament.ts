@@ -92,4 +92,7 @@ export interface TournamentStanding {
 	goalsFor: number;
 	goalsAgainst: number;
 	goalDifference: number;
+	matchesRemaining: number;
+	pointsPerGame: number;
+	projectedPoints: number;
 }

@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { memo } from "react";
+import { memo, useMemo, useState } from "react";
 import { getTournamentStandings } from "@/api/tournaments";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
 	Table,
 	TableBody,
@@ -21,58 +23,99 @@ interface StandingsTableProps {
 /**
  * Componente per la riga della classifica, ottimizzato con React.memo.
  */
-const StandingRow = memo(({ row, index }: { row: TournamentStanding; index: number }) => {
-	return (
-		<TableRow className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}>
-			<TableCell className="font-medium">
-				<div
+const StandingRow = memo(
+	({
+		row,
+		index,
+		highlightProjection,
+	}: {
+		row: TournamentStanding;
+		index: number;
+		highlightProjection: boolean;
+	}) => {
+		return (
+			<TableRow className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}>
+				<TableCell className="font-medium">
+					<div
+						className={cn(
+							"w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold",
+							index === 0
+								? "bg-yellow-400 text-yellow-950"
+								: index === 1
+									? "bg-slate-300 text-slate-900"
+									: index === 2
+										? "bg-amber-600 text-white"
+										: "bg-muted text-muted-foreground",
+						)}
+					>
+						{row.position}
+					</div>
+				</TableCell>
+				<TableCell className="font-semibold text-foreground">{row.teamName}</TableCell>
+				<TableCell className="text-center font-bold text-lg text-primary">{row.points}</TableCell>
+				<TableCell className="text-center text-muted-foreground">{row.played}</TableCell>
+				<TableCell className="text-center hidden md:table-cell text-green-600 dark:text-green-500">
+					{row.won}
+				</TableCell>
+				<TableCell className="text-center hidden md:table-cell text-muted-foreground/70">
+					{row.drawn}
+				</TableCell>
+				<TableCell className="text-center hidden md:table-cell text-red-500 dark:text-red-400">
+					{row.lost}
+				</TableCell>
+				<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
+					{row.goalsFor}
+				</TableCell>
+				<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
+					{row.goalsAgainst}
+				</TableCell>
+				<TableCell className="text-center font-mono text-sm">
+					{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+				</TableCell>
+				<TableCell
 					className={cn(
-						"w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold",
-						index === 0
-							? "bg-yellow-400 text-yellow-950"
-							: index === 1
-								? "bg-slate-300 text-slate-900"
-								: index === 2
-									? "bg-amber-600 text-white"
-									: "bg-muted text-muted-foreground",
+						"text-center font-semibold italic",
+						highlightProjection
+							? "text-purple-600 dark:text-purple-400 bg-purple-500/5"
+							: "text-muted-foreground/50",
 					)}
 				>
-					{row.position}
-				</div>
-			</TableCell>
-			<TableCell className="font-semibold text-foreground">{row.teamName}</TableCell>
-			<TableCell className="text-center font-bold text-lg text-primary">{row.points}</TableCell>
-			<TableCell className="text-center text-muted-foreground">{row.played}</TableCell>
-			<TableCell className="text-center hidden md:table-cell text-green-600 dark:text-green-500">
-				{row.won}
-			</TableCell>
-			<TableCell className="text-center hidden md:table-cell text-muted-foreground/70">
-				{row.drawn}
-			</TableCell>
-			<TableCell className="text-center hidden md:table-cell text-red-500 dark:text-red-400">
-				{row.lost}
-			</TableCell>
-			<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
-				{row.goalsFor}
-			</TableCell>
-			<TableCell className="text-center hidden sm:table-cell text-muted-foreground">
-				{row.goalsAgainst}
-			</TableCell>
-			<TableCell className="text-center font-mono text-sm">
-				{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-			</TableCell>
-		</TableRow>
-	);
-});
+					{row.projectedPoints}
+				</TableCell>
+			</TableRow>
+		);
+	},
+);
 
 StandingRow.displayName = "StandingRow";
 
 export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) => {
+	const [showProjection, setShowProjection] = useState(false);
+
 	const { data: standings, isLoading } = useQuery<TournamentStanding[]>({
 		queryKey: ["standings", tournamentId],
 		queryFn: () => getTournamentStandings(tournamentId),
 		enabled: status !== TournamentStatus.setup,
 	});
+
+	const sortedStandings = useMemo(() => {
+		if (!standings) return [];
+		const data = [...standings];
+		if (showProjection) {
+			return data.sort((a, b) => {
+				if (b.projectedPoints !== a.projectedPoints) {
+					return b.projectedPoints - a.projectedPoints;
+				}
+				// Pareggio: punti reali
+				if (b.points !== a.points) {
+					return b.points - a.points;
+				}
+				// Pareggio: differenza reti
+				return b.goalDifference - a.goalDifference;
+			});
+		}
+		return data;
+	}, [standings, showProjection]);
 
 	if (status === TournamentStatus.setup) {
 		return (
@@ -98,6 +141,9 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 							<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
 							<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
 							<TableHead className="text-center">DR</TableHead>
+							<TableHead className="text-center text-purple-600 dark:text-purple-400">
+								Proj
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -136,6 +182,9 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 								<TableCell>
 									<Skeleton className="h-4 w-8 mx-auto" />
 								</TableCell>
+								<TableCell>
+									<Skeleton className="h-4 w-6 mx-auto" />
+								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
@@ -145,34 +194,59 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 	}
 
 	return (
-		<div className="border rounded-md bg-card">
-			<Table>
-				<TableHeader>
-					<TableRow className="bg-muted/50">
-						<TableHead className="w-12.5">Pos</TableHead>
-						<TableHead>Squadra</TableHead>
-						<TableHead className="text-center font-bold">PT</TableHead>
-						<TableHead className="text-center text-muted-foreground">G</TableHead>
-						<TableHead className="text-center hidden md:table-cell">V</TableHead>
-						<TableHead className="text-center hidden md:table-cell">N</TableHead>
-						<TableHead className="text-center hidden md:table-cell">P</TableHead>
-						<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
-						<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
-						<TableHead className="text-center">DR</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{standings?.length === 0 ? (
-						<TableRow>
-							<TableCell colSpan={10} className="text-center h-24 text-muted-foreground">
-								Nessuna partita giocata
-							</TableCell>
+		<div className="space-y-4">
+			<div className="flex items-center justify-end gap-2 px-1">
+				<Label htmlFor="projection-mode" className="text-sm text-muted-foreground cursor-pointer">
+					Mostra Proiezione Finale
+				</Label>
+				<Switch id="projection-mode" checked={showProjection} onCheckedChange={setShowProjection} />
+			</div>
+
+			<div className="border rounded-md bg-card">
+				<Table>
+					<TableHeader>
+						<TableRow className="bg-muted/50">
+							<TableHead className="w-12.5">Pos</TableHead>
+							<TableHead>Squadra</TableHead>
+							<TableHead className="text-center font-bold">PT</TableHead>
+							<TableHead className="text-center text-muted-foreground">G</TableHead>
+							<TableHead className="text-center hidden md:table-cell">V</TableHead>
+							<TableHead className="text-center hidden md:table-cell">N</TableHead>
+							<TableHead className="text-center hidden md:table-cell">P</TableHead>
+							<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
+							<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
+							<TableHead className="text-center">DR</TableHead>
+							<TableHead
+								className={cn(
+									"text-center cursor-help",
+									showProjection && "text-purple-600 dark:text-purple-400 font-bold",
+								)}
+								title="Basato sulla media punti attuale"
+							>
+								Proj
+							</TableHead>
 						</TableRow>
-					) : (
-						standings?.map((row, index) => <StandingRow key={row.teamId} row={row} index={index} />)
-					)}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{sortedStandings.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={11} className="text-center h-24 text-muted-foreground">
+									Nessuna partita giocata
+								</TableCell>
+							</TableRow>
+						) : (
+							sortedStandings.map((row, index) => (
+								<StandingRow
+									key={row.teamId}
+									row={row}
+									index={index}
+									highlightProjection={showProjection}
+								/>
+							))
+						)}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	);
 };
