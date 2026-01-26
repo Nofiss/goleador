@@ -1,4 +1,4 @@
-import { ArrowRightLeft, CalendarClock, MapPin, Search } from "lucide-react";
+import { ArrowRightLeft, CalendarClock, LayoutGrid, List, MapPin, Search } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { type TournamentDetail, type TournamentMatch, TournamentStatus } from "@/types";
+import { MatchesCrossTable } from "./detail/MatchesCrossTable";
 
 interface Props {
 	tournament: TournamentDetail;
@@ -229,6 +231,7 @@ export const MatchesTab = ({ tournament }: Props) => {
 	const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
+	const [viewMode, setViewMode] = useState<"list" | "matrix">("list");
 
 	// Ottimizzazione: useMemo per evitare ricalcoli costosi su ogni render
 	// Spostato prima dell'early return per seguire le regole degli Hooks
@@ -274,27 +277,46 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	return (
 		<div className="animate-in fade-in duration-500">
-			{/* Toolbar di Filtraggio */}
-			<div className="flex flex-col sm:flex-row gap-4 mb-6">
-				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-					<Input
-						placeholder="Cerca squadra..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="pl-9"
-					/>
+			{/* Toolbar di Filtraggio e Switcher Vista */}
+			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-muted/30 p-4 rounded-xl border border-border/50">
+				<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-1">
+					<div className="relative flex-1 sm:max-w-xs">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+						<Input
+							placeholder="Cerca squadra..."
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="pl-9 bg-background"
+						/>
+					</div>
+					<Select value={statusFilter} onValueChange={setStatusFilter}>
+						<SelectTrigger className="w-full sm:w-[180px] bg-background">
+							<SelectValue placeholder="Stato partita" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="ALL">Tutte le partite</SelectItem>
+							<SelectItem value="TO_PLAY">Da Giocare</SelectItem>
+							<SelectItem value="FINISHED">Terminate</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
-				<Select value={statusFilter} onValueChange={setStatusFilter}>
-					<SelectTrigger className="w-full sm:w-[180px]">
-						<SelectValue placeholder="Stato partita" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="ALL">Tutte le partite</SelectItem>
-						<SelectItem value="TO_PLAY">Da Giocare</SelectItem>
-						<SelectItem value="FINISHED">Terminate</SelectItem>
-					</SelectContent>
-				</Select>
+
+				<Tabs
+					value={viewMode}
+					onValueChange={(v) => setViewMode(v as "list" | "matrix")}
+					className="w-full sm:w-auto"
+				>
+					<TabsList className="grid w-full grid-cols-2 sm:w-[200px]">
+						<TabsTrigger value="list" className="flex items-center gap-2">
+							<List className="h-4 w-4" />
+							Lista
+						</TabsTrigger>
+						<TabsTrigger value="matrix" className="flex items-center gap-2">
+							<LayoutGrid className="h-4 w-4" />
+							Matrice
+						</TabsTrigger>
+					</TabsList>
+				</Tabs>
 			</div>
 
 			{filteredMatches.length === 0 ? (
@@ -314,6 +336,13 @@ export const MatchesTab = ({ tournament }: Props) => {
 						Resetta filtri
 					</Button>
 				</div>
+			) : viewMode === "matrix" ? (
+				<MatchesCrossTable
+					teams={tournament.teams}
+					matches={filteredMatches}
+					isReferee={isReferee}
+					onSelectMatch={setSelectedMatch}
+				/>
 			) : secondLegMatches.length > 0 ? (
 				<>
 					<MatchGrid

@@ -65,23 +65,37 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
             );
 
             // Lookup istantaneo dal Dizionario
-            matchDto.HomeTeamName =
+            if (
                 homeParticipant != null
                 && playerTeamMap.TryGetValue(
                     homeParticipant.PlayerId,
                     out (string Name, Guid Id) homeTeam
                 )
-                    ? homeTeam.Name
-                    : "N/A";
+            )
+            {
+                matchDto.HomeTeamId = homeTeam.Id;
+                matchDto.HomeTeamName = homeTeam.Name;
+            }
+            else
+            {
+                matchDto.HomeTeamName = "N/A";
+            }
 
-            matchDto.AwayTeamName =
+            if (
                 awayParticipant != null
                 && playerTeamMap.TryGetValue(
                     awayParticipant.PlayerId,
                     out (string Name, Guid Id) awayTeam
                 )
-                    ? awayTeam.Name
-                    : "N/A";
+            )
+            {
+                matchDto.AwayTeamId = awayTeam.Id;
+                matchDto.AwayTeamName = awayTeam.Name;
+            }
+            else
+            {
+                matchDto.AwayTeamName = "N/A";
+            }
 
             // Mapping Tavolo
             matchDto.TableId = matchEntity.TableId;

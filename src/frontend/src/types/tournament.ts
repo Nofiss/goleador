@@ -63,6 +63,8 @@ export interface TournamentMatch {
 	scoreAway: number;
 	round: number;
 	status: number;
+	homeTeamId: string;
+	awayTeamId: string;
 	homeTeamName: string;
 	awayTeamName: string;
 	tableId?: number;
