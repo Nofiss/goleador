@@ -15,8 +15,16 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 
         RuleFor(v => v.Password)
             .NotEmpty()
-            .MinimumLength(6)
-            .WithMessage("La password deve essere di almeno 6 caratteri.");
+            .MinimumLength(8)
+            .WithMessage("La password deve essere di almeno 8 caratteri.")
+            .Matches(@"[A-Z]")
+            .WithMessage("La password deve contenere almeno una lettera maiuscola.")
+            .Matches(@"[a-z]")
+            .WithMessage("La password deve contenere almeno una lettera minuscola.")
+            .Matches(@"[0-9]")
+            .WithMessage("La password deve contenere almeno un numero.")
+            .Matches(@"[\!\?\*\.]")
+            .WithMessage("La password deve contenere almeno un carattere speciale (!?*.).");
 
         RuleFor(v => v.FirstName).NotEmpty();
         RuleFor(v => v.LastName).NotEmpty();
