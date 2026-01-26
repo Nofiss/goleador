@@ -15,6 +15,7 @@ import { MatchResultDialog } from "@/features/matches/MatchResultDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { type TournamentDetail, type TournamentMatch, TournamentStatus } from "@/types";
+import { BulkAssignTableDialog } from "./actions/BulkAssignTableDialog";
 import { MatchesCrossTable } from "./detail/MatchesCrossTable";
 
 interface Props {
@@ -227,8 +228,9 @@ const MatchGrid = memo(
 MatchGrid.displayName = "MatchGrid";
 
 export const MatchesTab = ({ tournament }: Props) => {
-	const { isReferee } = useAuth();
+	const { isReferee, isAdmin } = useAuth();
 	const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
+	const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
 	const [viewMode, setViewMode] = useState<"list" | "matrix">("list");
@@ -299,6 +301,15 @@ export const MatchesTab = ({ tournament }: Props) => {
 							<SelectItem value="FINISHED">Terminate</SelectItem>
 						</SelectContent>
 					</Select>
+					{isAdmin && (
+						<Button
+							variant="outline"
+							className="bg-background border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors"
+							onClick={() => setIsBulkAssignOpen(true)}
+						>
+							<MapPin className="mr-2 h-4 w-4" /> Assegna Tavoli
+						</Button>
+					)}
 				</div>
 
 				<Tabs
@@ -372,6 +383,13 @@ export const MatchesTab = ({ tournament }: Props) => {
 				isOpen={!!selectedMatch}
 				onClose={() => setSelectedMatch(null)}
 				tournamentId={tournament.id}
+			/>
+
+			<BulkAssignTableDialog
+				tournamentId={tournament.id}
+				isOpen={isBulkAssignOpen}
+				onOpenChange={setIsBulkAssignOpen}
+				hasReturnMatches={tournament.hasReturnMatches}
 			/>
 		</div>
 	);
