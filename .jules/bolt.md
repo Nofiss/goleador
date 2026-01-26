@@ -9,3 +9,7 @@
 ## 2026-01-22 - [Responsive Layout Optimization]
 **Learning:** Using 'window.matchMedia' instead of 'window.resize' listeners for responsive logic (like calculating grid columns) significantly reduces the number of re-renders and CPU usage during window resizing.
 **Action:** Prefer 'matchMedia' listeners for breakpoint-based state updates.
+
+## 2026-01-26 - [Global Ranking Multi-Layer Optimization]
+**Learning:** For high-visibility, read-heavy features like a Global Ranking, a three-pronged approach is most effective: (1) Database Index on sorting field, (2) Application-level Caching with explicit invalidation on relevant commands, and (3) Frontend Memoization of list items.
+**Action:** Apply this pattern to all "leaderboard" style features in the app.

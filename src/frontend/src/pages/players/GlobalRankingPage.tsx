@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Trophy } from "lucide-react";
+import React from "react";
 import { getGlobalRanking } from "@/api/players";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -10,6 +11,45 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+
+interface PlayerRowProps {
+	player: {
+		id: string;
+		nickname: string;
+		eloRating: number;
+		totalMatches: number;
+		winRate: number;
+	};
+	index: number;
+}
+
+const PlayerRow = React.memo(({ player, index }: PlayerRowProps) => (
+	<TableRow>
+		<TableCell className="font-medium">
+			<div className="flex items-center justify-center">
+				{index < 3 ? (
+					<Trophy
+						className={`h-5 w-5 ${
+							index === 0 ? "text-yellow-500" : index === 1 ? "text-slate-400" : "text-amber-600"
+						}`}
+					/>
+				) : (
+					<span className="text-muted-foreground">{index + 1}</span>
+				)}
+			</div>
+		</TableCell>
+		<TableCell className="font-semibold">{player.nickname}</TableCell>
+		<TableCell className="text-right">
+			<span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+				{player.eloRating}
+			</span>
+		</TableCell>
+		<TableCell className="text-right font-mono text-sm">{player.totalMatches}</TableCell>
+		<TableCell className="text-right font-mono text-sm">{player.winRate}%</TableCell>
+	</TableRow>
+));
+
+PlayerRow.displayName = "PlayerRow";
 
 export const GlobalRankingPage = () => {
 	const { data: ranking, isLoading } = useQuery({
@@ -55,39 +95,7 @@ export const GlobalRankingPage = () => {
 							</TableRow>
 						) : (
 							ranking?.map((player, index) => (
-								<TableRow key={player.id}>
-									<TableCell className="font-medium">
-										<div className="flex items-center justify-center">
-											{index < 3 ? (
-												<>
-													<span className="sr-only">{index + 1}° posto</span>
-													<Trophy
-														aria-hidden="true"
-														className={`h-5 w-5 ${
-															index === 0
-																? "text-yellow-500"
-																: index === 1
-																	? "text-slate-400"
-																	: "text-amber-600"
-														}`}
-													/>
-												</>
-											) : (
-												<span className="text-muted-foreground">{index + 1}</span>
-											)}
-										</div>
-									</TableCell>
-									<TableCell className="font-semibold">{player.nickname}</TableCell>
-									<TableCell className="text-right">
-										<span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-											{player.eloRating}
-										</span>
-									</TableCell>
-									<TableCell className="text-right font-mono text-sm">
-										{player.totalMatches}
-									</TableCell>
-									<TableCell className="text-right font-mono text-sm">{player.winRate}%</TableCell>
-								</TableRow>
+								<PlayerRow key={player.id} player={player} index={index} />
 							))
 						)}
 					</TableBody>

@@ -61,6 +61,9 @@ public class UpdateMatchResultCommandHandler(
             cache.Remove($"Standings-{match.TournamentId}");
         }
 
+        // Invalida ranking globale (Elo e statistiche cambiano)
+        cache.Remove("GlobalRanking");
+
         // 5. Trigger ELO se la partita è stata appena conclusa
         if (!wasPlayed && match.Status == MatchStatus.Played)
         {
