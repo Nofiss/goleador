@@ -14,3 +14,8 @@
 **Vulnerability:** The API lacked basic security headers (CSP, X-Frame-Options, etc.), exposed documentation in production, and issued JWTs with local time and missing standard subject claims.
 **Learning:** Security by default is often missing in boilerplate. Missing headers like `nosniff` or `DENY` (X-Frame-Options) leave the app vulnerable to basic web attacks. Furthermore, using `DateTime.Now` for JWT expiration is a common bug as the spec requires UTC, leading to authentication failures across time zones.
 **Prevention:** Implement a standard "Security Hardening" middleware in `Program.cs` that sets secure defaults for all responses. Ensure JWT generation always includes `ClaimTypes.NameIdentifier` for consistent user identification and uses `DateTime.UtcNow`.
+
+## 2025-05-20 - Standardized Password Complexity and Validation Testing
+**Vulnerability:** Weak password policies (min 6 chars, no complexity) in registration and creation flows, and missing validation for password reset commands.
+**Learning:** Default identity settings often permit weak passwords. When implementing custom complexity via FluentValidation, it's critical to apply it consistently across all flows (Register, Create, Reset). Additionally, testing validators that depend on `IConfiguration` (e.g., for domain allow-lists) requires proper configuration mocking to avoid `NullReferenceException`.
+**Prevention:** Always use a minimum of 8 characters with required complexity (upper, lower, digit, special). Centralize or consistently apply these rules. Use `ConfigurationBuilder.AddInMemoryCollection` in validator unit tests to provide necessary configuration sections.
