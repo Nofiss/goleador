@@ -16,6 +16,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
 
         builder.HasIndex(p => p.Nickname).IsUnique();
         builder.HasIndex(p => p.UserId).IsUnique();
+        builder.HasIndex(p => p.EloRating);
 
         // Altri campi stringa con limiti sensati
         builder.Property(p => p.FirstName).IsRequired().HasMaxLength(100);
