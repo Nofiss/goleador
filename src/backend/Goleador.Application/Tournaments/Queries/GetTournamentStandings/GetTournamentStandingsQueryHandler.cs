@@ -51,12 +51,10 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
             team => new TournamentStandingDto { TeamId = team.Id, TeamName = team.Name }
         );
 
-        // 4. CALCOLA STATISTICHE DALLE PARTITE GIOCATE
-        IEnumerable<Match> playedMatches = tournament.Matches.Where(m =>
-            m.Status == MatchStatus.Played
-        );
+        // 4. CALCOLA STATISTICHE E TOTALI PARTITE
+        var totalScheduledMap = tournament.Teams.ToDictionary(team => team.Id, _ => 0);
 
-        foreach (Match match in playedMatches)
+        foreach (Match match in tournament.Matches)
         {
             // Troviamo gli ID dei giocatori partecipanti per lato
             var homePlayerIds = match
@@ -80,6 +78,16 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
 
             // Se non troviamo le squadre (dati sporchi o setup errato), saltiamo la partita
             if (homeTeamId == Guid.Empty || awayTeamId == Guid.Empty)
+            {
+                continue;
+            }
+
+            // Incrementiamo il totale delle partite programmate per le squadre
+            totalScheduledMap[homeTeamId]++;
+            totalScheduledMap[awayTeamId]++;
+
+            // Se la partita non è stata giocata, non aggiorniamo le statistiche di classifica
+            if (match.Status != MatchStatus.Played)
             {
                 continue;
             }
@@ -167,7 +175,28 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
             }
         }
 
-        // 5. ORDINAMENTO FINALE
+        // 5. CALCOLO PROIEZIONE
+        foreach (var stats in standingsMap.Values)
+        {
+            int totalScheduled = totalScheduledMap.GetValueOrDefault(stats.TeamId);
+
+            if (stats.Played > 0)
+            {
+                stats.PointsPerGame = (double)stats.Points / stats.Played;
+                stats.MatchesRemaining = totalScheduled - stats.Played;
+
+                // Proiezione = Punti Attuali + (Media * Rimanenti)
+                stats.ProjectedPoints =
+                    stats.Points + (int)Math.Round(stats.PointsPerGame * stats.MatchesRemaining);
+            }
+            else
+            {
+                // Se non ha giocato, proiezione a 0
+                stats.ProjectedPoints = 0;
+            }
+        }
+
+        // 6. ORDINAMENTO FINALE
         var ranking = standingsMap
             .Values.OrderByDescending(x => x.Points) // 1. Punti
             .ThenByDescending(x => x.GoalDifference) // 2. Differenza Reti

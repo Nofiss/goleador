@@ -17,4 +17,9 @@ public class TournamentStandingDto
     public int GoalsFor { get; set; }
     public int GoalsAgainst { get; set; }
     public int GoalDifference => GoalsFor - GoalsAgainst;
+
+    // Proiezione
+    public int MatchesRemaining { get; set; }
+    public double PointsPerGame { get; set; }
+    public int ProjectedPoints { get; set; }
 }
