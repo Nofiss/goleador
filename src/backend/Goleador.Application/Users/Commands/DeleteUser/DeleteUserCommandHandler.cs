@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using MediatR;
 
@@ -12,7 +13,7 @@ public class DeleteUserCommandHandler(
     {
         if (request.UserId == currentUser.UserId)
         {
-            throw new InvalidOperationException("Non puoi eliminare il tuo stesso account.");
+            throw new ForbiddenAccessException("Non puoi eliminare il tuo stesso account.");
         }
 
         (var success, var errors) = await identityService.DeleteUserAsync(request.UserId);
