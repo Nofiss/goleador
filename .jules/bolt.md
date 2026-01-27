@@ -13,3 +13,7 @@
 ## 2026-01-26 - [Global Ranking Multi-Layer Optimization]
 **Learning:** For high-visibility, read-heavy features like a Global Ranking, a three-pronged approach is most effective: (1) Database Index on sorting field, (2) Application-level Caching with explicit invalidation on relevant commands, and (3) Frontend Memoization of list items.
 **Action:** Apply this pattern to all "leaderboard" style features in the app.
+
+## 2026-01-27 - [Batch Statistics Aggregation]
+**Learning:** Calling individual statistics queries (e.g., via MediatR) inside a loop for a set of players creates a significant N+1 performance bottleneck. Using a single LINQ query with 'SelectMany', 'GroupBy', and aggregate functions fetches all necessary data in one round-trip.
+**Action:** When processing multiple players, always prefer batch aggregation over individual query calls.
