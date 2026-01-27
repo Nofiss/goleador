@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
@@ -130,9 +131,9 @@ export const MatchResultDialog = ({
 				<div className="space-y-6 py-4">
 					{/* SELEZIONE TAVOLO */}
 					<div className="space-y-2">
-						<Label>Tavolo da Gioco</Label>
+						<Label htmlFor="table-select">Tavolo da Gioco</Label>
 						<Select value={tableId} onValueChange={setTableId}>
-							<SelectTrigger>
+							<SelectTrigger id="table-select">
 								<SelectValue placeholder="Seleziona un tavolo..." />
 							</SelectTrigger>
 							<SelectContent>
@@ -149,17 +150,20 @@ export const MatchResultDialog = ({
 						{/* CASA */}
 						<div className="text-center w-1/3">
 							<Label
+								htmlFor="score-home"
 								className="block mb-2 font-bold text-blue-700 truncate"
 								title={match.homeTeamName}
 							>
 								{match.homeTeamName || "Casa"}
 							</Label>
 							<Input
+								id="score-home"
 								type="number"
 								min="0"
 								className="text-center text-2xl h-14 font-mono"
 								value={scoreHome}
 								onChange={(e) => setScoreHome(parseInt(e.target.value, 10) || 0)}
+								aria-label={`Punteggio ${match.homeTeamName || "Casa"}`}
 							/>
 						</div>
 
@@ -168,17 +172,20 @@ export const MatchResultDialog = ({
 						{/* OSPITE */}
 						<div className="text-center w-1/3">
 							<Label
+								htmlFor="score-away"
 								className="block mb-2 font-bold text-red-700 truncate"
 								title={match.awayTeamName}
 							>
 								{match.awayTeamName || "Ospiti"}
 							</Label>
 							<Input
+								id="score-away"
 								type="number"
 								min="0"
 								className="text-center text-2xl h-14 font-mono"
 								value={scoreAway}
 								onChange={(e) => setScoreAway(parseInt(e.target.value, 10) || 0)}
+								aria-label={`Punteggio ${match.awayTeamName || "Ospiti"}`}
 							/>
 						</div>
 					</div>
@@ -189,6 +196,7 @@ export const MatchResultDialog = ({
 						Annulla
 					</Button>
 					<Button
+						disabled={mutation.isPending}
 						onClick={() => {
 							if (!match) return;
 							mutation.mutate({
@@ -200,7 +208,14 @@ export const MatchResultDialog = ({
 							});
 						}}
 					>
-						Conferma Risultato
+						{mutation.isPending ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Salvataggio...
+							</>
+						) : (
+							"Conferma Risultato"
+						)}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
