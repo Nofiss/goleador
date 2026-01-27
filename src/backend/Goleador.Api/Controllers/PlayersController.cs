@@ -1,5 +1,6 @@
 using Goleador.Application.Players.Commands.CreatePlayer;
 using Goleador.Application.Players.Queries.GetGlobalRanking;
+using Goleador.Application.Players.Queries.GetPendingMatches;
 using Goleador.Application.Players.Queries.GetPlayerProfile;
 using Goleador.Application.Players.Queries.GetPlayers;
 using Goleador.Application.Players.Queries.GetPlayerStatistics;
@@ -35,6 +36,11 @@ public class PlayersController : ApiControllerBase
     [Authorize]
     public async Task<ActionResult<PlayerProfileDto>> GetMyProfile() =>
         await Mediator.Send(new GetMyPlayerProfileQuery());
+
+    [HttpGet("me/pending-matches")]
+    [Authorize]
+    public async Task<ActionResult<List<PendingMatchDto>>> GetMyPendingMatches() =>
+        await Mediator.Send(new GetMyPendingMatchesQuery());
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreatePlayerCommand command)
