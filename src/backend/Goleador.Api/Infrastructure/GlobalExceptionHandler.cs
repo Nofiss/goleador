@@ -50,7 +50,64 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             return true;
         }
 
-        // Se è un'altra eccezione (es. Database down), la lasciamo gestire al framework (o a un altro handler 500)
-        return false;
+        if (exception is NotFoundException || exception is KeyNotFoundException)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "The specified resource was not found.",
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                Detail = exception.Message,
+            };
+
+            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            return true;
+        }
+
+        if (exception is UnauthorizedAccessException)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Type = "https://tools.ietf.org/html/rfc7235#section-3.1"
+            };
+
+            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            return true;
+        }
+
+        if (exception is ForbiddenAccessException)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Forbidden",
+                Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3",
+                Detail = exception.Message
+            };
+
+            httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            return true;
+        }
+
+        // Final catch-all for any other exception to prevent information disclosure (stack traces, etc.)
+        logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+
+        var internalProblemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status500InternalServerError,
+            Title = "Internal Server Error",
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Detail = "An unexpected error occurred. Please try again later."
+        };
+
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await httpContext.Response.WriteAsJsonAsync(internalProblemDetails, cancellationToken);
+
+        return true;
     }
 }

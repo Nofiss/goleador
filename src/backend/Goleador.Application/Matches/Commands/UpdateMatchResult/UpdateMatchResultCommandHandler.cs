@@ -24,7 +24,7 @@ public class UpdateMatchResultCommandHandler(
         // 1. Recupera la partita
         Match match =
             await context.Matches.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Match with ID {request.Id} not found.");
+            ?? throw new NotFoundException(nameof(Match), request.Id);
 
         var wasPlayed = match.Status == MatchStatus.Played;
 
