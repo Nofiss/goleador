@@ -22,12 +22,30 @@ public class TournamentsController : ApiControllerBase
     public async Task<ActionResult<List<TournamentDto>>> GetAll() =>
         await Mediator.Send(new GetTournamentsQuery());
 
+    /// <summary>
+    /// Recupera i dettagli di un torneo specifico tramite il suo ID.
+    /// </summary>
+    /// <param name="id">L'identificatore univoco del torneo.</param>
+    /// <returns>I dettagli del torneo richiesto.</returns>
+    /// <response code="200">Ritorna i dettagli del torneo.</response>
+    /// <response code="404">Se il torneo non è stato trovato.</response>
     [HttpGet("{id}")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(TournamentDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TournamentDetailDto>> GetById(Guid id) =>
         await Mediator.Send(new GetTournamentByIdQuery(id));
 
+    /// <summary>
+    /// Crea un nuovo torneo in fase di Setup.
+    /// </summary>
+    /// <param name="command">Dati del torneo (Nome, Tipo, Formato)</param>
+    /// <returns>L'ID del torneo creato</returns>
+    /// <response code="201">Il torneo è stato creato con successo.</response>
+    /// <response code="400">Se i dati inviati non sono validi.</response>
     [HttpPost]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Guid>> Create(CreateTournamentCommand command) =>
         await Mediator.Send(command);
 

@@ -1,6 +1,6 @@
+using System.Reflection;
 using System.Text;
 using Goleador.Api.Infrastructure;
-using Goleador.Api.Infrastructure.Authentication;
 using Goleador.Api.Services;
 using Goleador.Application;
 using Goleador.Application.Common.Interfaces;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -59,10 +60,38 @@ builder
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
-builder.Services.AddOpenApi(options =>
+builder.Services.AddSwaggerGen(c =>
 {
-    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Goleador API", Version = "v1" });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        In = ParameterLocation.Header,
+        BearerFormat = "JWT",
+        Description = "Inserisci il token JWT nel formato: Bearer {token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -96,7 +125,10 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger(options =>
+    {
+        options.RouteTemplate = "openapi/{documentName}.json";
+    });
     app.MapScalarApiReference(options =>
         options
             .WithTitle("Goleador API")
