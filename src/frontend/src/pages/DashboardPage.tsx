@@ -8,6 +8,7 @@ import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UserDashboard } from "@/features/dashboard/UserDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { TournamentStatus } from "@/types";
@@ -47,6 +48,10 @@ export const DashboardPage = () => {
 		() => tournaments?.filter((t) => t.status === TournamentStatus.setup) || [],
 		[tournaments],
 	);
+
+	if (isAuthenticated) {
+		return <UserDashboard />;
+	}
 
 	return (
 		<div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">

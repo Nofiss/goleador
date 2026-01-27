@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 
 const TOKEN_KEY = "goleador_token";
@@ -9,6 +10,23 @@ export const useAuth = () => {
 	const [roles, setRolesState] = useState<string[]>(
 		JSON.parse(localStorage.getItem(ROLES_KEY) || "[]"),
 	);
+
+	// Decode token to get userId and username (nickname)
+	let userId: string | null = null;
+	let username: string | null = null;
+
+	if (token) {
+		try {
+			const decoded = jwtDecode<Record<string, string>>(token);
+			userId =
+				decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ||
+				decoded.sub;
+			username =
+				decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || decoded.name;
+		} catch (e) {
+			console.error("Error decoding token", e);
+		}
+	}
 
 	const login = (newToken: string, newRefreshToken: string, newRoles: string[]) => {
 		localStorage.setItem(TOKEN_KEY, newToken);
@@ -32,6 +50,8 @@ export const useAuth = () => {
 
 	return {
 		token,
+		userId,
+		username,
 		roles,
 		isAdmin,
 		isReferee,

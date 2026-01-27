@@ -13,7 +13,7 @@ interface PlayerStatsDialogProps {
 export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps) => {
 	const { data: stats, isLoading } = useQuery({
 		queryKey: ["playerStats", playerId],
-		queryFn: () => getPlayerStatistics(playerId!),
+		queryFn: () => getPlayerStatistics(playerId as string),
 		enabled: !!playerId, // Esegui solo se ID è presente
 	});
 
