@@ -1,6 +1,6 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Application.Players.Queries.GetPlayerStatistics;
 using Goleador.Domain.Entities;
+using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,8 +8,7 @@ namespace Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
 
 public class GenerateBalancedTeamsCommandHandler(
     IApplicationDbContext context,
-    ITeamGeneratorService aiService,
-    IMediator mediator
+    ITeamGeneratorService aiService
 ) : IRequestHandler<GenerateBalancedTeamsCommand, Unit>
 {
     public async Task<Unit> Handle(GenerateBalancedTeamsCommand request, CancellationToken token)
@@ -21,7 +20,6 @@ public class GenerateBalancedTeamsCommandHandler(
                     .ThenInclude(tt => tt.Players)
                 .FirstOrDefaultAsync(t => t.Id == request.TournamentId, token)
             ?? throw new KeyNotFoundException("Torneo non trovato.");
-        ;
 
         // Prendi solo i team con 1 giocatore (quelli in attesa di pairing)
         var pendingTeams = tournament.Teams.Where(t => t.Players.Count == 1).ToList();
@@ -31,24 +29,38 @@ public class GenerateBalancedTeamsCommandHandler(
             throw new Exception("Servono almeno 2 giocatori per generare squadre.");
         }
 
-        // 2. Calcola Skill Score per ogni giocatore
-        // Usiamo una logica semplice: WinRate * (Log(PartiteGiocate) + 1)
-        // Oppure riusiamo la query GetPlayerStatisticsQuery
+        // 2. Calcola Skill Score per ogni giocatore in batch (Bolt ⚡ Optimization)
+        // Evitiamo il problema N+1 eliminando i singoli mediator.Send per ogni giocatore.
+        var playerIds = pendingTeams.Select(t => t.Players.First().Id).ToList();
+
+        var playerStats = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played)
+            .SelectMany(m => m.Participants)
+            .Where(p => playerIds.Contains(p.PlayerId))
+            .GroupBy(p => p.PlayerId)
+            .Select(g => new
+            {
+                PlayerId = g.Key,
+                Wins = g.Count(p => (p.Side == Side.Home && p.Match.ScoreHome > p.Match.ScoreAway) ||
+                                   (p.Side == Side.Away && p.Match.ScoreAway > p.Match.ScoreHome)),
+                Draws = g.Count(p => p.Match.ScoreHome == p.Match.ScoreAway),
+                Total = g.Count()
+            })
+            .ToDictionaryAsync(x => x.PlayerId, x => x, token);
+
         var playerSkills = new Dictionary<Guid, double>();
-
-        foreach (TournamentTeam? team in pendingTeams)
+        foreach (var playerId in playerIds)
         {
-            Player player = team.Players.First();
-            // Chiamiamo la query delle statistiche (o calcoliamo al volo)
-            PlayerStatisticsDto stats = await mediator.Send(
-                new GetPlayerStatisticsQuery(player.Id),
-                token
-            );
+            playerStats.TryGetValue(playerId, out var stats);
+            int wins = stats?.Wins ?? 0;
+            int draws = stats?.Draws ?? 0;
+            int total = stats?.Total ?? 0;
+            double winRate = total == 0 ? 0 : Math.Round((double)wins / total * 100, 1);
 
-            // Formula Skill: Punti totali + (WinRate * 2)
-            // Esempio: Un giocatore con 50% winrate e 10 partite è meglio di uno con 100% winrate e 1 partita.
-            var skill = (stats.Wins * 3) + (stats.Draws * 1) + stats.WinRate;
-            playerSkills.Add(player.Id, skill);
+            // Formula Skill: (Wins * 3) + (Draws * 1) + WinRate
+            var skill = (wins * 3) + (draws * 1) + winRate;
+            playerSkills.Add(playerId, skill);
         }
 
         // 3. Chiama l'AI
@@ -60,19 +72,23 @@ public class GenerateBalancedTeamsCommandHandler(
         // A. Rimuovi i team "Pending" singoli
         context.TournamentTeams.RemoveRange(pendingTeams);
 
+        // Mappa per lookup veloce O(1) invece di O(N) dentro il loop (Bolt ⚡ Optimization)
+        var pendingPlayersMap = pendingTeams.ToDictionary(t => t.Players.First().Id, t => t.Players.First());
+
         // B. Crea i nuovi Team Accoppiati
-        var teamCounter = 1;
         foreach ((Guid Player1, Guid Player2) in pairs)
         {
-            Player p1 = pendingTeams.First(t => t.Players.First().Id == Player1).Players.First();
-            Player p2 = pendingTeams.First(t => t.Players.First().Id == Player2).Players.First();
+            if (!pendingPlayersMap.TryGetValue(Player1, out var p1) ||
+                !pendingPlayersMap.TryGetValue(Player2, out var p2))
+            {
+                continue;
+            }
 
-            // Nome generato (o chiedilo all'AI di inventare nomi divertenti!)
+            // Nome generato
             var teamName = $"{p1.Nickname} & {p2.Nickname}";
 
             var newTeam = new TournamentTeam(tournament.Id, teamName, [p1, p2]);
             context.TournamentTeams.Add(newTeam);
-            teamCounter++;
         }
 
         await context.SaveChangesAsync(token);
