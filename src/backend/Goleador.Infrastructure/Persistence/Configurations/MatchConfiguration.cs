@@ -19,6 +19,10 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
 
         builder.Property(m => m.RowVersion).IsRowVersion();
 
+        builder.HasIndex(m => m.TournamentId);
+        builder.HasIndex(m => m.Status);
+        builder.HasIndex(m => new { m.TournamentId, m.Status });
+
         builder.HasQueryFilter(m => !m.IsDeleted);
     }
 }
