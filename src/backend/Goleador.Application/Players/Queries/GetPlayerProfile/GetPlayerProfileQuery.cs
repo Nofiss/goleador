@@ -32,6 +32,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
 
         var dto = new PlayerProfileDto
         {
+            Id = player.Id,
             FullName = $"{player.FirstName} {player.LastName}".Trim(),
             Nickname = player.Nickname,
             EloRating = player.EloRating,
@@ -45,6 +46,8 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
 
         var wins = 0;
         var losses = 0;
+        var goalsFor = 0;
+        var goalsAgainst = 0;
         var opponentsLosses = new Dictionary<Guid, (string Nickname, int Count)>();
         var partnersWins = new Dictionary<Guid, (string Nickname, int Count)>();
 
@@ -54,6 +57,9 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             var mySide = myParticipant.Side;
             var myScore = mySide == Side.Home ? match.ScoreHome : match.ScoreAway;
             var opponentScore = mySide == Side.Home ? match.ScoreAway : match.ScoreHome;
+
+            goalsFor += myScore;
+            goalsAgainst += opponentScore;
 
             string result;
             if (myScore > opponentScore)
@@ -116,6 +122,8 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
 
         dto.Wins = wins;
         dto.Losses = losses;
+        dto.GoalsFor = goalsFor;
+        dto.GoalsAgainst = goalsAgainst;
         dto.WinRate = dto.TotalMatches == 0 ? 0 : Math.Round((double)wins / dto.TotalMatches * 100, 1);
 
         var topNemesis = opponentsLosses.OrderByDescending(x => x.Value.Count).FirstOrDefault();

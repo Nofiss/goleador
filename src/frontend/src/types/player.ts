@@ -45,10 +45,13 @@ export interface MatchBriefDto {
 }
 
 export interface PlayerProfile {
+	id: string;
 	fullName: string;
 	nickname: string;
 	eloRating: number;
 	totalMatches: number;
+	goalsFor: number;
+	goalsAgainst: number;
 	wins: number;
 	losses: number;
 	winRate: number;

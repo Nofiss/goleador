@@ -1,5 +1,6 @@
 using Goleador.Application.Matches.Commands.CreateMatch;
 using Goleador.Application.Matches.Commands.UpdateMatchResult;
+using Goleador.Application.Matches.Queries.GetRecentMatches;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,11 @@ namespace Goleador.Api.Controllers;
 
 public class MatchesController : ApiControllerBase
 {
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<MatchDto>>> GetRecent() =>
+        await Mediator.Send(new GetRecentMatchesQuery());
+
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Guid>> Create(CreateMatchCommand command) =>
