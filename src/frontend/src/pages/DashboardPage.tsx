@@ -1,12 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, CalendarDays, Flame, Gamepad2, Sparkles, Trophy } from "lucide-react";
+import {
+	AlertCircle,
+	ArrowRight,
+	CalendarDays,
+	Flame,
+	Gamepad2,
+	Sparkles,
+	Trophy,
+} from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { getPlayerProfile } from "@/api/players";
 import { getTournaments } from "@/api/tournaments";
 import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageLoader } from "@/components/ui/PageLoader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserDashboard } from "@/features/dashboard/UserDashboard";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,7 +45,18 @@ const itemVariants = {
 export const DashboardPage = () => {
 	const { isAuthenticated } = useAuth();
 
-	const { data: tournaments, isLoading } = useQuery({
+	const {
+		data: profile,
+		isLoading: isProfileLoading,
+		isSuccess: isProfileSuccess,
+	} = useQuery({
+		queryKey: ["player-profile", "me"],
+		queryFn: () => getPlayerProfile(),
+		enabled: isAuthenticated,
+		retry: false,
+	});
+
+	const { data: tournaments, isLoading: isTournamentsLoading } = useQuery({
 		queryKey: ["tournaments"],
 		queryFn: getTournaments,
 	});
@@ -49,7 +71,11 @@ export const DashboardPage = () => {
 		[tournaments],
 	);
 
-	if (isAuthenticated) {
+	if (isAuthenticated && isProfileLoading) {
+		return <PageLoader />;
+	}
+
+	if (isAuthenticated && isProfileSuccess && profile) {
 		return <UserDashboard />;
 	}
 
@@ -72,6 +98,16 @@ export const DashboardPage = () => {
 			</div>
 
 			<div className="container mx-auto px-4 py-12 relative z-10">
+				{isAuthenticated && !isProfileLoading && !profile && (
+					<Alert className="mb-8 border-orange-500/50 bg-orange-500/10 text-orange-700 dark:text-orange-400">
+						<AlertCircle className="h-4 w-4" />
+						<AlertTitle>Profilo non collegato</AlertTitle>
+						<AlertDescription>
+							Non hai ancora collegato un profilo giocatore. Chiedi a un Admin di collegarti per
+							vedere le tue statistiche.
+						</AlertDescription>
+					</Alert>
+				)}
 				{/* 2. HERO SECTION */}
 				<motion.div
 					className="text-center mb-16 space-y-6"
@@ -157,7 +193,7 @@ export const DashboardPage = () => {
 							</div>
 
 							<div className="space-y-3 flex-1">
-								{isLoading ? (
+								{isTournamentsLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
 										<div
 											// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
@@ -216,7 +252,7 @@ export const DashboardPage = () => {
 							</div>
 
 							<div className="space-y-3 flex-1">
-								{isLoading ? (
+								{isTournamentsLoading ? (
 									Array.from({ length: 3 }).map((_, i) => (
 										<div
 											// biome-ignore lint/suspicious/noArrayIndexKey: Skeletons are static
