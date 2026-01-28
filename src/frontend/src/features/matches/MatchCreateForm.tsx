@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Swords } from "lucide-react";
+import { Loader2, RefreshCcw, Swords } from "lucide-react";
 import { useState } from "react";
 import { createMatch } from "@/api/matches";
 import { getPlayers } from "@/api/players";
@@ -21,7 +21,7 @@ interface Props {
 
 export const MatchCreateForm = ({ onSuccess }: Props) => {
 	const queryClient = useQueryClient();
-	const { data: players } = useQuery({
+	const { data: players, isLoading: isLoadingPlayers } = useQuery({
 		queryKey: ["players"],
 		queryFn: getPlayers,
 	});
@@ -40,6 +40,16 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 			onSuccess();
 		},
 	});
+
+	const handleSwap = () => {
+		setFormData({
+			...formData,
+			playerHomeId: formData.playerAwayId,
+			playerAwayId: formData.playerHomeId,
+			scoreHome: formData.scoreAway,
+			scoreAway: formData.scoreHome,
+		});
+	};
 
 	const isSamePlayer =
 		formData.playerHomeId &&
@@ -64,13 +74,14 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						<Select
 							value={formData.playerHomeId}
 							onValueChange={(v) => setFormData({ ...formData, playerHomeId: v })}
+							disabled={isLoadingPlayers}
 						>
 							<SelectTrigger id="playerHome" className="w-full text-center font-medium h-12">
-								<SelectValue placeholder="Seleziona..." />
+								<SelectValue placeholder={isLoadingPlayers ? "Caricamento..." : "Seleziona..."} />
 							</SelectTrigger>
 							<SelectContent>
 								{players?.map((p) => (
-									<SelectItem key={p.id} value={p.id}>
+									<SelectItem key={p.id} value={p.id} disabled={p.id === formData.playerAwayId}>
 										{p.nickname}
 									</SelectItem>
 								))}
@@ -95,9 +106,20 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 					</CardContent>
 				</Card>
 
-				{/* VS ICON */}
+				{/* VS ICON & SWAP */}
 				<div className="text-muted-foreground flex flex-col items-center gap-2">
 					<Swords className="h-10 w-10 text-gray-300" />
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-sm"
+						className="rounded-full hover:bg-muted"
+						onClick={handleSwap}
+						title="Inverti Squadre"
+						aria-label="Inverti Squadre"
+					>
+						<RefreshCcw className="h-4 w-4" />
+					</Button>
 					<span className="font-bold text-sm text-gray-400">VS</span>
 				</div>
 
@@ -110,13 +132,14 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						<Select
 							value={formData.playerAwayId}
 							onValueChange={(v) => setFormData({ ...formData, playerAwayId: v })}
+							disabled={isLoadingPlayers}
 						>
 							<SelectTrigger id="playerAway" className="w-full text-center font-medium h-12">
-								<SelectValue placeholder="Seleziona..." />
+								<SelectValue placeholder={isLoadingPlayers ? "Caricamento..." : "Seleziona..."} />
 							</SelectTrigger>
 							<SelectContent>
 								{players?.map((p) => (
-									<SelectItem key={p.id} value={p.id}>
+									<SelectItem key={p.id} value={p.id} disabled={p.id === formData.playerHomeId}>
 										{p.nickname}
 									</SelectItem>
 								))}
@@ -159,7 +182,14 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						mutation.isPending || isSamePlayer || !formData.playerHomeId || !formData.playerAwayId
 					}
 				>
-					{mutation.isPending ? "Salvataggio..." : "Registra Risultato"}
+					{mutation.isPending ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Salvataggio...
+						</>
+					) : (
+						"Registra Risultato"
+					)}
 				</Button>
 			</div>
 		</form>

@@ -9,7 +9,7 @@ export const MatchCreatePage = () => {
 	return (
 		<div className="max-w-4xl mx-auto space-y-8">
 			<div className="flex items-center gap-4">
-				<Button variant="ghost" size="icon" asChild>
+				<Button variant="ghost" size="icon" asChild aria-label="Torna indietro">
 					<Link to="/matches">
 						<ChevronLeft className="h-5 w-5" />
 					</Link>

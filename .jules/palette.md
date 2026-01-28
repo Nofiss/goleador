@@ -25,3 +25,7 @@
 ## 2025-05-17 - [Password Visibility Toggles and Input Consistency]
 **Learning:** Inconsistent placement of icons in authentication forms can lead to a disjointed user experience. Moving semantic icons (like Lock) to the left ensures they don't clash with functional icons (like Password Visibility Toggles) on the right. Toggles must have clear `aria-label` for screen readers.
 **Action:** Always place decorative/semantic icons on the left and interactive toggles on the right. Provide `aria-label` for all icon-only buttons.
+
+## 2025-05-20 - [Enhanced Match Registration UX]
+**Learning:** For forms involving participant selection and scoring (like match results), adding a "Swap" feature provides a significant delight for users who might have entered data in the wrong columns. Preventing same-player selection by disabling options in the UI is superior to showing error messages after selection.
+**Action:** Implement "Swap" buttons for bi-directional data forms. Disable already-selected options in cross-dependent dropdowns to prevent invalid states.
