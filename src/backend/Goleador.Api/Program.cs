@@ -5,6 +5,7 @@ using Goleador.Api.Services;
 using Goleador.Application;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Infrastructure;
+using Goleador.Infrastructure.Hubs;
 using Goleador.Infrastructure.Identity;
 using Goleador.Infrastructure.Persistence;
 using HealthChecks.UI.Client;
@@ -26,7 +27,10 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         }
     );
 });
@@ -64,6 +68,7 @@ builder
         };
     });
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -177,6 +182,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<TournamentHub>("/hubs/tournament");
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
