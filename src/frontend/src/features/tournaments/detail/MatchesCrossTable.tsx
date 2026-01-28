@@ -26,7 +26,7 @@ interface SingleCrossTableProps {
 }
 
 /**
- * Singola matrice per una fase del torneo.
+ * Singola matrice per i match del torneo (Andata e Ritorno unificati).
  */
 const SingleCrossTable = memo(
 	({ title, teams, matches, isReferee, onSelectMatch }: SingleCrossTableProps) => {
@@ -67,28 +67,29 @@ const SingleCrossTable = memo(
 								</tr>
 							</thead>
 							<tbody>
-								{teams.map((homeTeam) => (
+								{teams.map((homeTeam, rowIndex) => (
 									<tr key={homeTeam.id} className="group hover:bg-muted/5 transition-colors">
 										{/* Header Verticale (Sticky) */}
 										<th className="sticky left-0 z-20 bg-muted/80 backdrop-blur-sm border-b border-r p-4 text-left font-bold text-foreground group-hover:bg-muted/95 transition-colors whitespace-nowrap shadow-[1px_0_0_0_rgba(0,0,0,0.1)]">
 											{homeTeam.name}
 										</th>
-										{teams.map((awayTeam) => {
+										{teams.map((awayTeam, colIndex) => {
 											const isDiagonal = homeTeam.id === awayTeam.id;
+											const isUpper = rowIndex < colIndex;
 											const match = matchesMap.get(`${homeTeam.id}_${awayTeam.id}`);
 
 											if (isDiagonal) {
 												return (
 													<td
 														key={awayTeam.id}
-														className="border-b border-r p-0 bg-slate-100 dark:bg-slate-900/40 relative overflow-hidden"
+														className="border-b border-r p-0 bg-slate-900 relative overflow-hidden"
 													>
-														{/* Pattern a righe diagonali per indicare cella non valida */}
+														{/* Linea diagonale per separare i gironi */}
 														<div
-															className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+															className="absolute inset-0 opacity-20"
 															style={{
 																backgroundImage:
-																	"repeating-linear-gradient(45deg, #000, #000 10px, transparent 10px, transparent 20px)",
+																	"linear-gradient(45deg, transparent 49%, #334155 49%, #334155 51%, transparent 51%)",
 															}}
 														/>
 													</td>
@@ -99,7 +100,10 @@ const SingleCrossTable = memo(
 												return (
 													<td
 														key={awayTeam.id}
-														className="border-b border-r p-4 text-center italic text-muted-foreground/20 transition-colors"
+														className={cn(
+															"border-b border-r p-4 text-center italic text-muted-foreground/20 transition-colors",
+															isUpper ? "bg-primary/5" : "bg-background",
+														)}
 													>
 														-
 													</td>
@@ -117,7 +121,9 @@ const SingleCrossTable = memo(
 														"border-b border-r p-2 text-center transition-all relative group/cell",
 														isPlayed
 															? "bg-green-500/5 dark:bg-green-500/10"
-															: "bg-background hover:bg-muted/30",
+															: isUpper
+																? "bg-primary/5 hover:bg-primary/10"
+																: "bg-background hover:bg-muted/30",
 														isReferee &&
 															"cursor-pointer active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-10",
 													)}
@@ -185,28 +191,11 @@ export const MatchesCrossTable = memo(({ teams, matches, isReferee, onSelectMatc
 		return Array.from(tableMap.entries()).map(([id, name]) => ({ id, name }));
 	}, [matches]);
 
-	// Calcolo dinamico del punto di taglio tra andata e ritorno
-	const { matchesLeg1, matchesLeg2 } = useMemo(() => {
-		if (matches.length === 0) return { matchesLeg1: [], matchesLeg2: [] };
-		const maxRound = Math.max(...matches.map((m) => m.round));
-		const splitRound = Math.ceil(maxRound / 2);
-
-		return {
-			matchesLeg1: matches.filter((m) => m.round <= splitRound),
-			matchesLeg2: matches.filter((m) => m.round > splitRound),
-		};
-	}, [matches]);
-
-	// Applicazione filtro tavolo
-	const filteredLeg1 = useMemo(() => {
-		if (selectedTableId === "ALL") return matchesLeg1;
-		return matchesLeg1.filter((m) => String(m.tableId) === selectedTableId);
-	}, [matchesLeg1, selectedTableId]);
-
-	const filteredLeg2 = useMemo(() => {
-		if (selectedTableId === "ALL") return matchesLeg2;
-		return matchesLeg2.filter((m) => String(m.tableId) === selectedTableId);
-	}, [matchesLeg2, selectedTableId]);
+	// Applicazione filtro tavolo su tutti i match
+	const filteredMatches = useMemo(() => {
+		if (selectedTableId === "ALL") return matches;
+		return matches.filter((m) => String(m.tableId) === selectedTableId);
+	}, [matches, selectedTableId]);
 
 	return (
 		<div className="space-y-8">
@@ -233,22 +222,12 @@ export const MatchesCrossTable = memo(({ teams, matches, isReferee, onSelectMatc
 
 			<div className="space-y-10">
 				<SingleCrossTable
-					title="Girone di Andata"
+					title="Matrice Completa (Andata ▲ / Ritorno ▼)"
 					teams={teams}
-					matches={filteredLeg1}
+					matches={filteredMatches}
 					isReferee={isReferee}
 					onSelectMatch={onSelectMatch}
 				/>
-
-				{matchesLeg2.length > 0 && (
-					<SingleCrossTable
-						title="Girone di Ritorno"
-						teams={teams}
-						matches={filteredLeg2}
-						isReferee={isReferee}
-						onSelectMatch={onSelectMatch}
-					/>
-				)}
 			</div>
 		</div>
 	);
