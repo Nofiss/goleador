@@ -17,8 +17,22 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
     public async Task<TokenResponse?> LoginAsync(string email, string password)
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
-        if (user != null && await userManager.CheckPasswordAsync(user, password))
+        if (user == null)
         {
+            return null;
+        }
+
+        // Check if account is locked out (Defense against brute-force)
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return null;
+        }
+
+        if (await userManager.CheckPasswordAsync(user, password))
+        {
+            // Reset failed attempt counter on success
+            await userManager.ResetAccessFailedCountAsync(user);
+
             IList<string> userRoles = await userManager.GetRolesAsync(user);
             JwtSecurityToken accessToken = CreateToken(user, userRoles);
             string refreshToken = GenerateRefreshToken();
@@ -34,6 +48,10 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
                 userRoles.ToArray()
             );
         }
+
+        // Increment failed attempt counter on failure
+        await userManager.AccessFailedAsync(user);
+
         return null;
     }
 
@@ -137,8 +155,10 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
 
         var tokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false,
-            ValidateIssuer = false,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)
