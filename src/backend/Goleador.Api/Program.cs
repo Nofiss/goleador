@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using Serilog;
 using Goleador.Api.Infrastructure;
 using Goleador.Api.Services;
 using Goleador.Application;
@@ -17,6 +18,8 @@ using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -169,6 +172,8 @@ app.Use(async (context, next) =>
 });
 
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseSerilogRequestLogging();
 
 app.UseRouting();
 app.UseRateLimiter();

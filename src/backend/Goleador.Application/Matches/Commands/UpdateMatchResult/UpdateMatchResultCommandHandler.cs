@@ -4,7 +4,7 @@ using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-
+using Microsoft.Extensions.Logging;
 using Goleador.Application.Matches.Events;
 using Goleador.Domain.Enums;
 
@@ -13,7 +13,9 @@ namespace Goleador.Application.Matches.Commands.UpdateMatchResult;
 public class UpdateMatchResultCommandHandler(
     IApplicationDbContext context,
     IMemoryCache cache,
-    IMediator mediator
+    IMediator mediator,
+    ICurrentUserService currentUserService,
+    ILogger<UpdateMatchResultCommandHandler> logger
 ) : IRequestHandler<UpdateMatchResultCommand, Unit>
 {
     public async Task<Unit> Handle(
@@ -69,6 +71,14 @@ public class UpdateMatchResultCommandHandler(
         {
             await mediator.Publish(new MatchFinishedEvent(match.Id), cancellationToken);
         }
+
+        logger.LogInformation(
+            "User {UserId} updated match {MatchId} result to {ScoreHome}-{ScoreAway}",
+            currentUserService.UserId,
+            match.Id,
+            match.ScoreHome,
+            match.ScoreAway
+        );
 
         return Unit.Value;
     }
