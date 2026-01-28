@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 import { motion } from "framer-motion";
@@ -17,8 +17,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { getRecentMatches } from "@/api/matches";
-import { getPlayerProfile } from "@/api/players";
-import { getTournamentById, getTournaments } from "@/api/tournaments";
+import { getMyPendingMatches, getPlayerProfile } from "@/api/players";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import type { TournamentMatch } from "@/types";
 
 export const UserDashboard = () => {
 	const { userId: _userId } = useAuth();
@@ -44,57 +42,13 @@ export const UserDashboard = () => {
 		queryFn: getRecentMatches,
 	});
 
-	// 3. Fetch Tournaments to find pending matches
-	const { data: tournaments, isLoading: isTournamentsLoading } = useQuery({
-		queryKey: ["tournaments"],
-		queryFn: getTournaments,
+	// 3. Fetch User's Pending Matches
+	// Optimized: Uses a dedicated endpoint instead of fetching all tournaments and their details
+	const { data: pendingMatches, isLoading: isPendingLoading } = useQuery({
+		queryKey: ["pending-matches", "me"],
+		queryFn: getMyPendingMatches,
+		enabled: !!profile,
 	});
-
-	const activeTournamentIds = useMemo(
-		() => tournaments?.filter((t) => t.status === 1).map((t) => t.id) || [],
-		[tournaments],
-	);
-
-	// Fetch details for each active tournament
-	const tournamentDetails = useQueries({
-		queries: activeTournamentIds.map((id) => ({
-			queryKey: ["tournament", id],
-			queryFn: () => getTournamentById(id),
-		})),
-	});
-
-	const isDetailsLoading = tournamentDetails.some((q) => q.isLoading);
-
-	// Filter pending matches where the user is a participant
-	const pendingMatches = useMemo(() => {
-		if (!profile) return [];
-		const matches: (TournamentMatch & { tournamentName: string; tournamentId: string })[] = [];
-
-		for (const query of tournamentDetails) {
-			if (query.data) {
-				const tournament = query.data;
-				const userMatches = tournament.matches
-					.filter((m) => {
-						if (m.status !== 0) return false;
-
-						// Find if user is in home or away team
-						const isUserInMatch = tournament.teams.some(
-							(team) =>
-								(team.id === m.homeTeamId || team.id === m.awayTeamId) &&
-								team.players.some((p) => p.id === profile.id),
-						);
-
-						return isUserInMatch;
-					})
-					.map((m) => ({ ...m, tournamentName: tournament.name, tournamentId: tournament.id }));
-
-				matches.push(...userMatches);
-			}
-		}
-		return matches.sort(
-			(a, b) => (a.round || 0) - (b.round || 0) || a.tournamentName.localeCompare(b.tournamentName),
-		);
-	}, [tournamentDetails, profile]);
 
 	// Calculate Current Streak from profile.recentMatches
 	const currentStreak = useMemo(() => {
@@ -110,7 +64,7 @@ export const UserDashboard = () => {
 		return streak;
 	}, [profile]);
 
-	if (isProfileLoading || isTournamentsLoading) {
+	if (isProfileLoading || isPendingLoading) {
 		return (
 			<div className="container mx-auto px-4 py-8 space-y-8">
 				<Skeleton className="h-48 w-full rounded-3xl" />
@@ -323,17 +277,17 @@ export const UserDashboard = () => {
 								<Calendar className="h-5 w-5 text-primary" /> Partite da Giocare
 							</CardTitle>
 							<Badge variant="secondary" className="rounded-full">
-								{pendingMatches.length}
+								{pendingMatches?.length || 0}
 							</Badge>
 						</div>
 					</CardHeader>
 					<CardContent className="p-0 flex-1">
 						<ScrollArea className="h-[400px]">
-							{isDetailsLoading && pendingMatches.length === 0 ? (
+							{isPendingLoading && !pendingMatches ? (
 								<div className="flex items-center justify-center h-48">
 									<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
 								</div>
-							) : pendingMatches.length === 0 ? (
+							) : !pendingMatches || pendingMatches.length === 0 ? (
 								<div className="flex flex-col items-center justify-center h-64 text-center px-8">
 									<div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
 										<Gamepad2 className="h-8 w-8 text-muted-foreground opacity-30" />
@@ -362,11 +316,11 @@ export const UserDashboard = () => {
 														</span>
 													</div>
 													<div className="text-lg font-bold flex items-center gap-3">
-														<span className="text-blue-700 dark:text-blue-400">
+														<span className="text-blue-700 dark:text-blue-400 truncate max-w-[120px]">
 															{match.homeTeamName}
 														</span>
 														<span className="text-muted-foreground text-xs font-normal">vs</span>
-														<span className="text-red-700 dark:text-red-400">
+														<span className="text-red-700 dark:text-red-400 truncate max-w-[120px]">
 															{match.awayTeamName}
 														</span>
 													</div>

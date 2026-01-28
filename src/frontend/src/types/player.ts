@@ -59,3 +59,14 @@ export interface PlayerProfile {
 	bestPartner?: RelatedPlayerDto;
 	recentMatches: MatchBriefDto[];
 }
+
+export interface PendingMatch {
+	id: string;
+	tournamentId: string;
+	tournamentName: string;
+	homeTeamName: string;
+	awayTeamName: string;
+	opponentName: string;
+	round: number;
+	tableName?: string;
+}

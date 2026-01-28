@@ -17,3 +17,7 @@
 ## 2026-01-27 - [Batch Statistics Aggregation]
 **Learning:** Calling individual statistics queries (e.g., via MediatR) inside a loop for a set of players creates a significant N+1 performance bottleneck. Using a single LINQ query with 'SelectMany', 'GroupBy', and aggregate functions fetches all necessary data in one round-trip.
 **Action:** When processing multiple players, always prefer batch aggregation over individual query calls.
+
+## 2026-05-22 - [Environment Capability Correction]
+**Learning:** Contrary to previous journal entries, the current sandbox environment DOES have `dotnet` SDK 10.0.100 installed and can build/test C# projects.
+**Action:** Do not rule out backend optimizations; use `dotnet build` and `dotnet test` to verify changes in the Application and Infrastructure layers.

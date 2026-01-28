@@ -1,4 +1,4 @@
-import type { Player, PlayerProfile, PlayerRanking, PlayerStatistics } from "@/types";
+import type { PendingMatch, Player, PlayerProfile, PlayerRanking, PlayerStatistics } from "@/types";
 import { api } from "./axios";
 
 export const getPlayers = async (): Promise<Player[]> => {
@@ -19,5 +19,10 @@ export const getGlobalRanking = async (): Promise<PlayerRanking[]> => {
 export const getPlayerProfile = async (id?: string): Promise<PlayerProfile> => {
 	const endpoint = id ? `/players/${id}/profile` : "/players/me/profile";
 	const response = await api.get<PlayerProfile>(endpoint);
+	return response.data;
+};
+
+export const getMyPendingMatches = async (): Promise<PendingMatch[]> => {
+	const response = await api.get<PendingMatch[]>("/players/me/pending-matches");
 	return response.data;
 };

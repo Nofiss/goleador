@@ -30,6 +30,8 @@ public class GetMyPendingMatchesQueryHandler(
         var pendingMatches = await context.Matches
             .AsNoTracking()
             .Include(m => m.Tournament)
+                .ThenInclude(t => t!.Teams)
+                    .ThenInclude(tt => tt.Players)
             .Include(m => m.Table)
             .Include(m => m.Participants)
                 .ThenInclude(p => p.Player)
@@ -44,10 +46,28 @@ public class GetMyPendingMatchesQueryHandler(
             var mySide = myParticipant.Side;
             var opponentParticipants = m.Participants.Where(p => p.Side != mySide).ToList();
 
+            // Resolve team names if it's a tournament match
+            string homeTeamName = "Home Team";
+            string awayTeamName = "Away Team";
+
+            if (m.Tournament != null)
+            {
+                var homePlayerIds = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
+                var awayPlayerIds = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
+
+                homeTeamName = m.Tournament.Teams
+                    .FirstOrDefault(t => t.Players.Any(p => homePlayerIds.Contains(p.Id)))?.Name ?? "Home Team";
+                awayTeamName = m.Tournament.Teams
+                    .FirstOrDefault(t => t.Players.Any(p => awayPlayerIds.Contains(p.Id)))?.Name ?? "Away Team";
+            }
+
             return new PendingMatchDto
             {
                 Id = m.Id,
+                TournamentId = m.TournamentId ?? Guid.Empty,
                 TournamentName = m.Tournament?.Name ?? "Individual Match",
+                HomeTeamName = homeTeamName,
+                AwayTeamName = awayTeamName,
                 Round = m.Round,
                 TableName = m.Table?.Name,
                 OpponentName = string.Join(" - ", opponentParticipants.Select(p => p.Player.Nickname))
