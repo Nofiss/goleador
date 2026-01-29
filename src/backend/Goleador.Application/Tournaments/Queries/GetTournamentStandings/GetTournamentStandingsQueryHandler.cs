@@ -20,6 +20,7 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         Tournament tournament =
             await context
                 .Tournaments.AsNoTracking()
+                .AsSplitQuery() // Ottimizzazione Bolt ⚡: Carica le collezioni separatamente per evitare il prodotto cartesiano
                 .Include(t => t.Teams)
                     .ThenInclude(tt => tt.Players)
                 .Include(t => t.Matches)
@@ -56,25 +57,27 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
 
         foreach (Match match in tournament.Matches)
         {
-            // Troviamo gli ID dei giocatori partecipanti per lato
-            var homePlayerIds = match
-                .Participants.Where(p => p.Side == Side.Home)
-                .Select(p => p.PlayerId)
-                .ToList();
+            // Ottimizzazione Bolt ⚡: Evitiamo multiple allocazioni LINQ e ToList() in un loop stretto.
+            // Troviamo il Team ID basandoci sui partecipanti e la mappa playerTeamMap in un singolo passaggio.
+            Guid homeTeamId = Guid.Empty;
+            Guid awayTeamId = Guid.Empty;
 
-            var awayPlayerIds = match
-                .Participants.Where(p => p.Side == Side.Away)
-                .Select(p => p.PlayerId)
-                .ToList();
+            foreach (var participant in match.Participants)
+            {
+                if (participant.Side == Side.Home && homeTeamId == Guid.Empty)
+                {
+                    homeTeamId = playerTeamMap.GetValueOrDefault(participant.PlayerId);
+                }
+                else if (participant.Side == Side.Away && awayTeamId == Guid.Empty)
+                {
+                    awayTeamId = playerTeamMap.GetValueOrDefault(participant.PlayerId);
+                }
 
-            // Troviamo il Team ID basandoci sul primo giocatore trovato nella mappa
-            // (Assumiamo che tutti i giocatori di un lato appartengano alla stessa squadra)
-            Guid homeTeamId = homePlayerIds
-                .Select(id => playerTeamMap.GetValueOrDefault(id))
-                .FirstOrDefault(id => id != Guid.Empty);
-            Guid awayTeamId = awayPlayerIds
-                .Select(id => playerTeamMap.GetValueOrDefault(id))
-                .FirstOrDefault(id => id != Guid.Empty);
+                if (homeTeamId != Guid.Empty && awayTeamId != Guid.Empty)
+                {
+                    break;
+                }
+            }
 
             // Se non troviamo le squadre (dati sporchi o setup errato), saltiamo la partita
             if (homeTeamId == Guid.Empty || awayTeamId == Guid.Empty)
