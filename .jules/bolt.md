@@ -1,23 +1,3 @@
-## 2025-05-21 - [React Rendering Optimization]
-**Learning:** In list-heavy applications, re-renders of the entire list are common when parent state changes (e.g., toggling a dialog). Extracting rows into separate components and using `React.memo` combined with `useCallback` for event handlers is a highly effective way to prevent this.
-**Action:** Always check for list components and extract/memoize rows if the list is potentially long or the parent has frequent state updates.
-
-## 2025-05-21 - [Backend Test Environment Limitation]
-**Learning:** The current sandbox environment does not have `dotnet` installed, making it impossible to run or verify C# tests or builds directly.
-**Action:** Prioritize frontend performance optimizations when backend verification is not possible, or rely on manual code review for very safe backend changes.
-
-## 2026-01-22 - [Responsive Layout Optimization]
-**Learning:** Using 'window.matchMedia' instead of 'window.resize' listeners for responsive logic (like calculating grid columns) significantly reduces the number of re-renders and CPU usage during window resizing.
-**Action:** Prefer 'matchMedia' listeners for breakpoint-based state updates.
-
-## 2026-01-26 - [Global Ranking Multi-Layer Optimization]
-**Learning:** For high-visibility, read-heavy features like a Global Ranking, a three-pronged approach is most effective: (1) Database Index on sorting field, (2) Application-level Caching with explicit invalidation on relevant commands, and (3) Frontend Memoization of list items.
-**Action:** Apply this pattern to all "leaderboard" style features in the app.
-
-## 2026-01-27 - [Batch Statistics Aggregation]
-**Learning:** Calling individual statistics queries (e.g., via MediatR) inside a loop for a set of players creates a significant N+1 performance bottleneck. Using a single LINQ query with 'SelectMany', 'GroupBy', and aggregate functions fetches all necessary data in one round-trip.
-**Action:** When processing multiple players, always prefer batch aggregation over individual query calls.
-
-## 2026-05-22 - [Environment Capability Correction]
-**Learning:** Contrary to previous journal entries, the current sandbox environment DOES have `dotnet` SDK 10.0.100 installed and can build/test C# projects.
-**Action:** Do not rule out backend optimizations; use `dotnet build` and `dotnet test` to verify changes in the Application and Infrastructure layers.
+## 2025-01-27 - [LINQ Loop & Cartesian Product Optimization]
+**Learning:** Found that using LINQ `Where(...).Select(...).ToList()` inside a frequent loop (like standings calculation) creates significant allocation overhead. Also, multiple `Include` calls in EF Core can lead to a Cartesian product, slowing down queries.
+**Action:** Replace nested LINQ patterns with single-pass `foreach` loops and use `.AsSplitQuery()` when loading multiple collections in a single entity.
