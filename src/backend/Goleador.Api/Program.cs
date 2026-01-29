@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -106,10 +107,17 @@ builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddFixedWindowLimiter("AuthPolicy", opt =>
-    {
-        builder.Configuration.GetSection("RateLimiting:AuthPolicy").Bind(opt);
-    });
+    // Partition the rate limit by IP address to prevent a global Denial of Service (DoS) attack.
+    // If IP is unavailable, fall back to the Host header.
+    options.AddPolicy("AuthPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
+            factory: _ =>
+            {
+                var settings = new FixedWindowRateLimiterOptions();
+                builder.Configuration.GetSection("RateLimiting:AuthPolicy").Bind(settings);
+                return settings;
+            }));
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -126,6 +134,19 @@ builder.Services.AddHealthChecks()
         timeout: TimeSpan.FromSeconds(3));
 
 WebApplication app = builder.Build();
+
+// Basic Security Headers - Moved to the top of the pipeline to ensure they are added to all responses,
+// including errors and rate-limit rejections.
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+    // Enhanced CSP: added object-src 'none', base-uri 'self', and form-action 'self' for better protection.
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    await next();
+});
 
 app.UseExceptionHandler();
 
@@ -157,16 +178,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Basic Security Headers
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-Frame-Options", "DENY");
-    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
-    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none';");
-    await next();
-});
 
 app.UseCors(MyAllowSpecificOrigins);
 
