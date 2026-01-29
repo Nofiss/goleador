@@ -51,7 +51,10 @@ const SingleCrossTable = memo(
 								<tr>
 									{/* Cella Angolo (Sticky sia orizzontale che verticale) */}
 									<th className="sticky left-0 top-0 z-30 bg-muted/95 backdrop-blur-sm border-b border-r p-4 min-w-[160px] text-left font-bold text-muted-foreground uppercase tracking-wider shadow-[1px_0_0_0_rgba(0,0,0,0.1)]">
-										<div className="flex flex-col">
+										<div
+											className="flex flex-col"
+											title="Sulle righe la squadra in Casa, sulle colonne la squadra Ospite"
+										>
 											<span className="text-[10px] self-end opacity-70">OSPITI</span>
 											<span className="text-[10px] self-start opacity-70">CASA</span>
 										</div>
@@ -83,6 +86,7 @@ const SingleCrossTable = memo(
 													<td
 														key={awayTeam.id}
 														className="border-b border-r p-0 bg-slate-900 relative overflow-hidden"
+														aria-label="Cella vuota (stessa squadra)"
 													>
 														{/* Linea diagonale per separare i gironi */}
 														<div
@@ -117,6 +121,7 @@ const SingleCrossTable = memo(
 													key={awayTeam.id}
 													role={isReferee ? "button" : undefined}
 													tabIndex={isReferee ? 0 : undefined}
+													title={`${homeTeam.name} vs ${awayTeam.name}`}
 													className={cn(
 														"border-b border-r p-2 text-center transition-all relative group/cell",
 														isPlayed
