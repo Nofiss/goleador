@@ -235,13 +235,15 @@ export const MatchesTab = ({ tournament }: Props) => {
 	const [statusFilter, setStatusFilter] = useState("ALL");
 	const [viewMode, setViewMode] = useState<"list" | "matrix">("list");
 
-	// Ottimizzazione: useMemo per evitare ricalcoli costosi su ogni render
-	// Spostato prima dell'early return per seguire le regole degli Hooks
+	// Ottimizzazione Bolt ⚡: useMemo per evitare ricalcoli costosi su ogni render
+	// Ridotto l'overhead di toLowerCase() spostandolo fuori dal loop di filter
 	const filteredMatches = useMemo(() => {
+		const query = searchQuery.toLowerCase().trim();
 		return tournament.matches.filter((match) => {
 			const matchesSearch =
-				match.homeTeamName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				match.awayTeamName.toLowerCase().includes(searchQuery.toLowerCase());
+				!query ||
+				match.homeTeamName.toLowerCase().includes(query) ||
+				match.awayTeamName.toLowerCase().includes(query);
 
 			const matchesStatus =
 				statusFilter === "ALL" ||
@@ -252,19 +254,30 @@ export const MatchesTab = ({ tournament }: Props) => {
 		});
 	}, [tournament.matches, searchQuery, statusFilter]);
 
-	// Ottimizzazione: isola le derivazioni costanti (split point delle leg) dai dati dinamici (filtri)
+	// Ottimizzazione Bolt ⚡: Calcolo del round di split in O(N) invece di O(N log N)
+	// Evitiamo lo spread operator in Math.max per prevenire stack overflow su tornei giganti
 	const roundsInFirstLeg = useMemo(() => {
-		const allMatchesSorted = [...tournament.matches].sort((a, b) => a.round - b.round);
-		const max = Math.max(...allMatchesSorted.map((m) => m.round), 0);
-		return tournament.hasReturnMatches ? max / 2 : max;
+		const maxRound = tournament.matches.reduce((max, m) => (m.round > max ? m.round : max), 0);
+		return tournament.hasReturnMatches ? maxRound / 2 : maxRound;
 	}, [tournament.matches, tournament.hasReturnMatches]);
 
+	// Ottimizzazione Bolt ⚡: Split delle leg in un singolo passaggio invece di due filter()
 	const { firstLegMatches, secondLegMatches } = useMemo(() => {
 		const sorted = [...filteredMatches].sort((a, b) => a.round - b.round);
+		const first: TournamentMatch[] = [];
+		const second: TournamentMatch[] = [];
+
+		for (const m of sorted) {
+			if (m.round <= roundsInFirstLeg) {
+				first.push(m);
+			} else {
+				second.push(m);
+			}
+		}
 
 		return {
-			firstLegMatches: sorted.filter((m) => m.round <= roundsInFirstLeg),
-			secondLegMatches: sorted.filter((m) => m.round > roundsInFirstLeg),
+			firstLegMatches: first,
+			secondLegMatches: second,
 		};
 	}, [filteredMatches, roundsInFirstLeg]);
 
