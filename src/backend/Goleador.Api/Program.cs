@@ -19,6 +19,12 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Defense in Depth: Disable the Server header to avoid revealing server technology and version.
+    options.AddServerHeader = false;
+});
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -142,9 +148,22 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+
     // Enhanced CSP: added object-src 'none', base-uri 'self', and form-action 'self' for better protection.
-    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';");
-    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    // Also added upgrade-insecure-requests to ensure all content is loaded over HTTPS.
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;");
+
+    // Modern browsers ignore X-XSS-Protection in favor of CSP. Setting it to 0 is the current recommendation
+    // to avoid potential side-channel leaks from the browser's built-in XSS auditor.
+    context.Response.Headers.Append("X-XSS-Protection", "0");
+
+    // Restrict browser features to reduce attack surface.
+    context.Response.Headers.Append("Permissions-Policy", "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
+
+    // Isolate the browsing context to prevent cross-origin information leaks (Spectre/Meltdown mitigation).
+    context.Response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin");
+    context.Response.Headers.Append("Cross-Origin-Resource-Policy", "same-origin");
+
     await next();
 });
 
