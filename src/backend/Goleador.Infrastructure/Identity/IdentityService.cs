@@ -17,7 +17,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
     public async Task<TokenResponse?> LoginAsync(string email, string password)
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        if (user == null || user.IsDeleted)
         {
             return null;
         }
@@ -73,9 +73,16 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
 
         if (
             user == null
+            || user.IsDeleted
             || user.RefreshToken != HashToken(refreshToken)
             || user.RefreshTokenExpiryTime <= DateTime.UtcNow
         )
+        {
+            return null;
+        }
+
+        // Defense in Depth: Ensure the account is not locked out before rotating the token.
+        if (await userManager.IsLockedOutAsync(user))
         {
             return null;
         }
