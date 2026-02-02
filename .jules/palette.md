@@ -29,3 +29,7 @@
 ## 2025-05-20 - [Enhanced Match Registration UX]
 **Learning:** For forms involving participant selection and scoring (like match results), adding a "Swap" feature provides a significant delight for users who might have entered data in the wrong columns. Preventing same-player selection by disabling options in the UI is superior to showing error messages after selection.
 **Action:** Implement "Swap" buttons for bi-directional data forms. Disable already-selected options in cross-dependent dropdowns to prevent invalid states.
+
+## 2025-05-21 - [Semantic ARIA for Match History & Charts]
+**Learning:** Visual-only match history indicators (like colored bars) and charts (like PieCharts) are opaque to screen readers. Providing a detailed `aria-label` and a `title` (for tooltips) that includes context (score, opponent, result) makes this data meaningful for all users. Marking purely decorative icons with `aria-hidden="true"` reduces screen reader fatigue on data-heavy dashboards.
+**Action:** Always enhance visual data indicators with `role="img"`, descriptive `aria-label`, and `title`. Ensure decorative icons in data lists/badges are hidden from screen readers.
