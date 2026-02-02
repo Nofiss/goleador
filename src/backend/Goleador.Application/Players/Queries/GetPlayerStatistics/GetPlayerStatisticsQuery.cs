@@ -23,70 +23,63 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
                 .FirstOrDefaultAsync(p => p.Id == request.PlayerId, cancellationToken)
             ?? throw new KeyNotFoundException("Player not found");
 
-        // 2. Recupera tutte le partite GIOCATE (Status = Played) dove il giocatore era presente
-        // Dobbiamo includere i Participants per sapere in che squadra (Side) giocava
-        List<Match> matches = await context
-            .Matches.AsNoTracking()
-            .Include(m => m.Participants)
-            .Where(m =>
-                m.Status == MatchStatus.Played
-                && m.Participants.Any(p => p.PlayerId == request.PlayerId)
-            )
-            .OrderByDescending(m => m.DatePlayed) // Dalla più recente
+        // 2. Ottimizzazione Bolt ⚡: Calcolo statistiche aggregate direttamente nel Database.
+        // Invece di caricare migliaia di partite in memoria (O(N)), usiamo GroupBy e Sum/Count (O(1) transfer).
+        var aggregateStats = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .Select(m => new
+            {
+                IsHome = m.Participants.Any(p => p.PlayerId == request.PlayerId && p.Side == Side.Home),
+                m.ScoreHome,
+                m.ScoreAway
+            })
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                MatchesPlayed = g.Count(),
+                Wins = g.Count(x => (x.IsHome && x.ScoreHome > x.ScoreAway) || (!x.IsHome && x.ScoreAway > x.ScoreHome)),
+                Draws = g.Count(x => x.ScoreHome == x.ScoreAway),
+                Losses = g.Count(x => (x.IsHome && x.ScoreHome < x.ScoreAway) || (!x.IsHome && x.ScoreAway < x.ScoreHome)),
+                GoalsFor = g.Sum(x => x.IsHome ? x.ScoreHome : x.ScoreAway),
+                GoalsAgainst = g.Sum(x => x.IsHome ? x.ScoreAway : x.ScoreHome)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // 3. Ottimizzazione Bolt ⚡: Recupero solo le ultime 5 partite per la forma recente.
+        var recentMatches = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .OrderByDescending(m => m.DatePlayed)
+            .Take(5)
+            .Select(m => new
+            {
+                IsHome = m.Participants.Any(p => p.PlayerId == request.PlayerId && p.Side == Side.Home),
+                m.ScoreHome,
+                m.ScoreAway
+            })
             .ToListAsync(cancellationToken);
 
-        // 3. Calcolo Statistiche
+        // 4. Mappatura DTO
         var stats = new PlayerStatisticsDto
         {
             PlayerId = player.Id,
             Nickname = player.Nickname,
-            MatchesPlayed = matches.Count,
+            MatchesPlayed = aggregateStats?.MatchesPlayed ?? 0,
+            Wins = aggregateStats?.Wins ?? 0,
+            Draws = aggregateStats?.Draws ?? 0,
+            Losses = aggregateStats?.Losses ?? 0,
+            GoalsFor = aggregateStats?.GoalsFor ?? 0,
+            GoalsAgainst = aggregateStats?.GoalsAgainst ?? 0,
+            RecentForm = recentMatches.Select(m =>
+            {
+                var myScore = m.IsHome ? m.ScoreHome : m.ScoreAway;
+                var opponentScore = m.IsHome ? m.ScoreAway : m.ScoreHome;
+                if (myScore > opponentScore) return "W";
+                if (myScore < opponentScore) return "L";
+                return "D";
+            }).ToList()
         };
-
-        foreach (Match match in matches)
-        {
-            // Trova in che lato giocava il nostro player (Home o Away)
-            MatchParticipant participant = match.Participants.First(p =>
-                p.PlayerId == request.PlayerId
-            );
-            Side mySide = participant.Side;
-
-            // Determina i goal miei e dell'avversario
-            var myScore = mySide == Side.Home ? match.ScoreHome : match.ScoreAway;
-            var opponentScore = mySide == Side.Home ? match.ScoreAway : match.ScoreHome;
-
-            // Aggiorna contatori
-            stats.GoalsFor += myScore;
-            stats.GoalsAgainst += opponentScore;
-
-            string resultChar; // W, D, L
-
-            if (myScore > opponentScore)
-            {
-                stats.Wins++;
-                resultChar = "W";
-            }
-            else if (myScore < opponentScore)
-            {
-                stats.Losses++;
-                resultChar = "L";
-            }
-            else
-            {
-                stats.Draws++;
-                resultChar = "D";
-            }
-
-            // Aggiungi al trend solo se non ne abbiamo già 5
-            if (stats.RecentForm.Count < 5)
-            {
-                stats.RecentForm.Add(resultChar);
-            }
-        }
-
-        // Il loop era ordinato per data decrescente (più recenti prima),
-        // quindi RecentForm è già nell'ordine giusto (Recente -> Vecchio).
-        // Se lo vuoi visualizzare da sinistra (vecchio) a destra (recente), fai .Reverse() sul frontend.
 
         return stats;
     }
