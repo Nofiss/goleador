@@ -17,12 +17,13 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
     public async Task<TokenResponse?> LoginAsync(string email, string password)
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        // Security: Prevent authentication for deleted accounts and avoid account enumeration.
+        if (user == null || user.IsDeleted)
         {
             return null;
         }
 
-        // Check if account is locked out (Defense against brute-force)
+        // Security: Check if account is locked out to prevent brute-force attacks (Defense in Depth).
         if (await userManager.IsLockedOutAsync(user))
         {
             return null;
@@ -71,8 +72,12 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
 
         ApplicationUser? user = await userManager.FindByIdAsync(userId);
 
+        // Security: Invalidate refresh token renewal if user is deleted or locked out.
+        // This ensures that administrative actions (lockout/deletion) take effect immediately upon next refresh.
         if (
             user == null
+            || user.IsDeleted
+            || await userManager.IsLockedOutAsync(user)
             || user.RefreshToken != HashToken(refreshToken)
             || user.RefreshTokenExpiryTime <= DateTime.UtcNow
         )
