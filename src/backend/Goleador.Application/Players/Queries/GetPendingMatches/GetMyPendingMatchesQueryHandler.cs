@@ -29,6 +29,7 @@ public class GetMyPendingMatchesQueryHandler(
 
         var pendingMatches = await context.Matches
             .AsNoTracking()
+            .AsSplitQuery() // Bolt ⚡ Optimization: Load collections separately to avoid Cartesian product
             .Include(m => m.Tournament)
                 .ThenInclude(t => t!.Teams)
                     .ThenInclude(tt => tt.Players)
@@ -41,6 +42,24 @@ public class GetMyPendingMatchesQueryHandler(
             .ThenBy(m => m.Round)
             .ToListAsync(cancellationToken);
 
+        // Bolt ⚡ Optimization: Pre-calculate player-to-team map for all relevant tournaments
+        // This avoids nested LINQ loops (O(N*M)) during DTO projection in memory.
+        var processedTournaments = new HashSet<Guid>();
+        var playerTeamMap = new Dictionary<(Guid TournamentId, Guid PlayerId), string>();
+        foreach (var match in pendingMatches)
+        {
+            if (match.Tournament != null && processedTournaments.Add(match.Tournament.Id))
+            {
+                foreach (var team in match.Tournament.Teams)
+                {
+                    foreach (var p in team.Players)
+                    {
+                        playerTeamMap[(match.Tournament.Id, p.Id)] = team.Name;
+                    }
+                }
+            }
+        }
+
         return pendingMatches.Select(m => {
             var myParticipant = m.Participants.First(p => p.PlayerId == player.Id);
             var mySide = myParticipant.Side;
@@ -52,13 +71,16 @@ public class GetMyPendingMatchesQueryHandler(
 
             if (m.Tournament != null)
             {
-                var homePlayerIds = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
-                var awayPlayerIds = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
+                // Bolt ⚡ Optimization: Use O(1) dictionary lookup instead of O(M) nested Any()
+                homeTeamName = m.Participants
+                    .Where(p => p.Side == Side.Home)
+                    .Select(p => playerTeamMap.GetValueOrDefault((m.Tournament.Id, p.PlayerId)))
+                    .FirstOrDefault(name => name != null) ?? "Home Team";
 
-                homeTeamName = m.Tournament.Teams
-                    .FirstOrDefault(t => t.Players.Any(p => homePlayerIds.Contains(p.Id)))?.Name ?? "Home Team";
-                awayTeamName = m.Tournament.Teams
-                    .FirstOrDefault(t => t.Players.Any(p => awayPlayerIds.Contains(p.Id)))?.Name ?? "Away Team";
+                awayTeamName = m.Participants
+                    .Where(p => p.Side == Side.Away)
+                    .Select(p => playerTeamMap.GetValueOrDefault((m.Tournament.Id, p.PlayerId)))
+                    .FirstOrDefault(name => name != null) ?? "Away Team";
             }
 
             return new PendingMatchDto

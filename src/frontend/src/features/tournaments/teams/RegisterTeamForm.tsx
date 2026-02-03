@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { registerTeam } from "@/api/tournaments";
@@ -122,7 +123,14 @@ export const RegisterTeamForm = ({
 						className="w-full font-bold"
 						disabled={mutation.isPending || !teamName || selectedPlayers.length === 0}
 					>
-						{mutation.isPending ? "Registrazione..." : "Crea Squadra"}
+						{mutation.isPending ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Registrazione...
+							</>
+						) : (
+							"Crea Squadra"
+						)}
 					</Button>
 				</form>
 			</DialogContent>

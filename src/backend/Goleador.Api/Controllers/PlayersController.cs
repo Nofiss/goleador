@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Goleador.Api.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class PlayersController : ApiControllerBase
 {
     [HttpGet]
@@ -43,6 +43,7 @@ public class PlayersController : ApiControllerBase
         await Mediator.Send(new GetMyPendingMatchesQuery());
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Guid>> Create(CreatePlayerCommand command)
     {
         // Invia il comando al layer Application tramite MediatR.
