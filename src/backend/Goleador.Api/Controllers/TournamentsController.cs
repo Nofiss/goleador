@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Goleador.Api.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class TournamentsController : ApiControllerBase
 {
     [HttpGet]
@@ -44,6 +44,7 @@ public class TournamentsController : ApiControllerBase
     /// <response code="201">Il torneo è stato creato con successo.</response>
     /// <response code="400">Se i dati inviati non sono validi.</response>
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Guid>> Create(CreateTournamentCommand command) =>
@@ -61,6 +62,7 @@ public class TournamentsController : ApiControllerBase
     }
 
     [HttpPost("{id}/teams")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Guid>> RegisterTeam(Guid id, RegisterTeamCommand command) =>
         id != command.TournamentId
             ? (ActionResult<Guid>)BadRequest()
@@ -78,6 +80,7 @@ public class TournamentsController : ApiControllerBase
     }
 
     [HttpPost("{id}/start")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Start(Guid id)
     {
         await Mediator.Send(new StartTournamentCommand(id));
