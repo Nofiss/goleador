@@ -1,4 +1,4 @@
-import { ChevronLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import { ChevronLeft, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/api/axios";
@@ -66,15 +66,21 @@ export const LoginPage = () => {
 					<form onSubmit={handleLogin} className="space-y-5">
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
-							<Input
-								id="email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								type="email"
-								placeholder="nome@esempio.com"
-								className="bg-background"
-								required
-							/>
+							<div className="relative">
+								<Input
+									id="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									type="email"
+									placeholder="nome@esempio.com"
+									className="bg-background pl-9"
+									required
+								/>
+								<Mail
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
+								/>
+							</div>
 						</div>
 
 						<div className="space-y-2">
@@ -93,7 +99,10 @@ export const LoginPage = () => {
 									className="bg-background pl-9 pr-10"
 									required
 								/>
-								<Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+								<Lock
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
+								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
