@@ -37,3 +37,7 @@
 ## 2025-05-21 - [Authentication Form Icon Consistency]
 **Learning:** Inconsistent usage of icons across authentication forms (e.g., having a Lock icon for password but no Mail icon for email) can make a UI feel unpolished or "half-finished." Providing a decorative icon for every field in the form creates a unified and professional visual identity.
 **Action:** Ensure all fields in a form follow the same icon pattern. Use `aria-hidden="true"` on decorative icons and provide consistent padding (`pl-9`) for all fields with icons to ensure alignment.
+
+## 2025-05-22 - [Form Component Consistency and Accessibility]
+**Learning:** Legacy forms often contain raw HTML elements (like `<input type="checkbox">`) that clash with the design system. Replacing them with library components (like `<Checkbox />`) while ensuring all labels are linked via `htmlFor` and `id` significantly improves both visual polish and accessibility.
+**Action:** Audit forms for raw HTML inputs and replace with Shadcn components. Always link Labels to their respective inputs.

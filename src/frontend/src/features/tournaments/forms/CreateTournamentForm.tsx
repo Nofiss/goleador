@@ -124,13 +124,12 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						</div>
 					</div>
 					<div className="flex items-center space-x-2 pt-2">
-						{/* Semplice checkbox HTML per rapidità, o usa Switch di shadcn */}
-						<input
-							type="checkbox"
+						<Checkbox
 							id="returnMatches"
-							className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 							checked={formData.hasReturnMatches}
-							onChange={(e) => setFormData({ ...formData, hasReturnMatches: e.target.checked })}
+							onCheckedChange={(checked) =>
+								setFormData({ ...formData, hasReturnMatches: !!checked })
+							}
 						/>
 						<Label htmlFor="returnMatches">Andata e Ritorno</Label>
 					</div>
@@ -208,7 +207,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 										className="w-16"
 										type="number"
 										placeholder="4"
-										aria-label="Soglia Goal"
+										aria-label="Soglia goal"
 										value={formData.goalThreshold || ""}
 										onChange={(e) =>
 											setFormData({
