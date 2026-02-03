@@ -22,8 +22,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
             return null;
         }
 
-        // Check if account is locked out (Defense against brute-force)
-        if (await userManager.IsLockedOutAsync(user))
+        // Check if account is locked out or soft-deleted (Defense in Depth)
+        if (await userManager.IsLockedOutAsync(user) || user.IsDeleted)
         {
             return null;
         }
@@ -73,6 +73,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
 
         if (
             user == null
+            || user.IsDeleted
             || user.RefreshToken != HashToken(refreshToken)
             || user.RefreshTokenExpiryTime <= DateTime.UtcNow
         )
