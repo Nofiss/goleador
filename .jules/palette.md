@@ -30,6 +30,14 @@
 **Learning:** For forms involving participant selection and scoring (like match results), adding a "Swap" feature provides a significant delight for users who might have entered data in the wrong columns. Preventing same-player selection by disabling options in the UI is superior to showing error messages after selection.
 **Action:** Implement "Swap" buttons for bi-directional data forms. Disable already-selected options in cross-dependent dropdowns to prevent invalid states.
 
+## 2025-05-21 - [Semantic ARIA for Match History & Charts]
+**Learning:** Visual-only match history indicators (like colored bars) and charts (like PieCharts) are opaque to screen readers. Providing a detailed `aria-label` and a `title` (for tooltips) that includes context (score, opponent, result) makes this data meaningful for all users. Marking purely decorative icons with `aria-hidden="true"` reduces screen reader fatigue on data-heavy dashboards.
+**Action:** Always enhance visual data indicators with `role="img"`, descriptive `aria-label`, and `title`. Ensure decorative icons in data lists/badges are hidden from screen readers.
+
+## 2025-05-21 - [Authentication Form Icon Consistency]
+**Learning:** Inconsistent usage of icons across authentication forms (e.g., having a Lock icon for password but no Mail icon for email) can make a UI feel unpolished or "half-finished." Providing a decorative icon for every field in the form creates a unified and professional visual identity.
+**Action:** Ensure all fields in a form follow the same icon pattern. Use `aria-hidden="true"` on decorative icons and provide consistent padding (`pl-9`) for all fields with icons to ensure alignment.
+
 ## 2025-05-22 - [Form Component Consistency and Accessibility]
 **Learning:** Legacy forms often contain raw HTML elements (like `<input type="checkbox">`) that clash with the design system. Replacing them with library components (like `<Checkbox />`) while ensuring all labels are linked via `htmlFor` and `id` significantly improves both visual polish and accessibility.
 **Action:** Audit forms for raw HTML inputs and replace with Shadcn components. Always link Labels to their respective inputs.

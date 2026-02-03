@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -59,14 +59,19 @@ export const ResetPasswordPage = () => {
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="space-y-2">
-							<Label>Nuova Password</Label>
+							<Label htmlFor="password">Nuova Password</Label>
 							<div className="relative">
 								<Input
+									id="password"
 									type={showPassword ? "text" : "password"}
 									required
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
-									className="pr-10"
+									className="pl-9 pr-10"
+								/>
+								<Lock
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
 								/>
 								<button
 									type="button"
@@ -79,14 +84,19 @@ export const ResetPasswordPage = () => {
 							</div>
 						</div>
 						<div className="space-y-2">
-							<Label>Conferma Password</Label>
+							<Label htmlFor="confirmPassword">Conferma Password</Label>
 							<div className="relative">
 								<Input
+									id="confirmPassword"
 									type={showConfirmPassword ? "text" : "password"}
 									required
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
-									className="pr-10"
+									className="pl-9 pr-10"
+								/>
+								<Lock
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
 								/>
 								<button
 									type="button"
