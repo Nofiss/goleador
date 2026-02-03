@@ -1,6 +1,7 @@
 // src/features/tournaments/CreateTournamentForm.tsx
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createTournament } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
@@ -59,8 +60,9 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 			<Card>
 				<CardContent className="pt-6 space-y-4">
 					<div className="space-y-2">
-						<Label>Nome Torneo</Label>
+						<Label htmlFor="name">Nome Torneo</Label>
 						<Input
+							id="name"
 							value={formData.name}
 							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 							placeholder="Es. Champions League 2026"
@@ -70,7 +72,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label>Modalità</Label>
+							<Label htmlFor="type">Modalità</Label>
 							<Select
 								value={formData.type.toString()}
 								onValueChange={(v) =>
@@ -80,7 +82,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 									})
 								}
 							>
-								<SelectTrigger>
+								<SelectTrigger id="type">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -96,12 +98,12 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						</div>
 
 						<div className="space-y-2">
-							<Label>Formato</Label>
+							<Label htmlFor="teamSize">Formato</Label>
 							<Select
 								value={formData.teamSize.toString()}
 								onValueChange={(v) => setFormData({ ...formData, teamSize: parseInt(v, 10) })}
 							>
-								<SelectTrigger>
+								<SelectTrigger id="teamSize">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -112,8 +114,9 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						</div>
 
 						<div className="space-y-2">
-							<Label>Note (Opzionale)</Label>
+							<Label htmlFor="notes">Note (Opzionale)</Label>
 							<Textarea
+								id="notes"
 								placeholder="Regole speciali, premi in palio..."
 								value={formData.notes}
 								onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -121,13 +124,12 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						</div>
 					</div>
 					<div className="flex items-center space-x-2 pt-2">
-						{/* Semplice checkbox HTML per rapidità, o usa Switch di shadcn */}
-						<input
-							type="checkbox"
+						<Checkbox
 							id="returnMatches"
-							className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 							checked={formData.hasReturnMatches}
-							onChange={(e) => setFormData({ ...formData, hasReturnMatches: e.target.checked })}
+							onCheckedChange={(checked) =>
+								setFormData({ ...formData, hasReturnMatches: !!checked })
+							}
 						/>
 						<Label htmlFor="returnMatches">Andata e Ritorno</Label>
 					</div>
@@ -144,8 +146,11 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						<div className="mt-4 space-y-4">
 							<div className="grid grid-cols-3 gap-2">
 								<div>
-									<Label className="text-xs">Vittoria</Label>
+									<Label htmlFor="pointsForWin" className="text-xs">
+										Vittoria
+									</Label>
 									<Input
+										id="pointsForWin"
 										type="number"
 										value={formData.pointsForWin}
 										onChange={(e) =>
@@ -157,8 +162,11 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 									/>
 								</div>
 								<div>
-									<Label className="text-xs">Pareggio</Label>
+									<Label htmlFor="pointsForDraw" className="text-xs">
+										Pareggio
+									</Label>
 									<Input
+										id="pointsForDraw"
 										type="number"
 										value={formData.pointsForDraw}
 										onChange={(e) =>
@@ -170,8 +178,11 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 									/>
 								</div>
 								<div>
-									<Label className="text-xs">Sconfitta</Label>
+									<Label htmlFor="pointsForLoss" className="text-xs">
+										Sconfitta
+									</Label>
 									<Input
+										id="pointsForLoss"
 										type="number"
 										value={formData.pointsForLoss}
 										onChange={(e) =>
@@ -185,13 +196,15 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							</div>
 
 							<div className="space-y-2">
-								<Label>Bonus Goal</Label>
+								<Label htmlFor="goalThreshold">Bonus Goal</Label>
 								<div className="flex gap-2 items-center">
 									<span className="text-sm">Se segnati &ge;</span>
 									<Input
+										id="goalThreshold"
 										className="w-16"
 										type="number"
 										placeholder="4"
+										aria-label="Soglia goal per bonus"
 										value={formData.goalThreshold || ""}
 										onChange={(e) =>
 											setFormData({
@@ -204,6 +217,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 									<Input
 										className="w-16"
 										type="number"
+										aria-label="Punti bonus per soglia goal"
 										value={formData.goalThresholdBonus}
 										onChange={(e) =>
 											setFormData({
@@ -226,8 +240,11 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							</div>
 							{formData.enableTenZeroBonus && (
 								<div className="flex gap-2 items-center ml-6">
-									<span className="text-sm">Punti Extra:</span>
+									<Label htmlFor="tenZeroBonus" className="text-sm">
+										Punti Extra:
+									</Label>
 									<Input
+										id="tenZeroBonus"
 										className="w-16"
 										type="number"
 										value={formData.tenZeroBonus}
@@ -247,7 +264,14 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 
 			<div className="flex justify-end gap-4">
 				<Button type="submit" size="lg" disabled={mutation.isPending}>
-					{mutation.isPending ? "Creazione..." : "Crea Torneo"}
+					{mutation.isPending ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							Creazione...
+						</>
+					) : (
+						"Crea Torneo"
+					)}
 				</Button>
 			</div>
 		</form>
