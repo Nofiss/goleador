@@ -2,6 +2,10 @@
 **Learning:** Found that using LINQ `Where(...).Select(...).ToList()` inside a frequent loop (like standings calculation) creates significant allocation overhead. Also, multiple `Include` calls in EF Core can lead to a Cartesian product, slowing down queries.
 **Action:** Replace nested LINQ patterns with single-pass `foreach` loops and use `.AsSplitQuery()` when loading multiple collections in a single entity.
 
+## 2025-01-27 - [Database-Side Aggregation vs Memory Loading]
+**Learning:** For statistics and aggregate data (counts, sums, averages), loading all related entities into memory (O(N) transfer) becomes a bottleneck as the dataset grows. EF Core can translate `GroupBy` and aggregate functions (`Sum`, `Count`) into efficient SQL.
+**Action:** Use database-side aggregation via `.GroupBy` and limited `.Take()` queries to calculate statistics, avoiding unbounded result sets and excessive memory allocations.
+
 ## 2025-01-28 - [Memory Projection with Composite Keys]
 **Learning:** In queries like `GetMyPendingMatches`, resolving relational names (like Team names) in memory using nested LINQ `FirstOrDefault(Any)` inside a `.Select` call leads to O(N*M) complexity. Even with small datasets, this is an anti-pattern.
 **Action:** Pre-calculate a lookup dictionary with composite keys `(TournamentId, PlayerId)` to achieve O(1) lookups during result projection, and always pair it with `.AsSplitQuery()` when the graph involves multiple collection includes.
