@@ -23,8 +23,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
             return null;
         }
 
-        // Security: Check if account is locked out to prevent brute-force attacks (Defense in Depth).
-        if (await userManager.IsLockedOutAsync(user))
+        // Check if account is locked out or soft-deleted (Defense in Depth)
+        if (await userManager.IsLockedOutAsync(user) || user.IsDeleted)
         {
             return null;
         }
@@ -81,6 +81,12 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
             || user.RefreshToken != HashToken(refreshToken)
             || user.RefreshTokenExpiryTime <= DateTime.UtcNow
         )
+        {
+            return null;
+        }
+
+        // Defense in Depth: Ensure the account is not locked out before rotating the token.
+        if (await userManager.IsLockedOutAsync(user))
         {
             return null;
         }
