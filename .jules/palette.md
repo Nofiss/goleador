@@ -29,3 +29,7 @@
 ## 2025-05-20 - [Enhanced Match Registration UX]
 **Learning:** For forms involving participant selection and scoring (like match results), adding a "Swap" feature provides a significant delight for users who might have entered data in the wrong columns. Preventing same-player selection by disabling options in the UI is superior to showing error messages after selection.
 **Action:** Implement "Swap" buttons for bi-directional data forms. Disable already-selected options in cross-dependent dropdowns to prevent invalid states.
+
+## 2025-05-21 - [Authentication Form Icon Consistency]
+**Learning:** Inconsistent usage of icons across authentication forms (e.g., having a Lock icon for password but no Mail icon for email) can make a UI feel unpolished or "half-finished." Providing a decorative icon for every field in the form creates a unified and professional visual identity.
+**Action:** Ensure all fields in a form follow the same icon pattern. Use `aria-hidden="true"` on decorative icons and provide consistent padding (`pl-9`) for all fields with icons to ensure alignment.
