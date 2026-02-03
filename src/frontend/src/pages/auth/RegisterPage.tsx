@@ -82,7 +82,10 @@ export const RegisterPage = () => {
 										onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
 										required
 									/>
-									<User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+									<User
+										className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+										aria-hidden="true"
+									/>
 								</div>
 							</div>
 							<div className="space-y-2 col-span-2 sm:col-span-1">
@@ -95,7 +98,10 @@ export const RegisterPage = () => {
 										onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
 										required
 									/>
-									<User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+									<User
+										className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+										aria-hidden="true"
+									/>
 								</div>
 							</div>
 						</div>
@@ -111,7 +117,10 @@ export const RegisterPage = () => {
 									onChange={(e) => setFormData({ ...formData, email: e.target.value })}
 									required
 								/>
-								<Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+								<Mail
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
+								/>
 							</div>
 						</div>
 
@@ -125,7 +134,10 @@ export const RegisterPage = () => {
 									onChange={(e) => setFormData({ ...formData, password: e.target.value })}
 									required
 								/>
-								<Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+								<Lock
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
+								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
@@ -143,9 +155,13 @@ export const RegisterPage = () => {
 								<Input
 									id="confirmPassword"
 									type={showConfirmPassword ? "text" : "password"}
-									className="bg-background pr-10"
+									className="bg-background pl-9 pr-10"
 									onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
 									required
+								/>
+								<Lock
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+									aria-hidden="true"
 								/>
 								<button
 									type="button"
