@@ -73,6 +73,61 @@ public class GetMyPendingMatchesQueryHandlerTests
     }
 
     [Fact]
+    public async Task Handle_Should_Resolve_Team_Names_Correctly()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+        using var context = new ApplicationDbContext(options);
+
+        var userId = "bolt-user-id";
+        var player = new Player("Bolt", "The", "Fast", "bolt@example.com", userId);
+        var teammate = new Player("Teammate", "T", "T", "t@example.com");
+        var opponent1 = new Player("Opponent1", "O1", "O1", "o1@example.com");
+        var opponent2 = new Player("Opponent2", "O2", "O2", "o2@example.com");
+        context.Players.AddRange(player, teammate, opponent1, opponent2);
+
+        var tournament = new Tournament("Pro League", TournamentType.RoundRobin, 2, false, null, null);
+
+        var teamA = new TournamentTeam(tournament.Id, "Team Lightning", new[] { player, teammate });
+        var teamB = new TournamentTeam(tournament.Id, "Team Turtle", new[] { opponent1, opponent2 });
+
+        tournament.RegisterTeam(teamA);
+        tournament.RegisterTeam(teamB);
+        context.Tournaments.Add(tournament);
+
+        var table = new Table("Table 1", "Main Room");
+        context.Tables.Add(table);
+        await context.SaveChangesAsync();
+
+        var match = new Goleador.Domain.Entities.Match(0, 0, tournament.Id, table.Id, 1);
+        match.AddParticipant(player.Id, Side.Home);
+        match.AddParticipant(teammate.Id, Side.Home);
+        match.AddParticipant(opponent1.Id, Side.Away);
+        match.AddParticipant(opponent2.Id, Side.Away);
+
+        context.Matches.Add(match);
+        await context.SaveChangesAsync();
+
+        var mockCurrentUserService = new Mock<ICurrentUserService>();
+        mockCurrentUserService.Setup(m => m.UserId).Returns(userId);
+
+        var handler = new GetMyPendingMatchesQueryHandler(context, mockCurrentUserService.Object);
+
+        // Act
+        var result = await handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
+
+        // Assert
+        result.Should().HaveCount(1);
+        result[0].HomeTeamName.Should().Be("Team Lightning");
+        result[0].AwayTeamName.Should().Be("Team Turtle");
+        result[0].OpponentName.Should().Contain("Opponent1");
+        result[0].OpponentName.Should().Contain("Opponent2");
+    }
+
+    [Fact]
     public async Task Handle_Should_Throw_UnauthorizedAccessException_When_No_Current_User()
     {
         // Arrange

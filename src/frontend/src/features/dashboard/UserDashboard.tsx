@@ -120,7 +120,7 @@ export const UserDashboard = () => {
 							</h1>
 							<div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
 								<div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
-									<Trophy className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+									<Trophy className="h-5 w-5 text-yellow-400 fill-yellow-400" aria-hidden="true" />
 									<span className="text-2xl font-black">{profile.eloRating}</span>
 									<span className="text-xs font-bold uppercase tracking-tighter opacity-70">
 										ELO
@@ -159,7 +159,11 @@ export const UserDashboard = () => {
 							<span className="text-4xl font-black">{profile.winRate}%</span>
 							<span className="text-xs text-muted-foreground font-medium">Precisione di gioco</span>
 						</div>
-						<div className="h-20 w-20">
+						<div
+							className="h-20 w-20"
+							role="img"
+							aria-label={`Win rate: ${profile.winRate}%. ${profile.wins} vittorie, ${profile.losses} sconfitte.`}
+						>
 							<ResponsiveContainer width="100%" height="100%">
 								<PieChart>
 									<Pie
@@ -197,6 +201,7 @@ export const UserDashboard = () => {
 									<motion.div
 										animate={{ scale: [1, 1.2, 1] }}
 										transition={{ repeat: Infinity, duration: 2 }}
+										aria-hidden="true"
 									>
 										<Flame className="h-8 w-8 text-orange-500 fill-orange-500" />
 									</motion.div>
@@ -207,19 +212,29 @@ export const UserDashboard = () => {
 									Vittorie consecutive
 								</span>
 								<div className="flex gap-1 mt-1">
-									{profile.recentMatches.slice(0, 5).map((m) => (
-										<div
-											key={m.id}
-											className={cn(
-												"h-1.5 w-6 rounded-full",
-												m.result === "W"
-													? "bg-green-500"
-													: m.result === "L"
-														? "bg-red-500"
-														: "bg-muted",
-											)}
-										/>
-									))}
+									{profile.recentMatches.slice(0, 5).map((m) => {
+										const resultLabel =
+											m.result === "W" ? "Vittoria" : m.result === "L" ? "Sconfitta" : "Pareggio";
+										const scoreDisplay = `${m.homeTeamName} ${m.scoreHome}-${m.scoreAway} ${m.awayTeamName}`;
+										const fullTitle = `${resultLabel}: ${scoreDisplay}`;
+
+										return (
+											<div
+												key={m.id}
+												role="img"
+												aria-label={fullTitle}
+												title={fullTitle}
+												className={cn(
+													"h-1.5 w-6 rounded-full cursor-help",
+													m.result === "W"
+														? "bg-green-500"
+														: m.result === "L"
+															? "bg-red-500"
+															: "bg-muted",
+												)}
+											/>
+										);
+									})}
 								</div>
 							</div>
 						</div>
@@ -325,7 +340,10 @@ export const UserDashboard = () => {
 														</span>
 													</div>
 												</div>
-												<div className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+												<div
+													className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"
+													aria-hidden="true"
+												>
 													<ArrowRight className="h-5 w-5" />
 												</div>
 											</div>
@@ -374,6 +392,7 @@ export const UserDashboard = () => {
 															? "bg-blue-500/10 text-blue-600"
 															: "bg-red-500/10 text-red-600",
 													)}
+													aria-hidden="true"
 												>
 													<Trophy className="h-5 w-5" />
 												</div>
