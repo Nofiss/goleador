@@ -30,6 +30,11 @@
 **Learning:** Defense in depth requires moving beyond standard headers. Legacy recommendations like `X-XSS-Protection: 1` can actually introduce side-channel vulnerabilities; current standards favor disabling it when a strong CSP is present. Furthermore, Kestrel's default behavior of adding its name to the `Server` header provides unnecessary reconnaissance data to attackers.
 **Prevention:** Implement `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` to isolate browsing contexts. Set `X-XSS-Protection: 0` when using CSP. Use `Permissions-Policy` to explicitly deny access to unused browser features. Always disable the Server header in Kestrel via `WebHost.ConfigureKestrel`.
 
+## 2026-01-29 - Comprehensive User Status Validation in Auth Flows
+**Vulnerability:** The application previously only checked for account lockout during the initial login process, allowing users with active sessions (refresh tokens) to continue renewing their access even after their account was locked or soft-deleted.
+**Learning:** Defense in depth requires verifying account status at every significant authentication touchpoint, including token refresh. Relying solely on the initial login check creates a window of vulnerability (up to the refresh token's expiration) where administrative actions like lockout or deletion are not immediately honored.
+**Prevention:** Always implement account status checks (`IsLockedOutAsync`, `IsDeleted`) in both `Login` and `RefreshToken` methods. Use explicit security comments to document these checks and ensure they are maintained during future refactors.
+
 ## 2026-01-29 - Explicit Soft-Delete Enforcement and Authorization Alignment
 **Vulnerability:** Soft-deleted users could potentially authenticate if global filters were bypassed. Additionally, `PlayersController` and `TournamentsController` had restrictive class-level `[Authorize(Roles = "Admin")]` attributes that conflicted with method-level `[Authorize]` attributes intended for regular players.
 **Learning:** Defense in depth requires explicit status checks even when global query filters are present, as some ORM methods or direct queries might bypass them. Furthermore, ASP.NET Core authorization attributes are additive; a restrictive class-level attribute will block access even if a method-level attribute is less restrictive (unless it is `[AllowAnonymous]`).
