@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { registerTeam } from "@/api/tournaments";
+import { addLateTeam, registerTeam } from "@/api/tournaments";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,6 +23,7 @@ interface RegisterTeamFormProps {
 	onOpenChange: (open: boolean) => void;
 	tournamentId: string;
 	availableCandidates: TournamentTeamPlayer[];
+	isLateEntry?: boolean;
 }
 
 export const RegisterTeamForm = ({
@@ -29,13 +31,14 @@ export const RegisterTeamForm = ({
 	onOpenChange,
 	tournamentId,
 	availableCandidates,
+	isLateEntry = false,
 }: RegisterTeamFormProps) => {
 	const queryClient = useQueryClient();
 	const [teamName, setTeamName] = useState("");
 	const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
 
 	const mutation = useMutation({
-		mutationFn: registerTeam,
+		mutationFn: isLateEntry ? addLateTeam : registerTeam,
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			toast.success("Squadra creata con successo! 🏆");
@@ -72,6 +75,20 @@ export const RegisterTeamForm = ({
 					</DialogDescription>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-6 pt-4">
+					{isLateEntry && (
+						<Alert
+							variant="default"
+							className="bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
+						>
+							<AlertCircle className="h-4 w-4" />
+							<AlertTitle>Late Entry</AlertTitle>
+							<AlertDescription>
+								Il torneo è in corso. Verranno generate automaticamente le partite contro tutti gli
+								avversari attuali.
+							</AlertDescription>
+						</Alert>
+					)}
+
 					<div className="space-y-2">
 						<Label htmlFor="teamName" className="text-xs uppercase font-bold text-muted-foreground">
 							Nome Squadra

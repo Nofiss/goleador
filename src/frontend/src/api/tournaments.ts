@@ -34,6 +34,14 @@ export const registerTeam = async (params: {
 	return api.post(`/tournaments/${params.tournamentId}/teams`, params);
 };
 
+export const addLateTeam = async (params: {
+	tournamentId: string;
+	teamName: string;
+	playerIds: string[];
+}) => {
+	return api.post(`/tournaments/${params.tournamentId}/teams/late`, params);
+};
+
 export const renameTeam = async (teamId: string, newName: string) => {
 	return api.put(`/tournaments/teams/${teamId}/rename`, { newName });
 };
