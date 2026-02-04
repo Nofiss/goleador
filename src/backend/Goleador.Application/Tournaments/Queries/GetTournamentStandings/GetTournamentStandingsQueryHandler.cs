@@ -20,6 +20,7 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         Tournament tournament =
             await context
                 .Tournaments.AsNoTracking()
+                .AsSplitQuery() // Ottimizzazione Bolt ⚡: Carica le collezioni separatamente per evitare il prodotto cartesiano
                 .Include(t => t.Teams)
                     .ThenInclude(tt => tt.Players)
                 .Include(t => t.Matches)
@@ -46,35 +47,25 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         }
 
         // 3. INIZIALIZZA CLASSIFICA (Tutti a zero)
+        // Ottimizzazione Bolt ⚡: Consolidiamo la creazione della mappa e dei DTO in un singolo passaggio.
+        // Usiamo MatchesRemaining temporaneamente per contare il totale delle partite programmate.
         var standingsMap = tournament.Teams.ToDictionary(
             team => team.Id,
-            team => new TournamentStandingDto { TeamId = team.Id, TeamName = team.Name }
+            team => new TournamentStandingDto { TeamId = team.Id, TeamName = team.Name, MatchesRemaining = 0 }
         );
 
         // 4. CALCOLA STATISTICHE E TOTALI PARTITE
-        var totalScheduledMap = tournament.Teams.ToDictionary(team => team.Id, _ => 0);
-
         foreach (Match match in tournament.Matches)
         {
-            // Troviamo gli ID dei giocatori partecipanti per lato
-            var homePlayerIds = match
-                .Participants.Where(p => p.Side == Side.Home)
-                .Select(p => p.PlayerId)
-                .ToList();
+            // Ottimizzazione Bolt ⚡: Risoluzione immediata delle squadre dai partecipanti.
+            // Se un match ha più partecipanti per lato (es. 2v2), usiamo il primo per identificare il team.
+            var homeParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Home);
+            var awayParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Away);
 
-            var awayPlayerIds = match
-                .Participants.Where(p => p.Side == Side.Away)
-                .Select(p => p.PlayerId)
-                .ToList();
+            if (homeParticipant == null || awayParticipant == null) continue;
 
-            // Troviamo il Team ID basandoci sul primo giocatore trovato nella mappa
-            // (Assumiamo che tutti i giocatori di un lato appartengano alla stessa squadra)
-            Guid homeTeamId = homePlayerIds
-                .Select(id => playerTeamMap.GetValueOrDefault(id))
-                .FirstOrDefault(id => id != Guid.Empty);
-            Guid awayTeamId = awayPlayerIds
-                .Select(id => playerTeamMap.GetValueOrDefault(id))
-                .FirstOrDefault(id => id != Guid.Empty);
+            Guid homeTeamId = playerTeamMap.GetValueOrDefault(homeParticipant.PlayerId);
+            Guid awayTeamId = playerTeamMap.GetValueOrDefault(awayParticipant.PlayerId);
 
             // Se non troviamo le squadre (dati sporchi o setup errato), saltiamo la partita
             if (homeTeamId == Guid.Empty || awayTeamId == Guid.Empty)
@@ -82,23 +73,19 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
                 continue;
             }
 
-            // Incrementiamo il totale delle partite programmate per le squadre
-            totalScheduledMap[homeTeamId]++;
-            totalScheduledMap[awayTeamId]++;
+            // Recuperiamo i DTO da aggiornare
+            if (!standingsMap.TryGetValue(homeTeamId, out var homeStats) ||
+                !standingsMap.TryGetValue(awayTeamId, out var awayStats))
+            {
+                continue;
+            }
+
+            // Incrementiamo il totale delle partite programmate (temporaneamente in MatchesRemaining)
+            homeStats.MatchesRemaining++;
+            awayStats.MatchesRemaining++;
 
             // Se la partita non è stata giocata, non aggiorniamo le statistiche di classifica
             if (match.Status != MatchStatus.Played)
-            {
-                continue;
-            }
-
-            // Recuperiamo i DTO da aggiornare
-            if (!standingsMap.TryGetValue(homeTeamId, out TournamentStandingDto? homeStats))
-            {
-                continue;
-            }
-
-            if (!standingsMap.TryGetValue(awayTeamId, out TournamentStandingDto? awayStats))
             {
                 continue;
             }
@@ -176,14 +163,17 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         }
 
         // 5. CALCOLO PROIEZIONE
+        // Ottimizzazione Bolt ⚡: Finalizziamo il calcolo delle partite rimanenti e della proiezione.
         foreach (var stats in standingsMap.Values)
         {
-            int totalScheduled = totalScheduledMap.GetValueOrDefault(stats.TeamId);
+            // A questo punto stats.MatchesRemaining contiene il totale delle partite assegnate.
+            // Sottraiamo le giocate per ottenere le rimanenti effettive.
+            int totalScheduled = stats.MatchesRemaining;
+            stats.MatchesRemaining = totalScheduled - stats.Played;
 
             if (stats.Played > 0)
             {
                 stats.PointsPerGame = (double)stats.Points / stats.Played;
-                stats.MatchesRemaining = totalScheduled - stats.Played;
 
                 // Proiezione = Punti Attuali + (Media * Rimanenti)
                 stats.ProjectedPoints =

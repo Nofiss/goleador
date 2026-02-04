@@ -16,6 +16,7 @@ public class UpdateMatchResultCommandHandler(
     IMediator mediator,
     ICurrentUserService currentUserService,
     ILogger<UpdateMatchResultCommandHandler> logger
+    ITournamentNotifier tournamentNotifier
 ) : IRequestHandler<UpdateMatchResultCommand, Unit>
 {
     public async Task<Unit> Handle(
@@ -79,6 +80,12 @@ public class UpdateMatchResultCommandHandler(
             match.ScoreHome,
             match.ScoreAway
         );
+        
+        // 6. Notifica Real-Time tramite SignalR
+        if (match.TournamentId.HasValue)
+        {
+            await tournamentNotifier.NotifyMatchUpdated(match.TournamentId.Value, match.Id);
+        }
 
         return Unit.Value;
     }
