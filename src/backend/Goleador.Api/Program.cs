@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using Serilog;
 using System.Threading.RateLimiting;
 using Goleador.Api.Infrastructure;
 using Goleador.Api.Services;
@@ -19,6 +20,7 @@ using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 builder.WebHost.ConfigureKestrel(options =>
 {
     // Defense in Depth: Disable the Server header to avoid revealing server technology and version.
@@ -212,6 +214,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseSerilogRequestLogging();
 
 app.UseRouting();
 app.UseRateLimiter();

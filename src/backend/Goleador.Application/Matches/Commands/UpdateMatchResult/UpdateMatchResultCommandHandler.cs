@@ -4,7 +4,7 @@ using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-
+using Microsoft.Extensions.Logging;
 using Goleador.Application.Matches.Events;
 using Goleador.Domain.Enums;
 
@@ -14,6 +14,8 @@ public class UpdateMatchResultCommandHandler(
     IApplicationDbContext context,
     IMemoryCache cache,
     IMediator mediator,
+    ICurrentUserService currentUserService,
+    ILogger<UpdateMatchResultCommandHandler> logger
     ITournamentNotifier tournamentNotifier
 ) : IRequestHandler<UpdateMatchResultCommand, Unit>
 {
@@ -71,6 +73,14 @@ public class UpdateMatchResultCommandHandler(
             await mediator.Publish(new MatchFinishedEvent(match.Id), cancellationToken);
         }
 
+        logger.LogInformation(
+            "User {UserId} updated match {MatchId} result to {ScoreHome}-{ScoreAway}",
+            currentUserService.UserId,
+            match.Id,
+            match.ScoreHome,
+            match.ScoreAway
+        );
+        
         // 6. Notifica Real-Time tramite SignalR
         if (match.TournamentId.HasValue)
         {
