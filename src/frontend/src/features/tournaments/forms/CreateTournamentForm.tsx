@@ -271,7 +271,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 				<Button type="submit" size="lg" disabled={mutation.isPending}>
 					{mutation.isPending ? (
 						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 							Creazione...
 						</>
 					) : (

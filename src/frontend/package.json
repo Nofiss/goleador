@@ -38,7 +38,7 @@
 		"jwt-decode": "^4.0.0",
 		"lucide-react": "^0.563.0",
 		"react": "^19.2.4",
-		"react-dom": "^19.2.0",
+		"react-dom": "^19.2.4",
 		"react-error-boundary": "^6.1.0",
 		"react-hook-form": "^7.71.1",
 		"react-router-dom": "^7.12.0",
