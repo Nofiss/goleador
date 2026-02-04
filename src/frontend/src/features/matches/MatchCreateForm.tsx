@@ -108,7 +108,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 
 				{/* VS ICON & SWAP */}
 				<div className="text-muted-foreground flex flex-col items-center gap-2">
-					<Swords className="h-10 w-10 text-gray-300" />
+					<Swords className="h-10 w-10 text-gray-300" aria-hidden="true" />
 					<Button
 						type="button"
 						variant="ghost"
@@ -118,7 +118,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						title="Inverti Squadre"
 						aria-label="Inverti Squadre"
 					>
-						<RefreshCcw className="h-4 w-4" />
+						<RefreshCcw className="h-4 w-4" aria-hidden="true" />
 					</Button>
 					<span className="font-bold text-sm text-gray-400">VS</span>
 				</div>
@@ -184,7 +184,7 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 				>
 					{mutation.isPending ? (
 						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 							Salvataggio...
 						</>
 					) : (

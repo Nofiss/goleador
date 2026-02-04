@@ -41,3 +41,7 @@
 ## 2025-05-22 - [Form Component Consistency and Accessibility]
 **Learning:** Legacy forms often contain raw HTML elements (like `<input type="checkbox">`) that clash with the design system. Replacing them with library components (like `<Checkbox />`) while ensuring all labels are linked via `htmlFor` and `id` significantly improves both visual polish and accessibility.
 **Action:** Audit forms for raw HTML inputs and replace with Shadcn components. Always link Labels to their respective inputs.
+
+## 2025-05-23 - [Universal Icon Accessibility and Screen Reader Optimization]
+**Learning:** Modern UIs are heavily reliant on icons that are purely decorative when accompanied by text or used for visual flair. Failing to hide these with `aria-hidden="true"` creates excessive "noise" for screen reader users. Conversely, when icons replace critical data (like rank numbers in a table), they must be paired with `sr-only` text to remain inclusive.
+**Action:** Systematically apply `aria-hidden="true"` to all decorative icons and ensure icons that represent data have `sr-only` text alternatives.

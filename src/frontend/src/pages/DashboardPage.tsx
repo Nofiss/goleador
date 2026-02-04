@@ -307,9 +307,9 @@ export const DashboardPage = () => {
 				>
 					<p className="text-muted-foreground text-sm uppercase tracking-widest mb-6">Powered by</p>
 					<div className="flex justify-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-						<Trophy className="w-8 h-8 text-yellow-500" />
-						<Gamepad2 className="w-8 h-8 text-purple-500" />
-						<Flame className="w-8 h-8 text-orange-500" />
+						<Trophy className="w-8 h-8 text-yellow-500" aria-hidden="true" />
+						<Gamepad2 className="w-8 h-8 text-purple-500" aria-hidden="true" />
+						<Flame className="w-8 h-8 text-orange-500" aria-hidden="true" />
 					</div>
 				</motion.div>
 			</div>
