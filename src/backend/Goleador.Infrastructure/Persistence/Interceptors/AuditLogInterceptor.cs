@@ -109,7 +109,7 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
     }
 
     private static bool IsSensitive(string propertyName) =>
-        propertyName is "PasswordHash" or "SecurityStamp" or "RefreshToken";
+        propertyName is "PasswordHash" or "SecurityStamp" or "RefreshToken" or "ConcurrencyStamp";
 
     private async Task OnAfterSaveChanges(DbContext context, List<AuditEntry> auditEntries, CancellationToken cancellationToken)
     {
