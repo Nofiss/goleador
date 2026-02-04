@@ -9,10 +9,14 @@ import {
 	TournamentHeader,
 	TournamentHeaderSkeleton,
 } from "@/features/tournaments/TournamentHeader";
+import { useTournamentHub } from "@/hooks/useTournamentHub";
 import { TournamentStatus } from "@/types";
 
 export const TournamentDetailPage = () => {
 	const { id } = useParams<{ id: string }>();
+
+	// Attiva SignalR per aggiornamenti in tempo reale
+	useTournamentHub(id);
 
 	const { data: tournament, isLoading } = useQuery({
 		queryKey: ["tournament", id],

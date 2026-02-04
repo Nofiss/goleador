@@ -153,7 +153,7 @@ const SingleCrossTable = memo(
 
 														{match.tableName && (
 															<span className="flex items-center gap-0.5 text-[9px] font-bold text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded-md border border-primary/10 transition-transform group-hover/cell:scale-110">
-																<MapPin className="h-2.5 w-2.5" />
+																<MapPin className="h-2.5 w-2.5" aria-hidden="true" />
 																{match.tableName}
 															</span>
 														)}
@@ -207,7 +207,7 @@ export const MatchesCrossTable = memo(({ teams, matches, isReferee, onSelectMatc
 			{/* Filtro Tavolo Globale */}
 			<div className="flex items-center gap-3 bg-muted/30 p-3 rounded-lg border border-border/50 w-fit">
 				<div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-					<TableIcon className="h-4 w-4" />
+					<TableIcon className="h-4 w-4" aria-hidden="true" />
 					Filtra per Tavolo:
 				</div>
 				<Select value={selectedTableId} onValueChange={setSelectedTableId}>

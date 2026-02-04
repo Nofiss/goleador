@@ -97,7 +97,7 @@ const MatchCard = memo(
 					<div className="flex flex-col items-end gap-1">
 						{match.status === 1 && match.datePlayed && (
 							<span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-								<CalendarClock className="h-3 w-3" />
+								<CalendarClock className="h-3 w-3" aria-hidden="true" />
 								{new Date(match.datePlayed).toLocaleDateString("it-IT", {
 									day: "2-digit",
 									month: "short",
@@ -108,7 +108,7 @@ const MatchCard = memo(
 						)}
 						{match.tableName && (
 							<span className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
-								<MapPin className="h-3 w-3" /> {match.tableName}
+								<MapPin className="h-3 w-3" aria-hidden="true" /> {match.tableName}
 							</span>
 						)}
 					</div>
@@ -203,9 +203,12 @@ const MatchGrid = memo(
 			<div className="mb-12">
 				<h3 className="text-lg font-semibold mt-8 mb-4 flex items-center gap-2 text-foreground/90">
 					{title === "Girone di Ritorno" ? (
-						<ArrowRightLeft className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+						<ArrowRightLeft
+							className="w-5 h-5 text-orange-500 dark:text-orange-400"
+							aria-hidden="true"
+						/>
 					) : (
-						<MapPin className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+						<MapPin className="w-5 h-5 text-blue-500 dark:text-blue-400" aria-hidden="true" />
 					)}
 					{title}
 				</h3>
@@ -284,7 +287,7 @@ export const MatchesTab = ({ tournament }: Props) => {
 	if (tournament.status === TournamentStatus.setup) {
 		return (
 			<div className="text-center py-12 bg-muted/20 border border-dashed border-border rounded-xl text-muted-foreground">
-				<CalendarClock className="w-10 h-10 mx-auto mb-3 opacity-20" />
+				<CalendarClock className="w-10 h-10 mx-auto mb-3 opacity-20" aria-hidden="true" />
 				<p>Il calendario verrà generato all'avvio del torneo.</p>
 			</div>
 		);
@@ -296,7 +299,10 @@ export const MatchesTab = ({ tournament }: Props) => {
 			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-muted/30 p-4 rounded-xl border border-border/50">
 				<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-1">
 					<div className="relative flex-1 sm:max-w-xs">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+						<Search
+							className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+							aria-hidden="true"
+						/>
 						<Input
 							placeholder="Cerca squadra..."
 							value={searchQuery}
@@ -320,7 +326,7 @@ export const MatchesTab = ({ tournament }: Props) => {
 							className="bg-background border-primary/20 hover:bg-primary/5 hover:text-primary transition-colors"
 							onClick={() => setIsBulkAssignOpen(true)}
 						>
-							<MapPin className="mr-2 h-4 w-4" /> Assegna Tavoli
+							<MapPin className="mr-2 h-4 w-4" aria-hidden="true" /> Assegna Tavoli
 						</Button>
 					)}
 				</div>
@@ -332,11 +338,11 @@ export const MatchesTab = ({ tournament }: Props) => {
 				>
 					<TabsList className="grid w-full grid-cols-2 sm:w-[200px]">
 						<TabsTrigger value="list" className="flex items-center gap-2">
-							<List className="h-4 w-4" />
+							<List className="h-4 w-4" aria-hidden="true" />
 							Lista
 						</TabsTrigger>
 						<TabsTrigger value="matrix" className="flex items-center gap-2">
-							<LayoutGrid className="h-4 w-4" />
+							<LayoutGrid className="h-4 w-4" aria-hidden="true" />
 							Matrice
 						</TabsTrigger>
 					</TabsList>
@@ -345,7 +351,10 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 			{filteredMatches.length === 0 ? (
 				<div className="text-center py-20 bg-muted/10 border border-dashed border-border rounded-xl animate-in fade-in zoom-in duration-300">
-					<Search className="w-10 h-10 mx-auto mb-3 opacity-20 text-muted-foreground" />
+					<Search
+						className="w-10 h-10 mx-auto mb-3 opacity-20 text-muted-foreground"
+						aria-hidden="true"
+					/>
 					<p className="text-muted-foreground font-medium">
 						Nessuna partita trovata con questi filtri.
 					</p>

@@ -78,7 +78,7 @@ export const TournamentHeader = ({ tournament }: Props) => {
 						disabled={tournament.teams.length < 2 || startMutation.isPending}
 						className="bg-green-600 hover:bg-green-700"
 					>
-						<PlayCircle className="mr-2 h-4 w-4" /> Avvia Torneo
+						<PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Avvia Torneo
 					</Button>
 				)}
 
