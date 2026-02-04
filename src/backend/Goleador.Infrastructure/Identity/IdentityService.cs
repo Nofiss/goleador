@@ -364,7 +364,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
     public async Task<string?> GeneratePasswordResetTokenAsync(string email)
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        // Security: Prevent generating reset tokens for deleted accounts (Defense in Depth).
+        if (user == null || user.IsDeleted)
         {
             return null;
         }
@@ -379,7 +380,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
     )
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        // Security: Prevent password reset for deleted accounts (Defense in Depth).
+        if (user == null || user.IsDeleted)
         {
             return (false, new[] { "Invalid request." });
         }

@@ -32,7 +32,7 @@ public class ForgotPasswordCommandHandler(
         // In produzione l'URL base viene da appsettings (es. App:ClientUrl)
         var clientUrl = configuration["App:ClientUrl"] ?? "http://localhost:5173";
         var resetLink =
-            $"{clientUrl.TrimEnd('/')}/reset-password?email={request.Email}&token={encodedToken}";
+            $"{clientUrl.TrimEnd('/')}/reset-password?email={HttpUtility.UrlEncode(request.Email)}&token={encodedToken}";
 
         // 3. Invia Mail
         await emailService.SendEmailAsync(
