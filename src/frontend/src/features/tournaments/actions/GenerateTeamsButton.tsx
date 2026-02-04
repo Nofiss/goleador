@@ -23,7 +23,7 @@ export const GenerateTeamsButton = ({ tournamentId }: { tournamentId: string }) 
 			onClick={() => mutation.mutate()}
 			disabled={mutation.isPending}
 		>
-			<Sparkles className="mr-2 h-4 w-4" />
+			<Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
 			{mutation.isPending ? "L'AI sta pensando..." : "Genera Squadre AI"}
 		</Button>
 	);

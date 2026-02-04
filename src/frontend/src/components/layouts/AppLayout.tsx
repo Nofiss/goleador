@@ -94,7 +94,7 @@ export const AppLayout = () => {
 										)
 									}
 								>
-									<item.icon className="h-4 w-4" />
+									<item.icon className="h-4 w-4" aria-hidden="true" />
 									{item.name}
 								</NavLink>
 							))}
@@ -122,7 +122,7 @@ export const AppLayout = () => {
 								)
 							}
 						>
-							<item.icon className="h-4 w-4" />
+							<item.icon className="h-4 w-4" aria-hidden="true" />
 							{item.name}
 						</NavLink>
 					))}
@@ -160,7 +160,7 @@ export const AppLayout = () => {
 									onClick={handleLogout}
 									className="text-red-600 focus:bg-red-50 dark:focus:bg-red-950/30 focus:text-red-600 cursor-pointer"
 								>
-									<LogOut className="mr-2 h-4 w-4" />
+									<LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
 									Esci
 								</DropdownMenuItem>
 							</DropdownMenuContent>

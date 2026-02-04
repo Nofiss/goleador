@@ -133,15 +133,43 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 						<TableRow className="bg-muted/50">
 							<TableHead className="w-12.5">Pos</TableHead>
 							<TableHead>Squadra</TableHead>
-							<TableHead className="text-center font-bold">PT</TableHead>
-							<TableHead className="text-center text-muted-foreground">G</TableHead>
-							<TableHead className="text-center hidden md:table-cell">V</TableHead>
-							<TableHead className="text-center hidden md:table-cell">N</TableHead>
-							<TableHead className="text-center hidden md:table-cell">P</TableHead>
-							<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
-							<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
-							<TableHead className="text-center">DR</TableHead>
-							<TableHead className="text-center text-purple-600 dark:text-purple-400">
+							<TableHead className="text-center font-bold cursor-help" title="Punti">
+								PT
+							</TableHead>
+							<TableHead className="text-center text-muted-foreground cursor-help" title="Giocate">
+								G
+							</TableHead>
+							<TableHead className="text-center hidden md:table-cell cursor-help" title="Vinte">
+								V
+							</TableHead>
+							<TableHead
+								className="text-center hidden md:table-cell cursor-help"
+								title="Pareggiate"
+							>
+								N
+							</TableHead>
+							<TableHead className="text-center hidden md:table-cell cursor-help" title="Perse">
+								P
+							</TableHead>
+							<TableHead
+								className="text-center hidden sm:table-cell cursor-help"
+								title="Goal Fatti"
+							>
+								GF
+							</TableHead>
+							<TableHead
+								className="text-center hidden sm:table-cell cursor-help"
+								title="Goal Subiti"
+							>
+								GS
+							</TableHead>
+							<TableHead className="text-center cursor-help" title="Differenza Reti">
+								DR
+							</TableHead>
+							<TableHead
+								className="text-center text-purple-600 dark:text-purple-400 cursor-help"
+								title="Proiezione Punti"
+							>
 								Proj
 							</TableHead>
 						</TableRow>
@@ -208,20 +236,45 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 						<TableRow className="bg-muted/50">
 							<TableHead className="w-12.5">Pos</TableHead>
 							<TableHead>Squadra</TableHead>
-							<TableHead className="text-center font-bold">PT</TableHead>
-							<TableHead className="text-center text-muted-foreground">G</TableHead>
-							<TableHead className="text-center hidden md:table-cell">V</TableHead>
-							<TableHead className="text-center hidden md:table-cell">N</TableHead>
-							<TableHead className="text-center hidden md:table-cell">P</TableHead>
-							<TableHead className="text-center hidden sm:table-cell">GF</TableHead>
-							<TableHead className="text-center hidden sm:table-cell">GS</TableHead>
-							<TableHead className="text-center">DR</TableHead>
+							<TableHead className="text-center font-bold cursor-help" title="Punti">
+								PT
+							</TableHead>
+							<TableHead className="text-center text-muted-foreground cursor-help" title="Giocate">
+								G
+							</TableHead>
+							<TableHead className="text-center hidden md:table-cell cursor-help" title="Vinte">
+								V
+							</TableHead>
+							<TableHead
+								className="text-center hidden md:table-cell cursor-help"
+								title="Pareggiate"
+							>
+								N
+							</TableHead>
+							<TableHead className="text-center hidden md:table-cell cursor-help" title="Perse">
+								P
+							</TableHead>
+							<TableHead
+								className="text-center hidden sm:table-cell cursor-help"
+								title="Goal Fatti"
+							>
+								GF
+							</TableHead>
+							<TableHead
+								className="text-center hidden sm:table-cell cursor-help"
+								title="Goal Subiti"
+							>
+								GS
+							</TableHead>
+							<TableHead className="text-center cursor-help" title="Differenza Reti">
+								DR
+							</TableHead>
 							<TableHead
 								className={cn(
 									"text-center cursor-help",
 									showProjection && "text-purple-600 dark:text-purple-400 font-bold",
 								)}
-								title="Basato sulla media punti attuale"
+								title="Proiezione (basata sulla media punti attuale)"
 							>
 								Proj
 							</TableHead>
