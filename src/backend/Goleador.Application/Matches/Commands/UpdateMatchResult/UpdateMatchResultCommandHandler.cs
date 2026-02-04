@@ -13,7 +13,8 @@ namespace Goleador.Application.Matches.Commands.UpdateMatchResult;
 public class UpdateMatchResultCommandHandler(
     IApplicationDbContext context,
     IMemoryCache cache,
-    IMediator mediator
+    IMediator mediator,
+    ITournamentNotifier tournamentNotifier
 ) : IRequestHandler<UpdateMatchResultCommand, Unit>
 {
     public async Task<Unit> Handle(
@@ -68,6 +69,12 @@ public class UpdateMatchResultCommandHandler(
         if (!wasPlayed && match.Status == MatchStatus.Played)
         {
             await mediator.Publish(new MatchFinishedEvent(match.Id), cancellationToken);
+        }
+
+        // 6. Notifica Real-Time tramite SignalR
+        if (match.TournamentId.HasValue)
+        {
+            await tournamentNotifier.NotifyMatchUpdated(match.TournamentId.Value, match.Id);
         }
 
         return Unit.Value;
