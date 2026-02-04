@@ -1,4 +1,5 @@
 using Goleador.Application.Teams.Commands.RenameTeam;
+using Goleador.Application.Tournaments.Commands.AddLateTeam;
 using Goleador.Application.Tournaments.Commands.CreateTournament;
 using Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
 using Goleador.Application.Tournaments.Commands.JoinTournament;
@@ -64,6 +65,13 @@ public class TournamentsController : ApiControllerBase
     [HttpPost("{id}/teams")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Guid>> RegisterTeam(Guid id, RegisterTeamCommand command) =>
+        id != command.TournamentId
+            ? (ActionResult<Guid>)BadRequest()
+            : (ActionResult<Guid>)await Mediator.Send(command);
+
+    [HttpPost("{id}/teams/late")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<Guid>> AddLateTeam(Guid id, AddLateTeamCommand command) =>
         id != command.TournamentId
             ? (ActionResult<Guid>)BadRequest()
             : (ActionResult<Guid>)await Mediator.Send(command);

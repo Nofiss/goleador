@@ -15,7 +15,7 @@ public class UpdateMatchResultCommandHandler(
     IMemoryCache cache,
     IMediator mediator,
     ICurrentUserService currentUserService,
-    ILogger<UpdateMatchResultCommandHandler> logger
+    ILogger<UpdateMatchResultCommandHandler> logger,
     ITournamentNotifier tournamentNotifier
 ) : IRequestHandler<UpdateMatchResultCommand, Unit>
 {

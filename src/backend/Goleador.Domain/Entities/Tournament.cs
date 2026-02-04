@@ -80,6 +80,23 @@ public class Tournament : BaseEntity
         _teams.Add(team);
     }
 
+    public void AddLateTeam(TournamentTeam team)
+    {
+        if (Status != TournamentStatus.Active)
+        {
+            throw new InvalidOperationException("Tournament must be Active to add a late team.");
+        }
+
+        if (team.Players.Count != TeamSize)
+        {
+            throw new InvalidOperationException(
+                $"This tournament requires teams of {TeamSize} player(s)."
+            );
+        }
+
+        _teams.Add(team);
+    }
+
     public void StartTournament()
     {
         if (_teams.Count < 2)

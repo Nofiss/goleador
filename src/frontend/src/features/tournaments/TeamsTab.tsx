@@ -15,6 +15,9 @@ export const TeamsTab = ({ tournament }: Props) => {
 	const { isAdmin } = useAuth();
 	const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
 
+	const isSetup = tournament.status === TournamentStatus.setup;
+	const isActive = tournament.status === TournamentStatus.active;
+
 	// Ottimizzazione: useMemo per evitare di ricalcolare i giocatori assegnati e disponibili ad ogni render
 	const { assignedPlayerIds, availableCandidates } = useMemo(() => {
 		const assignedIds = new Set(tournament.teams.flatMap((t) => t.players.map((p) => p.id)));
@@ -22,13 +25,11 @@ export const TeamsTab = ({ tournament }: Props) => {
 		return { assignedPlayerIds: Array.from(assignedIds), availableCandidates: available };
 	}, [tournament.teams, tournament.registeredPlayers]);
 
-	const isSetup = tournament.status === TournamentStatus.setup;
-
 	const newLocal = "text-sm text-muted-foreground/60 max-w-[250px] text-center";
 	return (
 		<div className="space-y-8 animate-in fade-in duration-500">
 			{/* ADMIN TOOLBAR */}
-			{isAdmin && isSetup && (
+			{isAdmin && (isSetup || isActive) && (
 				<div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-muted/30 p-4 rounded-2xl border border-border/50">
 					<div className="flex items-center gap-2">
 						<div className="p-2 bg-primary/10 rounded-lg">
@@ -105,6 +106,7 @@ export const TeamsTab = ({ tournament }: Props) => {
 				onOpenChange={setIsRegisterDialogOpen}
 				tournamentId={tournament.id}
 				availableCandidates={availableCandidates}
+				isLateEntry={isActive}
 			/>
 		</div>
 	);
