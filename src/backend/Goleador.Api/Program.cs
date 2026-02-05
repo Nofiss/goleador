@@ -75,6 +75,22 @@ builder
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
             ),
         };
+
+        // Defense in Depth: Enable JWT authentication for SignalR connections.
+        // WebSockets don't support custom headers in all browsers, so we extract the token from the query string.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddSignalR();

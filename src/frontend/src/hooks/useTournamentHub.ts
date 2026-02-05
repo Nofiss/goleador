@@ -17,7 +17,10 @@ export const useTournamentHub = (tournamentId: string | undefined) => {
 
 		// 1. Configurazione connessione
 		const connection = new HubConnectionBuilder()
-			.withUrl(`${API_BASE_URL}/hubs/tournament`)
+			.withUrl(`${API_BASE_URL}/hubs/tournament`, {
+				// Defense in Depth: Send the JWT token for authenticated SignalR connection.
+				accessTokenFactory: () => localStorage.getItem("goleador_token") || "",
+			})
 			.withAutomaticReconnect()
 			.configureLogging(LogLevel.Information)
 			.build();
