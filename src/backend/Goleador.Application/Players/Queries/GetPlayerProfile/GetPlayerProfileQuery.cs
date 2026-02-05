@@ -21,13 +21,25 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(p => p.Id == request.PlayerId, cancellationToken)
             ?? throw new KeyNotFoundException("Player not found");
 
+        // Optimization Bolt ⚡: Use .Select() projection instead of .Include()
+        // This fetches only the required scalar properties from the database, reducing
+        // data transfer and memory pressure significantly (O(1) columns instead of fetching full entity graphs).
         var matches = await context.Matches
             .AsNoTracking()
-            .Include(m => m.Participants)
-                .ThenInclude(p => p.Player)
             .Where(m => m.Status == MatchStatus.Played &&
                         m.Participants.Any(p => p.PlayerId == request.PlayerId))
             .OrderByDescending(m => m.DatePlayed)
+            .Select(m => new {
+                m.Id,
+                m.DatePlayed,
+                m.ScoreHome,
+                m.ScoreAway,
+                Participants = m.Participants.Select(p => new {
+                    p.PlayerId,
+                    p.Side,
+                    p.Player.Nickname
+                }).ToList()
+            })
             .ToListAsync(cancellationToken);
 
         var dto = new PlayerProfileDto
@@ -73,11 +85,11 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
                 {
                     if (partnersWins.TryGetValue(partner.PlayerId, out var val))
                     {
-                        partnersWins[partner.PlayerId] = (partner.Player.Nickname, val.Count + 1);
+                        partnersWins[partner.PlayerId] = (partner.Nickname, val.Count + 1);
                     }
                     else
                     {
-                        partnersWins[partner.PlayerId] = (partner.Player.Nickname, 1);
+                        partnersWins[partner.PlayerId] = (partner.Nickname, 1);
                     }
                 }
             }
@@ -92,11 +104,11 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
                 {
                     if (opponentsLosses.TryGetValue(opponent.PlayerId, out var val))
                     {
-                        opponentsLosses[opponent.PlayerId] = (opponent.Player.Nickname, val.Count + 1);
+                        opponentsLosses[opponent.PlayerId] = (opponent.Nickname, val.Count + 1);
                     }
                     else
                     {
-                        opponentsLosses[opponent.PlayerId] = (opponent.Player.Nickname, 1);
+                        opponentsLosses[opponent.PlayerId] = (opponent.Nickname, 1);
                     }
                 }
             }
@@ -113,8 +125,8 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
                     DatePlayed = match.DatePlayed,
                     ScoreHome = match.ScoreHome,
                     ScoreAway = match.ScoreAway,
-                    HomeTeamName = GetTeamName(match, Side.Home),
-                    AwayTeamName = GetTeamName(match, Side.Away),
+                    HomeTeamName = GetFormattedTeamName(match.Participants, Side.Home),
+                    AwayTeamName = GetFormattedTeamName(match.Participants, Side.Away),
                     Result = result
                 });
             }
@@ -151,10 +163,10 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         return dto;
     }
 
-    private string GetTeamName(Match match, Side side)
+    private static string GetFormattedTeamName(IEnumerable<dynamic> participants, Side side)
     {
-        var participants = match.Participants.Where(p => p.Side == side).ToList();
-        if (participants.Count == 0) return "Unknown";
-        return string.Join(" - ", participants.Select(p => p.Player.Nickname));
+        var sideParticipants = participants.Where(p => p.Side == side).ToList();
+        if (sideParticipants.Count == 0) return "Unknown";
+        return string.Join(" - ", sideParticipants.Select(p => (string)p.Nickname));
     }
 }
