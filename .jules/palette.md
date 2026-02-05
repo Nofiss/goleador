@@ -45,3 +45,7 @@
 ## 2025-05-23 - [Universal Icon Accessibility and Screen Reader Optimization]
 **Learning:** Modern UIs are heavily reliant on icons that are purely decorative when accompanied by text or used for visual flair. Failing to hide these with `aria-hidden="true"` creates excessive "noise" for screen reader users. Conversely, when icons replace critical data (like rank numbers in a table), they must be paired with `sr-only` text to remain inclusive.
 **Action:** Systematically apply `aria-hidden="true"` to all decorative icons and ensure icons that represent data have `sr-only` text alternatives.
+
+## 2025-05-24 - [Accessible Rank Visualization Pattern]
+**Learning:** When replacing numerical ranks with visual icons (like trophies for top positions), using a combination of `aria-hidden="true"` on the icon and a screen-reader-only (`sr-only`) span for the number provides a delightful visual experience while maintaining perfect accessibility. Consistency in this pattern across different ranking views (e.g., Global Ranking vs. Tournament Standings) reinforces the app's visual language.
+**Action:** Use the Trophy icon with `sr-only` text for top-3 ranks in all tables to provide visual delight and cross-page consistency.

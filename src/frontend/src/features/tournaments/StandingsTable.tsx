@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Trophy } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { getTournamentStandings } from "@/api/tournaments";
 import { Label } from "@/components/ui/label";
@@ -36,19 +37,27 @@ const StandingRow = memo(
 		return (
 			<TableRow className={cn(index === 0 && "bg-yellow-500/5 dark:bg-yellow-500/10")}>
 				<TableCell className="font-medium">
-					<div
-						className={cn(
-							"w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold",
-							index === 0
-								? "bg-yellow-400 text-yellow-950"
-								: index === 1
-									? "bg-slate-300 text-slate-900"
-									: index === 2
-										? "bg-amber-600 text-white"
-										: "bg-muted text-muted-foreground",
+					<div className="flex items-center justify-center">
+						{index < 3 ? (
+							<>
+								<Trophy
+									className={cn(
+										"h-5 w-5",
+										index === 0
+											? "text-yellow-500"
+											: index === 1
+												? "text-slate-400"
+												: "text-amber-600",
+									)}
+									aria-hidden="true"
+								/>
+								<span className="sr-only">{row.position}</span>
+							</>
+						) : (
+							<div className="w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold bg-muted text-muted-foreground">
+								{row.position}
+							</div>
 						)}
-					>
-						{row.position}
 					</div>
 				</TableCell>
 				<TableCell className="font-semibold text-foreground">{row.teamName}</TableCell>
