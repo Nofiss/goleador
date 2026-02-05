@@ -890,6 +890,8 @@
 		},
 		{
 			"key": "b222d63c-c1b4-4f93-81fe-86e1a3afd2ce",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-05",
 			"rule": "csharpsquid:S3776",
 			"severity": "CRITICAL",
 			"component": "Goleador:src/backend/Goleador.Application/Tournaments/Queries/GetTournamentStandings/GetTournamentStandingsQueryHandler.cs",
