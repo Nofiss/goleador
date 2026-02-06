@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { Mail, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -85,7 +86,13 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 						<FormItem>
 							<FormLabel>Nickname</FormLabel>
 							<FormControl>
-								<Input placeholder="Es. TheBomber" className="bg-background" {...field} />
+								<div className="relative">
+									<Input placeholder="Es. TheBomber" className="bg-background pl-9" {...field} />
+									<User
+										className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+										aria-hidden="true"
+									/>
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -100,7 +107,13 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 							<FormItem>
 								<FormLabel>Nome</FormLabel>
 								<FormControl>
-									<Input className="bg-background" {...field} />
+									<div className="relative">
+										<Input className="bg-background pl-9" {...field} />
+										<User
+											className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+											aria-hidden="true"
+										/>
+									</div>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -113,7 +126,13 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 							<FormItem>
 								<FormLabel>Cognome</FormLabel>
 								<FormControl>
-									<Input className="bg-background" {...field} />
+									<div className="relative">
+										<Input className="bg-background pl-9" {...field} />
+										<User
+											className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+											aria-hidden="true"
+										/>
+									</div>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -128,12 +147,18 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
-								<Input
-									type="email"
-									placeholder="mario.rossi@azienda.com"
-									className="bg-background"
-									{...field}
-								/>
+								<div className="relative">
+									<Input
+										type="email"
+										placeholder="mario.rossi@azienda.com"
+										className="bg-background pl-9"
+										{...field}
+									/>
+									<Mail
+										className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+										aria-hidden="true"
+									/>
+								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
