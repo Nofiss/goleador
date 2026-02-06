@@ -17,3 +17,7 @@
 ## 2025-02-03 - [Player Statistics Retrieval Optimization]
 **Learning:** Over-fetching in many-to-many relationships (Player -> MatchParticipant -> Match) can be a major bottleneck. The original code loaded all participants for every match where a player was present.
 **Action:** Use `.SelectMany(m => m.Participants)` followed by filtering and projection to fetch only the 4-5 scalar properties needed for calculation. This reduces data transfer and memory pressure, leading to a ~42% performance improvement in processing large datasets.
+
+## 2025-02-12 - [Database-Side Aggregation for Social Features]
+**Learning:** Calculating "Nemesis" and "Best Partner" by loading all historical matches into memory is an $O(N)$ anti-pattern. Even if N is matches, the materialization of full entity graphs (Matches + Participants) is expensive.
+**Action:** Use targeted database queries with `.Select()`, `.SelectMany()`, and `.GroupBy()` to calculate these relationships. Fetch only required scalar fields (Ids, Nicknames) and aggregate in memory only if the LINQ-to-SQL translation becomes too complex, ensuring that the heavy data lifting remains on the database side.

@@ -20,13 +20,40 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         var player = await FetchPlayerAsync(request.PlayerId, cancellationToken);
         var matches = await FetchMatchesAsync(request.PlayerId, cancellationToken);
 
+        var topPartner = partnerList
+            .GroupBy(p => new { p!.PlayerId, p.Nickname })
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault();
+
         var dto = new PlayerProfileDto
         {
             Id = player.Id,
             FullName = $"{player.FirstName} {player.LastName}".Trim(),
             Nickname = player.Nickname,
             EloRating = player.EloRating,
-            TotalMatches = matches.Count
+            TotalMatches = stats?.TotalMatches ?? 0,
+            Wins = stats?.Wins ?? 0,
+            Losses = stats?.Losses ?? 0,
+            GoalsFor = stats?.GoalsFor ?? 0,
+            GoalsAgainst = stats?.GoalsAgainst ?? 0,
+            WinRate = (stats?.TotalMatches ?? 0) == 0 ? 0 : Math.Round((double)stats!.Wins / stats.TotalMatches * 100, 1),
+            Nemesis = topNemesis == null ? null : new RelatedPlayerDto { PlayerId = topNemesis.Key.PlayerId, Nickname = topNemesis.Key.Nickname, Count = topNemesis.Count() },
+            BestPartner = topPartner == null ? null : new RelatedPlayerDto { PlayerId = topPartner.Key.PlayerId, Nickname = topPartner.Key.Nickname, Count = topPartner.Count() },
+            RecentMatches = recentMatches.Select(m => {
+                var myParticipant = m.Participants.First(p => p.PlayerId == request.PlayerId);
+                var mySide = myParticipant.Side;
+                var myScore = mySide == Side.Home ? m.ScoreHome : m.ScoreAway;
+                var oppScore = mySide == Side.Home ? m.ScoreAway : m.ScoreHome;
+                return new MatchBriefDto {
+                    Id = m.Id,
+                    DatePlayed = m.DatePlayed,
+                    ScoreHome = m.ScoreHome,
+                    ScoreAway = m.ScoreAway,
+                    HomeTeamName = string.Join(" - ", m.Participants.Where(p => p.Side == Side.Home).Select(p => p.Nickname)),
+                    AwayTeamName = string.Join(" - ", m.Participants.Where(p => p.Side == Side.Away).Select(p => p.Nickname)),
+                    Result = myScore > oppScore ? "W" : (myScore < oppScore ? "L" : "D")
+                };
+            }).ToList()
         };
 
         if (matches.Count == 0)
