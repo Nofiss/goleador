@@ -21,26 +21,91 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(p => p.Id == request.PlayerId, cancellationToken)
             ?? throw new KeyNotFoundException("Player not found");
 
-        // Optimization Bolt ⚡: Use .Select() projection instead of .Include()
-        // This fetches only the required scalar properties from the database, reducing
-        // data transfer and memory pressure significantly (O(1) columns instead of fetching full entity graphs).
-        var matches = await context.Matches
+        // Bolt ⚡ Optimization: Database-side aggregation for stats and relationships.
+        // Instead of loading all historical matches into memory (O(N) transfer), we perform
+        // targeted queries that return only the final results (O(1) transfer).
+
+        // 1. Aggregate Statistics
+        var stats = await context.Matches
             .AsNoTracking()
-            .Where(m => m.Status == MatchStatus.Played &&
-                        m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .Select(m => new
+            {
+                IsHome = m.Participants.Any(p => p.PlayerId == request.PlayerId && p.Side == Side.Home),
+                m.ScoreHome,
+                m.ScoreAway
+            })
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                TotalMatches = g.Count(),
+                Wins = g.Count(x => (x.IsHome && x.ScoreHome > x.ScoreAway) || (!x.IsHome && x.ScoreAway > x.ScoreHome)),
+                Losses = g.Count(x => (x.IsHome && x.ScoreHome < x.ScoreAway) || (!x.IsHome && x.ScoreAway < x.ScoreHome)),
+                GoalsFor = g.Sum(x => x.IsHome ? x.ScoreHome : x.ScoreAway),
+                GoalsAgainst = g.Sum(x => x.IsHome ? x.ScoreAway : x.ScoreHome)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        // 2. Recent Matches (Top 5)
+        var recentMatches = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
             .OrderByDescending(m => m.DatePlayed)
+            .Take(5)
             .Select(m => new {
                 m.Id,
                 m.DatePlayed,
                 m.ScoreHome,
                 m.ScoreAway,
-                Participants = m.Participants.Select(p => new {
-                    p.PlayerId,
-                    p.Side,
-                    p.Player.Nickname
-                }).ToList()
+                Participants = m.Participants.Select(p => new { p.PlayerId, p.Side, p.Player.Nickname }).ToList()
             })
             .ToListAsync(cancellationToken);
+
+        // 3. Nemesis (Opponent with most wins against me)
+        // We fetch the list of opponents from lost matches and aggregate them.
+        var nemesisList = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .Select(m => new {
+                IsHome = m.Participants.Any(p => p.PlayerId == request.PlayerId && p.Side == Side.Home),
+                m.ScoreHome,
+                m.ScoreAway,
+                Opponents = m.Participants
+                    .Where(p => p.Side != (m.Participants.Any(p2 => p2.PlayerId == request.PlayerId && p2.Side == Side.Home) ? Side.Home : Side.Away))
+                    .Select(p => new { p.PlayerId, p.Player.Nickname })
+            })
+            .Where(x => (x.IsHome && x.ScoreHome < x.ScoreAway) || (!x.IsHome && x.ScoreAway < x.ScoreHome))
+            .SelectMany(x => x.Opponents)
+            .ToListAsync(cancellationToken);
+
+        var topNemesis = nemesisList
+            .GroupBy(n => new { n.PlayerId, n.Nickname })
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault();
+
+        // 4. Best Partner (Teammate in won matches)
+        var partnerList = await context.Matches
+            .AsNoTracking()
+            .Where(m => m.Status == MatchStatus.Played && m.Participants.Any(p => p.PlayerId == request.PlayerId))
+            .Select(m => new {
+                IsHome = m.Participants.Any(p => p.PlayerId == request.PlayerId && p.Side == Side.Home),
+                m.ScoreHome,
+                m.ScoreAway,
+                Teammate = m.Participants
+                    .Where(p => p.PlayerId != request.PlayerId &&
+                               p.Side == (m.Participants.Any(p2 => p2.PlayerId == request.PlayerId && p2.Side == Side.Home) ? Side.Home : Side.Away))
+                    .Select(p => new { p.PlayerId, p.Player.Nickname })
+                    .FirstOrDefault()
+            })
+            .Where(x => (x.IsHome && x.ScoreHome > x.ScoreAway) || (!x.IsHome && x.ScoreAway > x.ScoreHome))
+            .Where(x => x.Teammate != null)
+            .Select(x => x.Teammate)
+            .ToListAsync(cancellationToken);
+
+        var topPartner = partnerList
+            .GroupBy(p => new { p!.PlayerId, p.Nickname })
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault();
 
         var dto = new PlayerProfileDto
         {
@@ -48,125 +113,31 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             FullName = $"{player.FirstName} {player.LastName}".Trim(),
             Nickname = player.Nickname,
             EloRating = player.EloRating,
-            TotalMatches = matches.Count
+            TotalMatches = stats?.TotalMatches ?? 0,
+            Wins = stats?.Wins ?? 0,
+            Losses = stats?.Losses ?? 0,
+            GoalsFor = stats?.GoalsFor ?? 0,
+            GoalsAgainst = stats?.GoalsAgainst ?? 0,
+            WinRate = (stats?.TotalMatches ?? 0) == 0 ? 0 : Math.Round((double)stats!.Wins / stats.TotalMatches * 100, 1),
+            Nemesis = topNemesis == null ? null : new RelatedPlayerDto { PlayerId = topNemesis.Key.PlayerId, Nickname = topNemesis.Key.Nickname, Count = topNemesis.Count() },
+            BestPartner = topPartner == null ? null : new RelatedPlayerDto { PlayerId = topPartner.Key.PlayerId, Nickname = topPartner.Key.Nickname, Count = topPartner.Count() },
+            RecentMatches = recentMatches.Select(m => {
+                var myParticipant = m.Participants.First(p => p.PlayerId == request.PlayerId);
+                var mySide = myParticipant.Side;
+                var myScore = mySide == Side.Home ? m.ScoreHome : m.ScoreAway;
+                var oppScore = mySide == Side.Home ? m.ScoreAway : m.ScoreHome;
+                return new MatchBriefDto {
+                    Id = m.Id,
+                    DatePlayed = m.DatePlayed,
+                    ScoreHome = m.ScoreHome,
+                    ScoreAway = m.ScoreAway,
+                    HomeTeamName = string.Join(" - ", m.Participants.Where(p => p.Side == Side.Home).Select(p => p.Nickname)),
+                    AwayTeamName = string.Join(" - ", m.Participants.Where(p => p.Side == Side.Away).Select(p => p.Nickname)),
+                    Result = myScore > oppScore ? "W" : (myScore < oppScore ? "L" : "D")
+                };
+            }).ToList()
         };
 
-        if (matches.Count == 0)
-        {
-            return dto;
-        }
-
-        var wins = 0;
-        var losses = 0;
-        var goalsFor = 0;
-        var goalsAgainst = 0;
-        var opponentsLosses = new Dictionary<Guid, (string Nickname, int Count)>();
-        var partnersWins = new Dictionary<Guid, (string Nickname, int Count)>();
-
-        foreach (var match in matches)
-        {
-            var myParticipant = match.Participants.First(p => p.PlayerId == request.PlayerId);
-            var mySide = myParticipant.Side;
-            var myScore = mySide == Side.Home ? match.ScoreHome : match.ScoreAway;
-            var opponentScore = mySide == Side.Home ? match.ScoreAway : match.ScoreHome;
-
-            goalsFor += myScore;
-            goalsAgainst += opponentScore;
-
-            string result;
-            if (myScore > opponentScore)
-            {
-                wins++;
-                result = "W";
-
-                // Best Partner Logic: teammates in won matches
-                var partner = match.Participants.FirstOrDefault(p => p.Side == mySide && p.PlayerId != request.PlayerId);
-                if (partner != null)
-                {
-                    if (partnersWins.TryGetValue(partner.PlayerId, out var val))
-                    {
-                        partnersWins[partner.PlayerId] = (partner.Nickname, val.Count + 1);
-                    }
-                    else
-                    {
-                        partnersWins[partner.PlayerId] = (partner.Nickname, 1);
-                    }
-                }
-            }
-            else if (myScore < opponentScore)
-            {
-                losses++;
-                result = "L";
-
-                // Nemesis Logic: opponents in lost matches
-                var opponents = match.Participants.Where(p => p.Side != mySide);
-                foreach (var opponent in opponents)
-                {
-                    if (opponentsLosses.TryGetValue(opponent.PlayerId, out var val))
-                    {
-                        opponentsLosses[opponent.PlayerId] = (opponent.Nickname, val.Count + 1);
-                    }
-                    else
-                    {
-                        opponentsLosses[opponent.PlayerId] = (opponent.Nickname, 1);
-                    }
-                }
-            }
-            else
-            {
-                result = "D";
-            }
-
-            if (dto.RecentMatches.Count < 5)
-            {
-                dto.RecentMatches.Add(new MatchBriefDto
-                {
-                    Id = match.Id,
-                    DatePlayed = match.DatePlayed,
-                    ScoreHome = match.ScoreHome,
-                    ScoreAway = match.ScoreAway,
-                    HomeTeamName = GetFormattedTeamName(match.Participants, Side.Home),
-                    AwayTeamName = GetFormattedTeamName(match.Participants, Side.Away),
-                    Result = result
-                });
-            }
-        }
-
-        dto.Wins = wins;
-        dto.Losses = losses;
-        dto.GoalsFor = goalsFor;
-        dto.GoalsAgainst = goalsAgainst;
-        dto.WinRate = dto.TotalMatches == 0 ? 0 : Math.Round((double)wins / dto.TotalMatches * 100, 1);
-
-        var topNemesis = opponentsLosses.OrderByDescending(x => x.Value.Count).FirstOrDefault();
-        if (topNemesis.Key != Guid.Empty)
-        {
-            dto.Nemesis = new RelatedPlayerDto
-            {
-                PlayerId = topNemesis.Key,
-                Nickname = topNemesis.Value.Nickname,
-                Count = topNemesis.Value.Count
-            };
-        }
-
-        var topPartner = partnersWins.OrderByDescending(x => x.Value.Count).FirstOrDefault();
-        if (topPartner.Key != Guid.Empty)
-        {
-            dto.BestPartner = new RelatedPlayerDto
-            {
-                PlayerId = topPartner.Key,
-                Nickname = topPartner.Value.Nickname,
-                Count = topPartner.Value.Count
-            };
-        }
-
         return dto;
-    }
-
-    private static string GetFormattedTeamName(IEnumerable<dynamic> participants, Side side)
-    {
-        var sideParticipants = participants.Where(p => p.Side == side).ToList();
-        if (sideParticipants.Count == 0) return "Unknown";
-        return string.Join(" - ", sideParticipants.Select(p => (string)p.Nickname));
     }
 }
