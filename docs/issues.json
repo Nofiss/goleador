@@ -2182,6 +2182,8 @@
 		},
 		{
 			"key": "81699428-e645-4eba-8741-3b7f9fe4c950",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-05",
 			"rule": "csharpsquid:S3776",
 			"severity": "CRITICAL",
 			"component": "Goleador:src/backend/Goleador.Application/Players/Queries/GetPlayerProfile/GetPlayerProfileQuery.cs",
