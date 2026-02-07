@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserPlus } from "lucide-react";
+import { Loader2, User, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { joinTournament } from "@/api/tournaments";
@@ -12,6 +12,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string }) => {
 	const [open, setOpen] = useState(false);
@@ -24,6 +25,7 @@ export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string })
 			queryClient.invalidateQueries({ queryKey: ["tournament", tournamentId] });
 			toast.success("Ti sei iscritto al torneo! 🎉");
 			setOpen(false);
+			setTeamName(""); // Reset field on success
 		},
 		onError: () => {
 			toast.error("Errore durante l'iscrizione");
@@ -34,7 +36,7 @@ export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string })
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button variant="default" className="bg-blue-600 hover:bg-blue-700">
-					<UserPlus className="mr-2 h-4 w-4" /> Partecipa
+					<UserPlus className="mr-2 h-4 w-4" aria-hidden="true" /> Partecipa
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-106.25">
@@ -42,21 +44,40 @@ export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string })
 					<DialogTitle>Iscrizione Torneo</DialogTitle>
 				</DialogHeader>
 				<div className="space-y-4 py-4">
-					<p className="text-sm text-gray-500">
-						Inserisci il nome con cui vuoi apparire in classifica (es. il tuo Nickname o nome di
-						battaglia).
-					</p>
-					<Input
-						placeholder="Nome Squadra"
-						value={teamName}
-						onChange={(e) => setTeamName(e.target.value)}
-					/>
+					<div className="space-y-2">
+						<Label htmlFor="teamName">Nome Squadra</Label>
+						<p id="teamName-desc" className="text-sm text-muted-foreground">
+							Inserisci il nome con cui vuoi apparire in classifica (es. il tuo Nickname o nome di
+							battaglia).
+						</p>
+						<div className="relative">
+							<Input
+								id="teamName"
+								placeholder="Il tuo Nickname"
+								value={teamName}
+								onChange={(e) => setTeamName(e.target.value)}
+								aria-describedby="teamName-desc"
+								className="pl-9"
+							/>
+							<User
+								className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50"
+								aria-hidden="true"
+							/>
+						</div>
+					</div>
 					<Button
 						className="w-full"
 						onClick={() => mutation.mutate()}
-						disabled={mutation.isPending}
+						disabled={mutation.isPending || !teamName.trim()}
 					>
-						{mutation.isPending ? "Iscrizione..." : "Conferma Iscrizione"}
+						{mutation.isPending ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+								Iscrizione in corso...
+							</>
+						) : (
+							"Conferma Iscrizione"
+						)}
 					</Button>
 				</div>
 			</DialogContent>

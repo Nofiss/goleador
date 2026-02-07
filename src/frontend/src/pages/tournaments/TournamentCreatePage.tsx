@@ -9,7 +9,7 @@ export const TournamentCreatePage = () => {
 	return (
 		<div className="max-w-3xl mx-auto space-y-6">
 			<div className="flex items-center gap-4">
-				<Button variant="ghost" size="icon" asChild>
+				<Button variant="ghost" size="icon" asChild aria-label="Torna alla lista tornei">
 					<Link to="/tournaments">
 						<ChevronLeft className="h-5 w-5" />
 					</Link>
