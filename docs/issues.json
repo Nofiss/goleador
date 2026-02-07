@@ -98,6 +98,8 @@
 		},
 		{
 			"key": "9ad7539d-f85d-42d3-8e27-8f3cf192d5b7",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-05",
 			"rule": "csharpsquid:S3776",
 			"severity": "CRITICAL",
 			"component": "Goleador:src/backend/Goleador.Application/Players/Queries/GetPlayerStatistics/GetPlayerStatisticsQuery.cs",
