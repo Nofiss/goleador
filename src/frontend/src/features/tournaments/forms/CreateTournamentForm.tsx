@@ -1,7 +1,7 @@
 // src/features/tournaments/CreateTournamentForm.tsx
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Swords, Table, Trophy, Users } from "lucide-react";
 import { useState } from "react";
 import { createTournament } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
@@ -61,66 +61,92 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 				<CardContent className="pt-6 space-y-4">
 					<div className="space-y-2">
 						<Label htmlFor="tournament-name">Nome Torneo</Label>
-						<Input
-							id="tournament-name"
-							value={formData.name}
-							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-							placeholder="Es. Champions League 2026"
-							required
-						/>
+						<div className="relative">
+							<Input
+								id="tournament-name"
+								className="pl-9"
+								value={formData.name}
+								onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+								placeholder="Es. Champions League 2026"
+								required
+							/>
+							<Trophy
+								className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50 pointer-events-none"
+								aria-hidden="true"
+							/>
+						</div>
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<Label htmlFor="tournament-type">Modalità</Label>
-							<Select
-								value={formData.type.toString()}
-								onValueChange={(v) =>
-									setFormData({
-										...formData,
-										type: parseInt(v, 10) as TournamentType,
-									})
-								}
-							>
-								<SelectTrigger id="tournament-type">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value={TournamentType.roundRobin.toString()}>
-										Girone (Campionato)
-									</SelectItem>
-									{/* Elimination non è ancora supportato dal backend scheduler, meglio nasconderlo o gestirlo */}
-									<SelectItem value={TournamentType.elimination.toString()} disabled>
-										Eliminazione (WIP)
-									</SelectItem>
-								</SelectContent>
-							</Select>
+							<div className="relative">
+								<Select
+									value={formData.type.toString()}
+									onValueChange={(v) =>
+										setFormData({
+											...formData,
+											type: parseInt(v, 10) as TournamentType,
+										})
+									}
+								>
+									<SelectTrigger id="tournament-type" className="pl-9 w-full">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={TournamentType.roundRobin.toString()}>
+											Girone (Campionato)
+										</SelectItem>
+										{/* Elimination non è ancora supportato dal backend scheduler, meglio nasconderlo o gestirlo */}
+										<SelectItem value={TournamentType.elimination.toString()} disabled>
+											Eliminazione (WIP)
+										</SelectItem>
+									</SelectContent>
+								</Select>
+								<Swords
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50 z-10 pointer-events-none"
+									aria-hidden="true"
+								/>
+							</div>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="tournament-format">Formato</Label>
-							<Select
-								value={formData.teamSize.toString()}
-								onValueChange={(v) => setFormData({ ...formData, teamSize: parseInt(v, 10) })}
-							>
-								<SelectTrigger id="tournament-format">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="1">1 vs 1</SelectItem>
-									<SelectItem value="2">2 vs 2</SelectItem>
-								</SelectContent>
-							</Select>
+							<div className="relative">
+								<Select
+									value={formData.teamSize.toString()}
+									onValueChange={(v) => setFormData({ ...formData, teamSize: parseInt(v, 10) })}
+								>
+									<SelectTrigger id="tournament-format" className="pl-9 w-full">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="1">1 vs 1</SelectItem>
+										<SelectItem value="2">2 vs 2</SelectItem>
+									</SelectContent>
+								</Select>
+								<Users
+									className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50 z-10 pointer-events-none"
+									aria-hidden="true"
+								/>
+							</div>
 						</div>
 
-						<div className="space-y-2">
+						<div className="space-y-2 col-span-2">
 							<Label htmlFor="tournament-notes">Note (Opzionale)</Label>
-							<Textarea
-								id="tournament-notes"
-								placeholder="Regole speciali, premi in palio..."
-								value={formData.notes}
-								onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-							/>
+							<div className="relative">
+								<Textarea
+									id="tournament-notes"
+									className="pl-9 min-h-[100px]"
+									placeholder="Regole speciali, premi in palio..."
+									value={formData.notes}
+									onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+								/>
+								<Table
+									className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/50 pointer-events-none"
+									aria-hidden="true"
+								/>
+							</div>
 						</div>
 					</div>
 					<div className="flex items-center space-x-2 pt-2">
@@ -137,10 +163,22 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 			</Card>
 
 			{/* Sezione Avanzate (Punteggi) */}
-			<Card>
+			<Card className="border-dashed">
 				<CardContent className="pt-6">
-					<Button type="button" variant="ghost" onClick={() => setShowAdvanced(!showAdvanced)}>
-						{showAdvanced ? "Nascondi Regole Punteggio" : "Configura Punteggi Personalizzati"}
+					<Button
+						type="button"
+						variant="ghost"
+						className="w-full justify-between"
+						onClick={() => setShowAdvanced(!showAdvanced)}
+					>
+						<span className="flex items-center gap-2">
+							{showAdvanced ? "Nascondi Regole Punteggio" : "Configura Punteggi Personalizzati"}
+						</span>
+						{showAdvanced ? (
+							<ChevronUp className="h-4 w-4" aria-hidden="true" />
+						) : (
+							<ChevronDown className="h-4 w-4" aria-hidden="true" />
+						)}
 					</Button>
 					{showAdvanced && (
 						<div className="mt-4 space-y-4">
