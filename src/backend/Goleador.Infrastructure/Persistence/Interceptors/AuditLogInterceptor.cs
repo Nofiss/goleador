@@ -36,6 +36,7 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
+    // SonarQube: csharpsquid:S3776 - Refactored to reduce cognitive complexity
     private List<AuditEntry> OnBeforeSaveChanges(DbContext context)
     {
         context.ChangeTracker.DetectChanges();
@@ -43,60 +44,10 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
 
         foreach (var entry in context.ChangeTracker.Entries())
         {
-            if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-                continue;
-
-            var auditEntry = new AuditEntry(entry)
+            var auditEntry = CreateAuditEntry(entry);
+            if (auditEntry != null)
             {
-                TableName = entry.Metadata.GetTableName() ?? entry.Metadata.Name,
-                UserId = currentUserService.UserId,
-                Type = entry.State switch
-                {
-                    EntityState.Added => "Create",
-                    EntityState.Modified => "Update",
-                    EntityState.Deleted => "Delete",
-                    _ => entry.State.ToString()
-                }
-            };
-            auditEntries.Add(auditEntry);
-
-            foreach (var property in entry.Properties)
-            {
-                if (property.IsTemporary)
-                {
-                    auditEntry.TemporaryProperties.Add(property);
-                    continue;
-                }
-
-                string propertyName = property.Metadata.Name;
-                if (property.Metadata.IsPrimaryKey())
-                {
-                    auditEntry.KeyValues[propertyName] = property.CurrentValue;
-                    continue;
-                }
-
-                if (IsSensitive(propertyName))
-                    continue;
-
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        auditEntry.NewValues[propertyName] = property.CurrentValue;
-                        break;
-
-                    case EntityState.Deleted:
-                        auditEntry.OldValues[propertyName] = property.OriginalValue;
-                        break;
-
-                    case EntityState.Modified:
-                        if (property.IsModified)
-                        {
-                            auditEntry.ChangedColumns.Add(propertyName);
-                            auditEntry.OldValues[propertyName] = property.OriginalValue;
-                            auditEntry.NewValues[propertyName] = property.CurrentValue;
-                        }
-                        break;
-                }
+                auditEntries.Add(auditEntry);
             }
         }
 
@@ -106,6 +57,76 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
         }
 
         return auditEntries.Where(_ => _.HasTemporaryProperties).ToList();
+    }
+
+    private AuditEntry? CreateAuditEntry(EntityEntry entry)
+    {
+        if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+            return null;
+
+        var auditEntry = new AuditEntry(entry)
+        {
+            TableName = entry.Metadata.GetTableName() ?? entry.Metadata.Name,
+            UserId = currentUserService.UserId,
+            Type = entry.State switch
+            {
+                EntityState.Added => "Create",
+                EntityState.Modified => "Update",
+                EntityState.Deleted => "Delete",
+                _ => entry.State.ToString()
+            }
+        };
+
+        foreach (var property in entry.Properties)
+        {
+            ProcessProperty(entry, auditEntry, property);
+        }
+
+        return auditEntry;
+    }
+
+    private static void ProcessProperty(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property)
+    {
+        if (property.IsTemporary)
+        {
+            auditEntry.TemporaryProperties.Add(property);
+            return;
+        }
+
+        string propertyName = property.Metadata.Name;
+        if (property.Metadata.IsPrimaryKey())
+        {
+            auditEntry.KeyValues[propertyName] = property.CurrentValue;
+            return;
+        }
+
+        if (IsSensitive(propertyName))
+            return;
+
+        MapPropertyValue(entry, auditEntry, property, propertyName);
+    }
+
+    private static void MapPropertyValue(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property, string propertyName)
+    {
+        switch (entry.State)
+        {
+            case EntityState.Added:
+                auditEntry.NewValues[propertyName] = property.CurrentValue;
+                break;
+
+            case EntityState.Deleted:
+                auditEntry.OldValues[propertyName] = property.OriginalValue;
+                break;
+
+            case EntityState.Modified:
+                if (property.IsModified)
+                {
+                    auditEntry.ChangedColumns.Add(propertyName);
+                    auditEntry.OldValues[propertyName] = property.OriginalValue;
+                    auditEntry.NewValues[propertyName] = property.CurrentValue;
+                }
+                break;
+        }
     }
 
     private static bool IsSensitive(string propertyName) =>
