@@ -1,10 +1,6 @@
 name: 🛡️ CI - Build & Test
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -15,16 +11,15 @@ jobs:
     name: 🏗️ Backend (.NET)
     runs-on: ubuntu-latest
 
-    # Esegui solo se cambiano file nel backend o nei workflow
     defaults:
       run:
         working-directory: ./src/backend
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
@@ -41,7 +36,7 @@ jobs:
         run: dotnet publish -c Release -o ./publish
 
       - name: Upload Backend Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: backend-dist
           path: src/backend/publish/
@@ -58,18 +53,18 @@ jobs:
         working-directory: ./src/frontend
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       # 1. Installa e configura PNPM
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
         with:
-          version: 9 # Usa la major version che stai usando in locale
+          version: 9
           run_install: false
 
       # 2. Setup Node.js + Caching automatico per pnpm
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -77,7 +72,6 @@ jobs:
           cache-dependency-path: src/frontend/pnpm-lock.yaml
 
       # 3. Installazione dipendenze
-      # --frozen-lockfile è l'equivalente pnpm di 'npm ci' (fallisce se il lock file cambia)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -85,14 +79,11 @@ jobs:
       - name: Type Check (TypeScript)
         run: pnpm tsc --noEmit
 
-      # - name: Biome ci
-      #   run: pnpm biome:ci
-
       - name: Build
         run: pnpm run build
 
       - name: Upload Frontend Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: src/frontend/dist/
@@ -103,20 +94,20 @@ jobs:
   release:
     name: 🚀 Create Release
     needs: [backend, frontend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Download Backend Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           name: backend-dist
           path: ./release-assets/backend
 
       - name: Download Frontend Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           name: frontend-dist
           path: ./release-assets/frontend
@@ -132,7 +123,6 @@ jobs:
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # Genera un tag automatico basato sulla data e il numero della build
           tag_name: v1.0.${{ github.run_number }}
           name: Release v1.0.${{ github.run_number }}
           draft: false

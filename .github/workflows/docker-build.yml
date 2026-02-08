@@ -1,13 +1,7 @@
 name: 🐳 Docker Publish
 
 on:
-  push:
-    branches: ["main"]
-    # Esegui solo se cambiano file rilevanti
-    paths:
-      - "src/backend/**"
-      - "src/frontend/**"
-      - ".github/workflows/docker-build.yml"
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -21,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Downcase REPO name
         run: |
