@@ -5,112 +5,121 @@ namespace Goleador.Application.Tournaments.Services;
 
 public static class RoundRobinScheduler
 {
+    // SonarQube: csharpsquid:S3776 - Refactored to reduce cognitive complexity from 21 to below 15.
     public static List<Match> GenerateMatches(Tournament tournament, List<TournamentTeam> teams)
     {
-        var matches = new List<Match>();
-        var teamsCount = teams.Count;
+        var workingTeams = new List<TournamentTeam>(teams);
+        EnsureEvenTeams(workingTeams);
 
-        // Se le squadre sono dispari, aggiungiamo una squadra "Dummy" (chi gioca contro Dummy riposa)
-        if (teamsCount % 2 != 0)
-        {
-            teams.Add(null!); // Null rappresenta il "Riposo"
-            teamsCount++;
-        }
+        var numRounds = workingTeams.Count - 1;
+        var matches = GenerateFirstLegMatches(tournament, workingTeams, numRounds);
 
-        var numRounds = teamsCount - 1;
-        var matchesPerRound = teamsCount / 2;
-
-        // Algoritmo di Berger (Circle Method)
-        // Immagina le squadre in cerchio. Una sta ferma, le altre ruotano.
-        for (var round = 0; round < numRounds; round++)
-        {
-            var currentRoundNumber = round + 1;
-
-            for (var i = 0; i < matchesPerRound; i++)
-            {
-                TournamentTeam teamHome = teams[i];
-                TournamentTeam teamAway = teams[teamsCount - 1 - i];
-
-                // Se una delle due squadre è null (Dummy), è un turno di riposo -> Niente partita
-                if (teamHome == null || teamAway == null)
-                {
-                    continue;
-                }
-
-                // Creiamo la partita (Andata)
-                // Alterniamo casa/trasferta in base al round per bilanciare (algoritmo standard)
-                if (round % 2 == 0)
-                {
-                    matches.Add(CreateMatch(tournament.Id, teamHome, teamAway, currentRoundNumber));
-                }
-                else
-                {
-                    matches.Add(CreateMatch(tournament.Id, teamAway, teamHome, currentRoundNumber));
-                }
-            }
-
-            // Rotazione delle squadre per il prossimo round
-            // Teniamo fissa la prima squadra (indice 0) e ruotiamo le altre
-            TournamentTeam lastTeam = teams[teamsCount - 1];
-            teams.RemoveAt(teamsCount - 1);
-            teams.Insert(1, lastTeam);
-        }
-
-        // Gestione Ritorno (Return Matches)
-        // Il modo più pulito con l'algoritmo di Berger è generare il ritorno semplicemente invertendo Home/Away
-        // nella lista generata.
         if (tournament.HasReturnMatches)
         {
-            // Creiamo una lista temporanea per il ritorno
-            var returnMatches = new List<Match>();
-
-            foreach (Match m in matches)
-            {
-                // Dobbiamo risalire ai Team per ricreare il match pulito.
-                // Poiché Match non ha "TeamId", è rischioso. 
-                // PER QUESTO ESEMPIO: Semplifichiamo. Se c'è ritorno, 
-                // assumiamo che per ogni match A vs B, ne creiamo uno B vs A.
-                // Ma ci servono gli ID dei giocatori.
-                var returnRoundNumber = m.Round + numRounds;
-
-                // Recuperiamo i player Home e Away dal match appena creato
-                var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
-                var awayPlayers = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
-
-                var returnMatch = new Match(0, 0, tournament.Id, null, returnRoundNumber); // Score 0-0
-                // Impostiamo lo stato come Scheduled (0)
-                // (Assumiamo che il costruttore o default lo metta a Scheduled, e score a 0)
-
-                foreach (Guid id in awayPlayers)
-                {
-                    returnMatch.AddParticipant(id, Side.Home); // Vecchi Away diventano Home
-                }
-
-                foreach (Guid id in homePlayers)
-                {
-                    returnMatch.AddParticipant(id, Side.Away); // Vecchi Home diventano Away
-                }
-
-                returnMatches.Add(returnMatch);
-            }
-            matches.AddRange(returnMatches);
+            matches.AddRange(GenerateReturnLegMatches(tournament, matches, numRounds));
         }
 
         return matches;
     }
 
-    static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
+    private static void EnsureEvenTeams(List<TournamentTeam> teams)
     {
-        var match = new Match(0, 0, tournamentId, null, round); // Score iniziale 0-0
+        if (teams.Count % 2 != 0)
+        {
+            teams.Add(null!); // Null represents a "Rest" round
+        }
+    }
 
-        // Aggiungiamo i giocatori della squadra Home
-        foreach (Player player in home.Players)
+    private static List<Match> GenerateFirstLegMatches(Tournament tournament, List<TournamentTeam> teams, int numRounds)
+    {
+        var matches = new List<Match>();
+        var matchesPerRound = teams.Count / 2;
+
+        for (var round = 0; round < numRounds; round++)
+        {
+            var roundNumber = round + 1;
+            matches.AddRange(GenerateRoundMatches(tournament, teams, round, roundNumber, matchesPerRound));
+            RotateTeams(teams);
+        }
+
+        return matches;
+    }
+
+    private static List<Match> GenerateRoundMatches(Tournament tournament, List<TournamentTeam> teams, int roundIdx, int roundNumber, int matchesPerRound)
+    {
+        var roundMatches = new List<Match>();
+        var teamsCount = teams.Count;
+
+        for (var i = 0; i < matchesPerRound; i++)
+        {
+            var teamHome = teams[i];
+            var teamAway = teams[teamsCount - 1 - i];
+
+            if (teamHome == null || teamAway == null)
+            {
+                continue;
+            }
+
+            // Alternate home/away based on round to balance scheduling
+            if (roundIdx % 2 == 0)
+            {
+                roundMatches.Add(CreateMatch(tournament.Id, teamHome, teamAway, roundNumber));
+            }
+            else
+            {
+                roundMatches.Add(CreateMatch(tournament.Id, teamAway, teamHome, roundNumber));
+            }
+        }
+
+        return roundMatches;
+    }
+
+    private static void RotateTeams(List<TournamentTeam> teams)
+    {
+        var teamsCount = teams.Count;
+        var lastTeam = teams[teamsCount - 1];
+        teams.RemoveAt(teamsCount - 1);
+        teams.Insert(1, lastTeam);
+    }
+
+    private static List<Match> GenerateReturnLegMatches(Tournament tournament, List<Match> firstLegMatches, int firstLegRounds)
+    {
+        var returnMatches = new List<Match>();
+
+        foreach (var m in firstLegMatches)
+        {
+            var returnRoundNumber = m.Round + firstLegRounds;
+            var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
+            var awayPlayers = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).ToList();
+
+            var returnMatch = new Match(0, 0, tournament.Id, null, returnRoundNumber);
+
+            foreach (var id in awayPlayers)
+            {
+                returnMatch.AddParticipant(id, Side.Home);
+            }
+
+            foreach (var id in homePlayers)
+            {
+                returnMatch.AddParticipant(id, Side.Away);
+            }
+
+            returnMatches.Add(returnMatch);
+        }
+
+        return returnMatches;
+    }
+
+    private static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
+    {
+        var match = new Match(0, 0, tournamentId, null, round);
+
+        foreach (var player in home.Players)
         {
             match.AddParticipant(player.Id, Side.Home);
         }
 
-        // Aggiungiamo i giocatori della squadra Away
-        foreach (Player player in away.Players)
+        foreach (var player in away.Players)
         {
             match.AddParticipant(player.Id, Side.Away);
         }
