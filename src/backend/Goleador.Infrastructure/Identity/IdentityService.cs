@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Application.Common.Models;
+using Goleador.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,8 +12,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Goleador.Infrastructure.Identity;
 
-public class IdentityService(UserManager<ApplicationUser> userManager, IConfiguration configuration)
-    : IIdentityService
+public class IdentityService(
+    UserManager<ApplicationUser> userManager,
+    IConfiguration configuration,
+    ApplicationDbContext context
+) : IIdentityService
 {
     public async Task<TokenResponse?> LoginAsync(string email, string password)
     {
@@ -306,16 +310,35 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         List<(string Id, string Email, string Username, string[] Roles)>
     > GetAllUsersAsync()
     {
-        List<ApplicationUser> users = await userManager.Users.ToListAsync();
-        var result = new List<(string, string, string, string[])>();
+        // Optimization Bolt ⚡: Use a single LINQ projection with joins to fetch all users and their roles.
+        // This eliminates the N+1 problem (O(N) queries) by retrieving all data in a single database roundtrip (O(1)).
+        var usersWithRoles = await context
+            .Set<ApplicationUser>()
+            .AsNoTracking()
+            .Select(u => new
+            {
+                u.Id,
+                u.Email,
+                u.UserName,
+                Roles = (
+                    from ur in context.Set<IdentityUserRole<string>>()
+                    join r in context.Set<IdentityRole>() on ur.RoleId equals r.Id
+                    where ur.UserId == u.Id
+                    select r.Name
+                )
+                    .Where(name => name != null)
+                    .ToList(),
+            })
+            .ToListAsync();
 
-        foreach (ApplicationUser user in users)
-        {
-            IList<string> roles = await userManager.GetRolesAsync(user);
-            result.Add((user.Id, user.Email!, user.UserName!, roles.ToArray()));
-        }
-
-        return result;
+        return usersWithRoles
+            .Select(x => (
+                x.Id,
+                x.Email ?? string.Empty,
+                x.UserName ?? string.Empty,
+                x.Roles.Cast<string>().ToArray()
+            ))
+            .ToList();
     }
 
     public async Task<(bool Success, string[] Errors)> UpdateUserRolesAsync(
