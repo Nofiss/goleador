@@ -21,3 +21,7 @@
 ## 2025-02-12 - [Database-Side Aggregation for Social Features]
 **Learning:** Calculating "Nemesis" and "Best Partner" by loading all historical matches into memory is an $O(N)$ anti-pattern. Even if N is matches, the materialization of full entity graphs (Matches + Participants) is expensive.
 **Action:** Use targeted database queries with `.Select()`, `.SelectMany()`, and `.GroupBy()` to calculate these relationships. Fetch only required scalar fields (Ids, Nicknames) and aggregate in memory only if the LINQ-to-SQL translation becomes too complex, ensuring that the heavy data lifting remains on the database side.
+
+## 2026-02-09 - [Identity N+1 Role Retrieval Optimization]
+**Learning:** Found that `IdentityService.GetAllUsersAsync` was performing a separate database query for each user to fetch their roles (N+1 problem). `UserManager` methods are often atomic and don't support batching role retrieval out-of-the-box.
+**Action:** Injected `ApplicationDbContext` into `IdentityService` and used a LINQ projection with joins on `Users`, `UserRoles`, and `Roles` to fetch all data in a single roundtrip, reducing complexity from O(N) to O(1) queries.
