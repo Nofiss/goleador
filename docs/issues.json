@@ -8278,6 +8278,8 @@
 		},
 		{
 			"key": "aeccbdfb-473e-4c72-a99b-90422bbccf4f",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-08",
 			"rule": "csharpsquid:S3776",
 			"severity": "CRITICAL",
 			"component": "Goleador:src/backend/Goleador.Application/Tournaments/Services/RoundRobinScheduler.cs",
