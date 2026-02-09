@@ -3,6 +3,9 @@ name: 🛡️ CI - Build & Test
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   # ===========================
   # BACKEND JOB
