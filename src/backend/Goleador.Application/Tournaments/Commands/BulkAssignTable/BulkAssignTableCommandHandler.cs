@@ -2,10 +2,11 @@ using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.BulkAssignTable;
 
-public class BulkAssignTableCommandHandler(IApplicationDbContext context)
+public class BulkAssignTableCommandHandler(IApplicationDbContext context, IMemoryCache cache)
     : IRequestHandler<BulkAssignTableCommand, Unit>
 {
     public async Task<Unit> Handle(
@@ -39,6 +40,9 @@ public class BulkAssignTableCommandHandler(IApplicationDbContext context)
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Invalidate cache when tables are bulk assigned
+        cache.Remove($"TournamentDetail-{request.TournamentId}");
 
         return Unit.Value;
     }

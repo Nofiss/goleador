@@ -3,10 +3,11 @@ using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.AddLateTeam;
 
-public class AddLateTeamCommandHandler(IApplicationDbContext context)
+public class AddLateTeamCommandHandler(IApplicationDbContext context, IMemoryCache cache)
     : IRequestHandler<AddLateTeamCommand, Guid>
 {
     public async Task<Guid> Handle(AddLateTeamCommand request, CancellationToken cancellationToken)
@@ -81,6 +82,9 @@ public class AddLateTeamCommandHandler(IApplicationDbContext context)
 
         context.Matches.AddRange(newMatches);
         await context.SaveChangesAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Invalidate cache when a late team is added
+        cache.Remove($"TournamentDetail-{tournament.Id}");
 
         return newTeam.Id;
     }

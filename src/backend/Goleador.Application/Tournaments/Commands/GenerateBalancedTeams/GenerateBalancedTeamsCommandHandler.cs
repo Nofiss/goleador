@@ -3,12 +3,14 @@ using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
 
 public class GenerateBalancedTeamsCommandHandler(
     IApplicationDbContext context,
-    ITeamGeneratorService aiService
+    ITeamGeneratorService aiService,
+    IMemoryCache cache
 ) : IRequestHandler<GenerateBalancedTeamsCommand, Unit>
 {
     public async Task<Unit> Handle(GenerateBalancedTeamsCommand request, CancellationToken token)
@@ -92,6 +94,10 @@ public class GenerateBalancedTeamsCommandHandler(
         }
 
         await context.SaveChangesAsync(token);
+
+        // Optimization Bolt ⚡: Invalidate cache when teams are generated
+        cache.Remove($"TournamentDetail-{tournament.Id}");
+
         return Unit.Value;
     }
 }

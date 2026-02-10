@@ -4,10 +4,11 @@ using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.StartTournament;
 
-public class StartTournamentCommandHandler(IApplicationDbContext context)
+public class StartTournamentCommandHandler(IApplicationDbContext context, IMemoryCache cache)
     : IRequestHandler<StartTournamentCommand, Unit>
 {
     public async Task<Unit> Handle(
@@ -55,6 +56,9 @@ public class StartTournamentCommandHandler(IApplicationDbContext context)
         tournament.StartTournament(); // Metodo creato nell'entità Tournament precedentemente
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Invalidate cache when tournament starts
+        cache.Remove($"TournamentDetail-{tournament.Id}");
 
         return Unit.Value;
     }

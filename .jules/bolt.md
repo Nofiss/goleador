@@ -25,3 +25,7 @@
 ## 2026-02-09 - [Identity N+1 Role Retrieval Optimization]
 **Learning:** Found that `IdentityService.GetAllUsersAsync` was performing a separate database query for each user to fetch their roles (N+1 problem). `UserManager` methods are often atomic and don't support batching role retrieval out-of-the-box.
 **Action:** Injected `ApplicationDbContext` into `IdentityService` and used a LINQ projection with joins on `Users`, `UserRoles`, and `Roles` to fetch all data in a single roundtrip, reducing complexity from O(N) to O(1) queries.
+
+## 2025-02-13 - [Tournament Detail Caching & Comprehensive Invalidation]
+**Learning:** Caching the complex `GetTournamentById` query significantly reduces database load and frontend latency for the most frequently visited page. However, caching requires a rigorous invalidation strategy.
+**Action:** Implemented `ICacheableQuery` for `GetTournamentByIdQuery` with a 30s TTL. Added explicit `cache.Remove($"TournamentDetail-{id}")` calls to all command handlers that modify tournament state (Matches, Teams, Status, Table Assignments) to ensure strict data consistency.

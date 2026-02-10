@@ -3,12 +3,14 @@ using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.JoinTournament;
 
 public class JoinTournamentCommandHandler(
     IApplicationDbContext context,
-    ICurrentUserService currentUserService
+    ICurrentUserService currentUserService,
+    IMemoryCache cache
 ) : IRequestHandler<JoinTournamentCommand, Guid>
 {
     public async Task<Guid> Handle(
@@ -54,6 +56,10 @@ public class JoinTournamentCommandHandler(
             var team = new TournamentTeam(tournament.Id, request.TeamName, [player]);
             tournament.RegisterTeam(team);
             await context.SaveChangesAsync(cancellationToken);
+
+            // Optimization Bolt ⚡: Invalidate cache when a user joins (team created)
+            cache.Remove($"TournamentDetail-{tournament.Id}");
+
             return team.Id;
         }
         // CASO B: Torneo 2vs2 (o NvsN) -> Qui è complesso.
