@@ -607,6 +607,8 @@
 		},
 		{
 			"key": "b806d955-d1f9-4322-a4f9-6ca2afe1c464",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-11",
 			"rule": "csharpsquid:S3776",
 			"severity": "CRITICAL",
 			"component": "Goleador:src/backend/Goleador.Application/Players/Queries/GetPendingMatches/GetMyPendingMatchesQueryHandler.cs",
