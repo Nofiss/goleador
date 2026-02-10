@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getTournaments } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
@@ -63,8 +63,21 @@ export const TournamentsListPage = () => {
 						</Card>
 					))
 				) : tournaments?.length === 0 ? (
-					<div className="col-span-full py-12 text-center border-2 border-dashed rounded-xl">
-						<p className="text-muted-foreground">Nessun torneo trovato.</p>
+					<div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed rounded-2xl bg-muted/10">
+						<div className="bg-muted rounded-full p-4 mb-4">
+							<Trophy className="h-10 w-10 text-muted-foreground/40" aria-hidden="true" />
+						</div>
+						<h3 className="text-xl font-semibold text-foreground">Nessun torneo trovato</h3>
+						<p className="text-muted-foreground mt-2 max-w-sm">
+							Al momento non ci sono competizioni attive o in programma.
+						</p>
+						{isAdmin && (
+							<Button asChild className="mt-6">
+								<Link to="/tournaments/new">
+									<Plus className="mr-2 h-4 w-4" /> Crea il primo torneo
+								</Link>
+							</Button>
+						)}
 					</div>
 				) : (
 					tournaments?.map((t) => (
