@@ -58,10 +58,11 @@ public class UpdateMatchResultCommandHandler(
             );
         }
 
-        // 4. Invalida cache classifica
+        // 4. Invalida cache classifica e dettaglio torneo
         if (match.TournamentId.HasValue)
         {
             cache.Remove($"Standings-{match.TournamentId}");
+            cache.Remove($"TournamentDetail-{match.TournamentId}");
         }
 
         // Invalida ranking globale (Elo e statistiche cambiano)
