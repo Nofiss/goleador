@@ -64,6 +64,20 @@ export const UserDashboard = () => {
 		return streak;
 	}, [profile]);
 
+	// Recharts data for Win Rate - Memoized to prevent recalculation on every render
+	const winRateData = useMemo(() => {
+		if (!profile) return [];
+		return [
+			{ name: "Vinte", value: profile.wins, color: "hsl(var(--primary))" },
+			{ name: "Perse", value: profile.losses, color: "hsl(var(--destructive))" },
+			{
+				name: "Pareggi",
+				value: Math.max(0, profile.totalMatches - profile.wins - profile.losses),
+				color: "hsl(var(--muted))",
+			},
+		].filter((d) => d.value > 0);
+	}, [profile]);
+
 	if (isProfileLoading || isPendingLoading) {
 		return (
 			<div className="container mx-auto px-4 py-8 space-y-8">
@@ -84,17 +98,6 @@ export const UserDashboard = () => {
 	if (!profile) return null;
 
 	const initials = profile.nickname.slice(0, 2).toUpperCase();
-
-	// Recharts data for Win Rate
-	const winRateData = [
-		{ name: "Vinte", value: profile.wins, color: "hsl(var(--primary))" },
-		{ name: "Perse", value: profile.losses, color: "hsl(var(--destructive))" },
-		{
-			name: "Pareggi",
-			value: Math.max(0, profile.totalMatches - profile.wins - profile.losses),
-			color: "hsl(var(--muted))",
-		},
-	].filter((d) => d.value > 0);
 
 	return (
 		<div className="container mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-700">

@@ -29,3 +29,7 @@
 ## 2025-02-13 - [Tournament Detail Caching & Comprehensive Invalidation]
 **Learning:** Caching the complex `GetTournamentById` query significantly reduces database load and frontend latency for the most frequently visited page. However, caching requires a rigorous invalidation strategy.
 **Action:** Implemented `ICacheableQuery` for `GetTournamentByIdQuery` with a 30s TTL. Added explicit `cache.Remove($"TournamentDetail-{id}")` calls to all command handlers that modify tournament state (Matches, Teams, Status, Table Assignments) to ensure strict data consistency.
+
+## 2025-02-14 - [React Query Global Configuration & Cache Sharing]
+**Learning:** Found that multiple components (Dashboard, Matches List) were fetching the same "Recent Matches" data using different query keys, leading to redundant API calls. Also, the default `staleTime` of 0 caused frequent unnecessary refetches.
+**Action:** Unified the query key for recent matches to `["recent-matches"]` across all components and set a global `staleTime` of 30s in `QueryClient` to maximize cache reuse and reduce server load.
