@@ -33,17 +33,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         // 2. Mappa base con AutoMapper
         TournamentDetailDto dto = mapper.Map<TournamentDetailDto>(tournament);
 
-        var playerTeamMap = new Dictionary<Guid, (string Name, Guid Id)>();
-        foreach (TournamentTeam team in tournament.Teams)
-        {
-            foreach (Player player in team.Players)
-            {
-                if (!playerTeamMap.ContainsKey(player.Id))
-                {
-                    playerTeamMap[player.Id] = (team.Name, team.Id);
-                }
-            }
-        }
+        var playerTeamMap = GetPlayerTeamMap(tournament);
 
         // Ottimizzazione Bolt ⚡: Usiamo un dizionario per evitare una ricerca O(N) dentro un loop O(N),
         // portando la complessità totale da O(N^2) a O(N).
@@ -51,55 +41,11 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
 
         foreach (TournamentMatchDto matchDto in dto.Matches)
         {
-            if (!matchMap.TryGetValue(matchDto.Id, out var matchEntity))
+            // SonarQube: csharpsquid:S3776 - Refactor logic to reduce cognitive complexity
+            if (matchMap.TryGetValue(matchDto.Id, out var matchEntity))
             {
-                continue;
+                EnrichMatch(matchDto, matchEntity, playerTeamMap);
             }
-
-            // Estraiamo i partecipanti
-            MatchParticipant? homeParticipant = matchEntity.Participants.FirstOrDefault(p =>
-                p.Side == Domain.Enums.Side.Home
-            );
-            MatchParticipant? awayParticipant = matchEntity.Participants.FirstOrDefault(p =>
-                p.Side == Domain.Enums.Side.Away
-            );
-
-            // Lookup istantaneo dal Dizionario
-            if (
-                homeParticipant != null
-                && playerTeamMap.TryGetValue(
-                    homeParticipant.PlayerId,
-                    out (string Name, Guid Id) homeTeam
-                )
-            )
-            {
-                matchDto.HomeTeamId = homeTeam.Id;
-                matchDto.HomeTeamName = homeTeam.Name;
-            }
-            else
-            {
-                matchDto.HomeTeamName = "N/A";
-            }
-
-            if (
-                awayParticipant != null
-                && playerTeamMap.TryGetValue(
-                    awayParticipant.PlayerId,
-                    out (string Name, Guid Id) awayTeam
-                )
-            )
-            {
-                matchDto.AwayTeamId = awayTeam.Id;
-                matchDto.AwayTeamName = awayTeam.Name;
-            }
-            else
-            {
-                matchDto.AwayTeamName = "N/A";
-            }
-
-            // Mapping Tavolo
-            matchDto.TableId = matchEntity.TableId;
-            matchDto.TableName = matchEntity.Table?.Name ?? string.Empty;
         }
 
         dto.RegisteredPlayers =
@@ -115,5 +61,70 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         dto.Matches = [.. dto.Matches.OrderBy(m => m.Round)];
 
         return dto;
+    }
+
+    private static Dictionary<Guid, (string Name, Guid Id)> GetPlayerTeamMap(Tournament tournament)
+    {
+        var playerTeamMap = new Dictionary<Guid, (string Name, Guid Id)>();
+        foreach (TournamentTeam team in tournament.Teams)
+        {
+            foreach (Player player in team.Players)
+            {
+                playerTeamMap.TryAdd(player.Id, (team.Name, team.Id));
+            }
+        }
+        return playerTeamMap;
+    }
+
+    private static void EnrichMatch(
+        TournamentMatchDto matchDto,
+        Match matchEntity,
+        Dictionary<Guid, (string Name, Guid Id)> playerTeamMap
+    )
+    {
+        // Estraiamo i partecipanti
+        MatchParticipant? homeParticipant = matchEntity.Participants.FirstOrDefault(p =>
+            p.Side == Domain.Enums.Side.Home
+        );
+        MatchParticipant? awayParticipant = matchEntity.Participants.FirstOrDefault(p =>
+            p.Side == Domain.Enums.Side.Away
+        );
+
+        // Lookup istantaneo dal Dizionario
+        if (
+            homeParticipant != null
+            && playerTeamMap.TryGetValue(
+                homeParticipant.PlayerId,
+                out (string Name, Guid Id) homeTeam
+            )
+        )
+        {
+            matchDto.HomeTeamId = homeTeam.Id;
+            matchDto.HomeTeamName = homeTeam.Name;
+        }
+        else
+        {
+            matchDto.HomeTeamName = "N/A";
+        }
+
+        if (
+            awayParticipant != null
+            && playerTeamMap.TryGetValue(
+                awayParticipant.PlayerId,
+                out (string Name, Guid Id) awayTeam
+            )
+        )
+        {
+            matchDto.AwayTeamId = awayTeam.Id;
+            matchDto.AwayTeamName = awayTeam.Name;
+        }
+        else
+        {
+            matchDto.AwayTeamName = "N/A";
+        }
+
+        // Mapping Tavolo
+        matchDto.TableId = matchEntity.TableId;
+        matchDto.TableName = matchEntity.Table?.Name ?? string.Empty;
     }
 }
