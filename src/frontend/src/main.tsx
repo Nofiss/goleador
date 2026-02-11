@@ -9,7 +9,14 @@ import { PwaUpdater } from "./components/PwaUpdater.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import "./globals.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 30, // 30 seconds
+			gcTime: 1000 * 60 * 5, // 5 minutes
+		},
+	},
+});
 
 const rootElement = document.getElementById("root");
 

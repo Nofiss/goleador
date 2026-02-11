@@ -51,7 +51,7 @@ MatchRow.displayName = "MatchRow";
 
 export const MatchesListTable = () => {
 	const { data: matches, isLoading } = useQuery({
-		queryKey: ["matches"],
+		queryKey: ["recent-matches"],
 		queryFn: getRecentMatches,
 	});
 
