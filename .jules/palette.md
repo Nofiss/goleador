@@ -49,3 +49,7 @@
 ## 2025-05-24 - [Accessible Rank Visualization Pattern]
 **Learning:** When replacing numerical ranks with visual icons (like trophies for top positions), using a combination of `aria-hidden="true"` on the icon and a screen-reader-only (`sr-only`) span for the number provides a delightful visual experience while maintaining perfect accessibility. Consistency in this pattern across different ranking views (e.g., Global Ranking vs. Tournament Standings) reinforces the app's visual language.
 **Action:** Use the Trophy icon with `sr-only` text for top-3 ranks in all tables to provide visual delight and cross-page consistency.
+
+## 2025-05-25 - [Theme-Aware Statistical Visualizations]
+**Learning:** Hardcoded color classes (e.g., bg-green-100, text-blue-600) often fail to provide sufficient contrast or visual harmony in dark mode. Using semantic theme variables (e.g., primary, muted, destructive) combined with transparent overlays (e.g., bg-emerald-500/10) ensures that complex statistical views remain accessible and aesthetically pleasing across all themes.
+**Action:** Replace hardcoded color utility classes with theme-aware semantic variables. Pair aria-label with role="img" when adding accessibility descriptors to non-interactive informational cards.
