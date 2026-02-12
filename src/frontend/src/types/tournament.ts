@@ -61,6 +61,8 @@ export interface TournamentTeamPlayer {
 export interface TournamentTeam {
 	id: string;
 	name: string;
+	logoUrl?: string;
+	sponsorUrl?: string;
 	players: TournamentTeamPlayer[];
 }
 

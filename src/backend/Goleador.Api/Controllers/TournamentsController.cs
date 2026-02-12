@@ -1,4 +1,5 @@
 using Goleador.Application.Teams.Commands.RenameTeam;
+using Goleador.Application.Teams.Commands.UploadBranding;
 using Goleador.Application.Tournaments.Commands.AddLateTeam;
 using Goleador.Application.Tournaments.Commands.CreateTournament;
 using Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
@@ -85,6 +86,24 @@ public class TournamentsController : ApiControllerBase
     {
         await Mediator.Send(new RenameTeamCommand(teamId, request.NewName));
         return NoContent();
+    }
+
+    [HttpPost("teams/{teamId}/branding")]
+    [Authorize(Roles = "Admin")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<BrandingUrlsDto>> UploadBranding(
+        Guid teamId,
+        IFormFile? logo,
+        IFormFile? sponsor
+    )
+    {
+        var command = new UploadTeamBrandingCommand(
+            teamId,
+            logo != null ? new FileDto(logo.OpenReadStream(), logo.FileName, logo.Length) : null,
+            sponsor != null ? new FileDto(sponsor.OpenReadStream(), sponsor.FileName, sponsor.Length) : null
+        );
+
+        return await Mediator.Send(command);
     }
 
     [HttpPost("{id}/start")]

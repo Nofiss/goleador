@@ -46,6 +46,14 @@ export const renameTeam = async (teamId: string, newName: string) => {
 	return api.put(`/tournaments/teams/${teamId}/rename`, { newName });
 };
 
+export const uploadTeamBranding = async (teamId: string, formData: FormData) => {
+	return api.post(`/tournaments/teams/${teamId}/branding`, formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+};
+
 export const startTournament = async (id: string) => {
 	return api.post(`/tournaments/${id}/start`);
 };
