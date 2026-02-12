@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using Serilog;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Goleador.Api.Infrastructure;
 using Goleador.Api.Services;
 using Goleador.Application;
@@ -31,16 +32,30 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
 {
+    var allowedOrigins =
+        builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+        ?? ["http://localhost:5173"];
+
     options.AddPolicy(
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins(allowedOrigins)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         }
     );
+});
+
+// Configure Forwarded Headers to support reverse proxies (IIS, Nginx, Docker)
+// This ensures that the application can correctly identify the client IP and the original protocol (HTTPS).
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Note: In production, for maximum security, you should restrict KnownIPNetworks and KnownProxies.
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 builder
@@ -236,6 +251,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 
 app.UseCors(MyAllowSpecificOrigins);
