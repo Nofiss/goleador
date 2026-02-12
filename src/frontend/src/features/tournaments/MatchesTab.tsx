@@ -286,9 +286,15 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	if (tournament.status === TournamentStatus.setup) {
 		return (
-			<div className="text-center py-12 bg-muted/20 border border-dashed border-border rounded-xl text-muted-foreground">
-				<CalendarClock className="w-10 h-10 mx-auto mb-3 opacity-20" aria-hidden="true" />
-				<p>Il calendario verrà generato all'avvio del torneo.</p>
+			<div className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-[2rem] bg-muted/5 border-muted-foreground/20">
+				<CalendarClock className="h-12 w-12 text-muted-foreground/20 mb-4" aria-hidden="true" />
+				<h3 className="text-xl font-semibold text-muted-foreground">
+					Calendario non ancora generato
+				</h3>
+				<p className="text-sm text-muted-foreground/60 max-w-[300px] text-center mt-2">
+					Il calendario delle partite verrà creato automaticamente non appena l'amministratore
+					avvierà il torneo.
+				</p>
 			</div>
 		);
 	}

@@ -128,8 +128,15 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 
 	if (status === TournamentStatus.setup) {
 		return (
-			<div className="text-center py-10 text-muted-foreground border rounded bg-gray-50">
-				Classifica disponibile all'avvio.
+			<div className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-[2rem] bg-muted/5 border-muted-foreground/20">
+				<Trophy className="h-12 w-12 text-muted-foreground/20 mb-4" aria-hidden="true" />
+				<h3 className="text-xl font-semibold text-muted-foreground">
+					Classifica non ancora disponibile
+				</h3>
+				<p className="text-sm text-muted-foreground/60 max-w-[300px] text-center mt-2">
+					Il torneo è ancora in fase di configurazione. La classifica sarà visibile non appena
+					inizieranno le partite.
+				</p>
 			</div>
 		);
 	}
