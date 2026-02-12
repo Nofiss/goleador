@@ -42,6 +42,7 @@ public static class DependencyInjection
 
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddTransient<ITournamentNotifier, SignalRTournamentNotifier>();
+        services.AddTransient<IFileStorageService, LocalFileStorageService>();
 
         services.AddScoped<ITeamGeneratorService, OpenAiTeamGeneratorService>();
 

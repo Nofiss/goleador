@@ -5,6 +5,8 @@ namespace Goleador.Domain.Entities;
 public class TournamentTeam : BaseEntity
 {
     public string Name { get; private set; } = string.Empty;
+    public string? LogoUrl { get; private set; }
+    public string? SponsorUrl { get; private set; }
     public Guid TournamentId { get; private set; }
     public Tournament Tournament { get; private set; } = null!;
 
@@ -29,5 +31,11 @@ public class TournamentTeam : BaseEntity
         }
 
         Name = newName.Trim();
+    }
+
+    public void UpdateBranding(string? logoUrl, string? sponsorUrl)
+    {
+        LogoUrl = logoUrl;
+        SponsorUrl = sponsorUrl;
     }
 }
