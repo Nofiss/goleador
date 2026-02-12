@@ -33,3 +33,7 @@
 ## 2025-02-14 - [React Query Global Configuration & Cache Sharing]
 **Learning:** Found that multiple components (Dashboard, Matches List) were fetching the same "Recent Matches" data using different query keys, leading to redundant API calls. Also, the default `staleTime` of 0 caused frequent unnecessary refetches.
 **Action:** Unified the query key for recent matches to `["recent-matches"]` across all components and set a global `staleTime` of 30s in `QueryClient` to maximize cache reuse and reduce server load.
+
+## 2025-02-14 - [DbContext Concurrency and Sequential Async Execution]
+**Learning:** When refactoring a single complex O(N) query into multiple efficient O(1) database queries (e.g., in `GetPlayerProfileQueryHandler`), it's tempting to use `Task.WhenAll` for parallel execution. However, EF Core `DbContext` is not thread-safe and will throw a concurrency exception if multiple queries are executed simultaneously on the same instance.
+**Action:** Execute granular database queries sequentially using `await` within the same handler to respect `DbContext` thread-safety while still benefiting from the O(N) to O(1) data transfer reduction.
