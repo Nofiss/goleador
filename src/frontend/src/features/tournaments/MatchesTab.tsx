@@ -50,6 +50,62 @@ export const MatchesTabSkeleton = () => (
 );
 
 /**
+ * Badge di stato per la partita (Da Giocare / Terminata).
+ * Riduce la complessità cognitiva di MatchCard (typescript:S3776).
+ */
+const MatchStatusBadge = memo(({ status }: { status: number }) => (
+	<span
+		className={cn(
+			"text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
+			status === 0
+				? "text-primary border-primary/20 bg-primary/5"
+				: "text-muted-foreground border-muted-foreground/20 bg-muted",
+		)}
+	>
+		{status === 0 ? "Da Giocare" : "Terminata"}
+	</span>
+));
+MatchStatusBadge.displayName = "MatchStatusBadge";
+
+/**
+ * Riga della squadra con relativo punteggio e evidenziazione vincitore.
+ * Riduce la complessità cognitiva di MatchCard (typescript:S3776).
+ */
+const TeamScoreRow = memo(
+	({
+		teamName,
+		score,
+		isPlayed,
+		isWinner,
+	}: {
+		teamName: string;
+		score: number;
+		isPlayed: boolean;
+		isWinner: boolean;
+	}) => (
+		<div className="flex justify-between items-center group/team">
+			<span
+				className={cn(
+					"text-base font-semibold transition-colors truncate",
+					isWinner ? "text-foreground" : "text-muted-foreground",
+				)}
+			>
+				{teamName}
+			</span>
+			<span
+				className={cn(
+					"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
+					isWinner && "text-primary font-bold",
+				)}
+			>
+				{isPlayed ? score : "-"}
+			</span>
+		</div>
+	),
+);
+TeamScoreRow.displayName = "TeamScoreRow";
+
+/**
  * Componente per la card della partita, ottimizzato con React.memo.
  * Previene re-render quando cambia lo stato del genitore ma i dati della partita sono invariati.
  */
@@ -62,124 +118,91 @@ const MatchCard = memo(
 		match: TournamentMatch;
 		isReferee: boolean;
 		onSelectMatch: (match: TournamentMatch) => void;
-	}) => (
-		<div
-			className={cn(
-				"group relative overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all",
-				"hover:shadow-md hover:-translate-y-0.5",
-				match.status === 1 ? "bg-muted/30" : "border-primary/20",
-			)}
-		>
-			{/* Status Bar laterale */}
+	}) => {
+		const isPlayed = match.status === 1;
+		const isToPlay = match.status === 0;
+		const homeWon = isPlayed && match.scoreHome > match.scoreAway;
+		const awayWon = isPlayed && match.scoreAway > match.scoreHome;
+
+		return (
 			<div
 				className={cn(
-					"absolute left-0 top-0 bottom-0 w-1 transition-colors",
-					match.status === 1 ? "bg-muted-foreground/30" : "bg-primary",
+					"group relative overflow-hidden rounded-xl border border-border/40 bg-card shadow-sm transition-all",
+					"hover:shadow-md hover:-translate-y-0.5",
+					isPlayed ? "bg-muted/30" : "border-primary/20",
 				)}
-			/>
-
-			<div className="pl-5 p-5">
-				{/* Header Card */}
-				<div
-					className={cn("flex justify-between items-start", match.status === 1 ? "mb-3" : "mb-4")}
-				>
-					<span
-						className={cn(
-							"text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
-							match.status === 0
-								? "text-primary border-primary/20 bg-primary/5"
-								: "text-muted-foreground border-muted-foreground/20 bg-muted",
-						)}
-					>
-						{match.status === 0 ? "Da Giocare" : "Terminata"}
-					</span>
-
-					<div className="flex flex-col items-end gap-1">
-						{match.status === 1 && match.datePlayed && (
-							<span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-								<CalendarClock className="h-3 w-3" aria-hidden="true" />
-								{new Date(match.datePlayed).toLocaleDateString("it-IT", {
-									day: "2-digit",
-									month: "short",
-									hour: "2-digit",
-									minute: "2-digit",
-								})}
-							</span>
-						)}
-						{match.tableName && (
-							<span className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
-								<MapPin className="h-3 w-3" aria-hidden="true" /> {match.tableName}
-							</span>
-						)}
-					</div>
-				</div>
-
-				{/* Squadre e Punteggio */}
-				<div className={cn(match.status === 1 ? "space-y-2" : "space-y-3")}>
-					<div className="flex justify-between items-center group/team">
-						<span
-							className={cn(
-								"text-base font-semibold transition-colors truncate",
-								match.status === 1 && match.scoreHome > match.scoreAway
-									? "text-foreground"
-									: "text-muted-foreground",
-							)}
-						>
-							{match.homeTeamName}
-						</span>
-						<span
-							className={cn(
-								"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
-								match.status === 1 && match.scoreHome > match.scoreAway && "text-primary font-bold",
-							)}
-						>
-							{match.status === 1 ? match.scoreHome : "-"}
-						</span>
-					</div>
-
-					<div className="flex justify-between items-center group/team">
-						<span
-							className={cn(
-								"text-base font-semibold transition-colors truncate",
-								match.status === 1 && match.scoreAway > match.scoreHome
-									? "text-foreground"
-									: "text-muted-foreground",
-							)}
-						>
-							{match.awayTeamName}
-						</span>
-						<span
-							className={cn(
-								"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
-								match.status === 1 && match.scoreAway > match.scoreHome && "text-primary font-bold",
-							)}
-						>
-							{match.status === 1 ? match.scoreAway : "-"}
-						</span>
-					</div>
-				</div>
-
-				{/* Azione (Solo Referee) */}
+			>
+				{/* Status Bar laterale */}
 				<div
 					className={cn(
-						"mt-4 pt-3 border-t min-h-9",
-						isReferee ? "border-border/50" : "border-transparent",
+						"absolute left-0 top-0 bottom-0 w-1 transition-colors",
+						isPlayed ? "bg-muted-foreground/30" : "bg-primary",
 					)}
-				>
-					{isReferee && (
-						<Button
-							variant={match.status === 0 ? "default" : "secondary"}
-							size="sm"
-							className="w-full h-8 text-xs font-semibold"
-							onClick={() => onSelectMatch(match)}
-						>
-							{match.status === 0 ? "Inserisci Risultato" : "Modifica Risultato"}
-						</Button>
-					)}
+				/>
+
+				<div className="pl-5 p-5">
+					{/* Header Card */}
+					<div className={cn("flex justify-between items-start", isPlayed ? "mb-3" : "mb-4")}>
+						<MatchStatusBadge status={match.status} />
+
+						<div className="flex flex-col items-end gap-1">
+							{isPlayed && match.datePlayed && (
+								<span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+									<CalendarClock className="h-3 w-3" aria-hidden="true" />
+									{new Date(match.datePlayed).toLocaleDateString("it-IT", {
+										day: "2-digit",
+										month: "short",
+										hour: "2-digit",
+										minute: "2-digit",
+									})}
+								</span>
+							)}
+							{match.tableName && (
+								<span className="flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
+									<MapPin className="h-3 w-3" aria-hidden="true" /> {match.tableName}
+								</span>
+							)}
+						</div>
+					</div>
+
+					{/* Squadre e Punteggio */}
+					<div className={cn(isPlayed ? "space-y-2" : "space-y-3")}>
+						<TeamScoreRow
+							teamName={match.homeTeamName}
+							score={match.scoreHome}
+							isPlayed={isPlayed}
+							isWinner={homeWon}
+						/>
+						<TeamScoreRow
+							teamName={match.awayTeamName}
+							score={match.scoreAway}
+							isPlayed={isPlayed}
+							isWinner={awayWon}
+						/>
+					</div>
+
+					{/* Azione (Solo Referee) */}
+					<div
+						className={cn(
+							"mt-4 pt-3 border-t min-h-9",
+							isReferee ? "border-border/50" : "border-transparent",
+						)}
+					>
+						{isReferee && (
+							<Button
+								variant={isToPlay ? "default" : "secondary"}
+								size="sm"
+								className="w-full h-8 text-xs font-semibold"
+								onClick={() => onSelectMatch(match)}
+							>
+								{isToPlay ? "Inserisci Risultato" : "Modifica Risultato"}
+							</Button>
+						)}
+					</div>
 				</div>
 			</div>
-		</div>
-	),
+		);
+	},
 );
 
 MatchCard.displayName = "MatchCard";
