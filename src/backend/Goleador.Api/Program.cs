@@ -1,8 +1,6 @@
 using System.Reflection;
 using System.Text;
-using Serilog;
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.HttpOverrides;
 using Goleador.Api.Infrastructure;
 using Goleador.Api.Services;
 using Goleador.Application;
@@ -14,10 +12,13 @@ using Goleador.Infrastructure.Persistence;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -272,6 +273,12 @@ app.MapHealthChecks(
     "/health",
     new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse }
 );
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
