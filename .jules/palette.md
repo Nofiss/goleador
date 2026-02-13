@@ -53,3 +53,7 @@
 ## 2025-05-25 - [Theme-Aware Statistical Visualizations]
 **Learning:** Hardcoded color classes (e.g., bg-green-100, text-blue-600) often fail to provide sufficient contrast or visual harmony in dark mode. Using semantic theme variables (e.g., primary, muted, destructive) combined with transparent overlays (e.g., bg-emerald-500/10) ensures that complex statistical views remain accessible and aesthetically pleasing across all themes.
 **Action:** Replace hardcoded color utility classes with theme-aware semantic variables. Pair aria-label with role="img" when adding accessibility descriptors to non-interactive informational cards.
+
+## 2025-05-26 - [Score Swapping and Table Selection Icons]
+**Learning:** In match-logging interfaces, users frequently enter scores in the wrong order. Providing a functional "Swap" button between the score inputs significantly reduces friction for correcting these errors. Additionally, following the "Input Icon UX Pattern" for all fields, including Select dropdowns, maintains a unified and polished design language.
+**Action:** Implement score swapping logic in match forms. Use absolute-positioned icons in Select triggers with corresponding padding to ensure visual consistency across all form elements.

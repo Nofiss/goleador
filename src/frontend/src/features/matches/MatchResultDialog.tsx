@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { Loader2 } from "lucide-react";
+import { ArrowLeftRight, Loader2, Table } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
@@ -132,18 +132,24 @@ export const MatchResultDialog = ({
 					{/* SELEZIONE TAVOLO */}
 					<div className="space-y-2">
 						<Label htmlFor="table-select">Tavolo da Gioco</Label>
-						<Select value={tableId} onValueChange={setTableId}>
-							<SelectTrigger id="table-select">
-								<SelectValue placeholder="Seleziona un tavolo..." />
-							</SelectTrigger>
-							<SelectContent>
-								{tables?.map((t) => (
-									<SelectItem key={t.id} value={t.id.toString()}>
-										{t.name} ({t.location})
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<div className="relative">
+							<Select value={tableId} onValueChange={setTableId}>
+								<SelectTrigger id="table-select" className="pl-9 w-full">
+									<SelectValue placeholder="Seleziona un tavolo..." />
+								</SelectTrigger>
+								<SelectContent>
+									{tables?.map((t) => (
+										<SelectItem key={t.id} value={t.id.toString()}>
+											{t.name} ({t.location})
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<Table
+								className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50 z-10 pointer-events-none"
+								aria-hidden="true"
+							/>
+						</div>
 					</div>
 
 					<div className="flex items-center justify-between gap-4">
@@ -167,7 +173,23 @@ export const MatchResultDialog = ({
 							/>
 						</div>
 
-						<span className="text-xl font-bold text-gray-400">-</span>
+						<div className="flex flex-col items-center gap-1">
+							<span className="text-xl font-bold text-muted-foreground/40">-</span>
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+								onClick={() => {
+									const temp = scoreHome;
+									setScoreHome(scoreAway);
+									setScoreAway(temp);
+								}}
+								aria-label="Scambia punteggi"
+							>
+								<ArrowLeftRight className="h-4 w-4" />
+							</Button>
+						</div>
 
 						{/* OSPITE */}
 						<div className="text-center w-1/3">
