@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -120,6 +121,15 @@ builder
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
+
+// Optimization Bolt ⚡: Add response compression to reduce payload size for data-heavy JSON responses.
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -254,6 +264,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+
+// Optimization Bolt ⚡: Use response compression middleware.
+app.UseResponseCompression();
+
 app.UseStaticFiles();
 
 app.UseCors(MyAllowSpecificOrigins);
