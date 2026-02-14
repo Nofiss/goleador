@@ -9,9 +9,10 @@ namespace Goleador.Application.Tables.Commands.DeleteTable;
 public class DeleteTableCommandHandler(IApplicationDbContext context)
     : IRequestHandler<DeleteTableCommand, Unit>
 {
-    public async Task<Unit> Handle(DeleteTableCommand request, CancellationToken token)
+    // csharpsquid:S927 - Rename parameter 'token' to 'cancellationToken' to match the interface declaration.
+    public async Task<Unit> Handle(DeleteTableCommand request, CancellationToken cancellationToken)
     {
-        var entity = await context.Tables.FindAsync(new object[] { request.Id }, token);
+        var entity = await context.Tables.FindAsync(new object[] { request.Id }, cancellationToken);
         if (entity == null)
             throw new KeyNotFoundException("Table not found");
 
@@ -19,7 +20,7 @@ public class DeleteTableCommandHandler(IApplicationDbContext context)
         // In un'app reale faresti Soft Delete (IsActive = false).
         // Per ora facciamo hard delete, gestendo l'errore nel frontend.
         context.Tables.Remove(entity);
-        await context.SaveChangesAsync(token);
+        await context.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }
