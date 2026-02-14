@@ -57,3 +57,7 @@
 ## 2025-05-26 - [Score Swapping and Table Selection Icons]
 **Learning:** In match-logging interfaces, users frequently enter scores in the wrong order. Providing a functional "Swap" button between the score inputs significantly reduces friction for correcting these errors. Additionally, following the "Input Icon UX Pattern" for all fields, including Select dropdowns, maintains a unified and polished design language.
 **Action:** Implement score swapping logic in match forms. Use absolute-positioned icons in Select triggers with corresponding padding to ensure visual consistency across all form elements.
+
+## 2026-02-14 - [Semantic Icons and Theme-Aware Match Creation UX]
+**Learning:** Using specific directional icons (like `ArrowLeftRight`) instead of generic cyclic ones (like `RefreshCcw`) for "Swap" actions provides better semantic clarity. Combining this with the "Input Icon UX Pattern" and theme-aware transparent overlays (e.g., `bg-blue-500/10`) creates a professional, accessible, and delight-inducing form experience that adapts perfectly to both light and dark modes.
+**Action:** Prefer directional icons for swap actions. Systematically use theme-aware transparent overlays for highlighted card backgrounds to ensure dark mode compatibility.
