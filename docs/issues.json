@@ -8060,7 +8060,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-14"
 		},
 		{
 			"key": "bb6d0739-d745-4362-9f0a-e224bf9bf548",
