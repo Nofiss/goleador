@@ -41,3 +41,7 @@
 ## 2025-05-15 - [Global API Response Compression]
 **Learning:** Found that while individual CQRS handlers were optimized for O(1) data transfer, the API lacked global response compression. Large JSON payloads (Standings, Rankings, Profiles) were being transmitted in raw format, consuming more bandwidth than necessary.
 **Action:** Implemented `AddResponseCompression` with Brotli and Gzip providers in `Program.cs`. Enabled compression for HTTPS to ensure that all data-heavy responses are minimized before transmission.
+
+## 2025-05-16 - [Tournament Standings Projection Optimization]
+**Learning:** Found that `GetTournamentStandingsQueryHandler` was using `Include` with `AsSplitQuery` to load full entity graphs for Teams, Players, and Matches. This resulted in over-fetching hundreds of unnecessary fields (Names, Emails, Dates) just to calculate a few scalar statistics.
+**Action:** Replaced eager loading with a targeted LINQ projection (`.Select()`) into private records. This reduced data transfer significantly by fetching only the minimal IDs and scores required for the standings algorithm, while maintaining O(1) in-memory resolution via dictionaries.
