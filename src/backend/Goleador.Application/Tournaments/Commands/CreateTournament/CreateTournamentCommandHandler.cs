@@ -32,6 +32,14 @@ public class CreateTournamentCommandHandler(IApplicationDbContext context)
             rules
         );
 
+        if (request.Cards != null)
+        {
+            foreach (var card in request.Cards)
+            {
+                entity.AddCardDefinition(card.Name, card.Description, card.Effect);
+            }
+        }
+
         context.Tournaments.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
 

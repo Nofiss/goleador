@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { ArrowLeftRight, Loader2, Table } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeftRight, Loader2, Table, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
 import { getTables } from "@/api/tables";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -22,13 +23,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import type { TournamentDetail, TournamentMatch } from "@/types";
+import { cn } from "@/lib/utils";
+import type { TournamentCard, TournamentDetail, TournamentMatch } from "@/types";
 
 interface MatchResultDialogProps {
 	match: TournamentMatch | null;
 	isOpen: boolean;
 	onClose: () => void;
 	tournamentId: string; // Serve per invalidare la cache giusta
+	cardDefinitions?: TournamentCard[];
+	allMatches?: TournamentMatch[];
 }
 
 export const MatchResultDialog = ({
@@ -36,11 +40,15 @@ export const MatchResultDialog = ({
 	isOpen,
 	onClose,
 	tournamentId,
+	cardDefinitions = [],
+	allMatches = [],
 }: MatchResultDialogProps) => {
 	const queryClient = useQueryClient();
 	const [scoreHome, setScoreHome] = useState(0);
 	const [scoreAway, setScoreAway] = useState(0);
 	const [tableId, setTableId] = useState<string>("");
+	const [selectedHomeCardIds, setSelectedHomeCardIds] = useState<string[]>([]);
+	const [selectedAwayCardIds, setSelectedAwayCardIds] = useState<string[]>([]);
 
 	const { data: tables } = useQuery({
 		queryKey: ["tables"],
@@ -54,8 +62,38 @@ export const MatchResultDialog = ({
 			setScoreHome(match.scoreHome);
 			setScoreAway(match.scoreAway);
 			setTableId(match.tableId ? match.tableId.toString() : "");
+
+			// Inizializza carte già selezionate
+			setSelectedHomeCardIds(
+				match.cardUsages
+					?.filter((cu) => cu.teamId === match.homeTeamId)
+					.map((cu) => cu.cardDefinitionId) || [],
+			);
+			setSelectedAwayCardIds(
+				match.cardUsages
+					?.filter((cu) => cu.teamId === match.awayTeamId)
+					.map((cu) => cu.cardDefinitionId) || [],
+			);
 		}
 	}, [match]);
+
+	// Calcola quali carte sono state già usate dai due team in ALTRE partite
+	const usedCardIdsByTeam = useMemo(() => {
+		const map = new Map<string, Set<string>>();
+		if (!match) return map;
+
+		for (const m of allMatches) {
+			if (m.id === match.id) continue; // Salta questa partita
+
+			for (const cu of m.cardUsages || []) {
+				if (!map.has(cu.teamId)) {
+					map.set(cu.teamId, new Set());
+				}
+				map.get(cu.teamId)?.add(cu.cardDefinitionId);
+			}
+		}
+		return map;
+	}, [allMatches, match]);
 
 	const mutation = useMutation({
 		mutationFn: async (variables: {
@@ -64,6 +102,7 @@ export const MatchResultDialog = ({
 			scoreHome: number;
 			scoreAway: number;
 			tableId: number | null;
+			usedCards: { cardDefinitionId: string; teamId: string }[];
 		}) => {
 			await setMatchResult(variables.matchId, {
 				id: variables.matchId,
@@ -71,6 +110,7 @@ export const MatchResultDialog = ({
 				scoreHome: variables.scoreHome,
 				scoreAway: variables.scoreAway,
 				tableId: variables.tableId,
+				usedCards: variables.usedCards,
 			});
 		},
 		onMutate: async (newResult) => {
@@ -211,6 +251,114 @@ export const MatchResultDialog = ({
 							/>
 						</div>
 					</div>
+
+					{/* SELEZIONE CARTE */}
+					{cardDefinitions.length > 0 && (
+						<div className="space-y-4 pt-4 border-t">
+							<div className="flex items-center gap-2 mb-2">
+								<Zap className="h-4 w-4 text-yellow-500" />
+								<span className="text-sm font-semibold">Carte Giocate</span>
+							</div>
+
+							<div className="grid grid-cols-2 gap-8">
+								{/* CARTE CASA */}
+								<div className="space-y-2">
+									<p className="text-[10px] uppercase font-bold text-blue-700 mb-1">
+										Carte {match.homeTeamName}
+									</p>
+									{cardDefinitions.map((card) => {
+										const isUsedByThisTeam = usedCardIdsByTeam.get(match.homeTeamId)?.has(card.id);
+										const isSelected = selectedHomeCardIds.includes(card.id);
+
+										return (
+											<div
+												key={card.id}
+												className={cn(
+													"flex items-start space-x-2 p-2 rounded border transition-colors",
+													isUsedByThisTeam ? "opacity-40 bg-muted" : "hover:bg-muted/50",
+													isSelected && "border-primary bg-primary/5",
+												)}
+											>
+												<Checkbox
+													id={`card-home-${card.id}`}
+													disabled={isUsedByThisTeam}
+													checked={isSelected}
+													onCheckedChange={(checked) => {
+														if (checked) {
+															setSelectedHomeCardIds([...selectedHomeCardIds, card.id]);
+														} else {
+															setSelectedHomeCardIds(
+																selectedHomeCardIds.filter((id) => id !== card.id),
+															);
+														}
+													}}
+												/>
+												<div className="grid gap-1.5 leading-none">
+													<label
+														htmlFor={`card-home-${card.id}`}
+														className="text-xs font-medium leading-none cursor-pointer"
+													>
+														{card.name}
+													</label>
+													<p className="text-[10px] text-muted-foreground line-clamp-1">
+														{card.description}
+													</p>
+												</div>
+											</div>
+										);
+									})}
+								</div>
+
+								{/* CARTE OSPITE */}
+								<div className="space-y-2">
+									<p className="text-[10px] uppercase font-bold text-red-700 mb-1">
+										Carte {match.awayTeamName}
+									</p>
+									{cardDefinitions.map((card) => {
+										const isUsedByThisTeam = usedCardIdsByTeam.get(match.awayTeamId)?.has(card.id);
+										const isSelected = selectedAwayCardIds.includes(card.id);
+
+										return (
+											<div
+												key={card.id}
+												className={cn(
+													"flex items-start space-x-2 p-2 rounded border transition-colors",
+													isUsedByThisTeam ? "opacity-40 bg-muted" : "hover:bg-muted/50",
+													isSelected && "border-primary bg-primary/5",
+												)}
+											>
+												<Checkbox
+													id={`card-away-${card.id}`}
+													disabled={isUsedByThisTeam}
+													checked={isSelected}
+													onCheckedChange={(checked) => {
+														if (checked) {
+															setSelectedAwayCardIds([...selectedAwayCardIds, card.id]);
+														} else {
+															setSelectedAwayCardIds(
+																selectedAwayCardIds.filter((id) => id !== card.id),
+															);
+														}
+													}}
+												/>
+												<div className="grid gap-1.5 leading-none">
+													<label
+														htmlFor={`card-away-${card.id}`}
+														className="text-xs font-medium leading-none cursor-pointer"
+													>
+														{card.name}
+													</label>
+													<p className="text-[10px] text-muted-foreground line-clamp-1">
+														{card.description}
+													</p>
+												</div>
+											</div>
+										);
+									})}
+								</div>
+							</div>
+						</div>
+					)}
 				</div>
 
 				<DialogFooter>
@@ -221,12 +369,25 @@ export const MatchResultDialog = ({
 						disabled={mutation.isPending}
 						onClick={() => {
 							if (!match) return;
+
+							const usedCards = [
+								...selectedHomeCardIds.map((id) => ({
+									cardDefinitionId: id,
+									teamId: match.homeTeamId,
+								})),
+								...selectedAwayCardIds.map((id) => ({
+									cardDefinitionId: id,
+									teamId: match.awayTeamId,
+								})),
+							];
+
 							mutation.mutate({
 								matchId: match.id,
 								rowVersion: match.rowVersion,
 								scoreHome,
 								scoreAway,
 								tableId: tableId ? parseInt(tableId, 10) : null,
+								usedCards,
 							});
 						}}
 					>

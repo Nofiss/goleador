@@ -18,6 +18,24 @@ export const TournamentPhase = {
 } as const;
 export type TournamentPhase = (typeof TournamentPhase)[keyof typeof TournamentPhase];
 
+export const CardEffect = {
+	none: 0,
+	doublePoints: 1,
+} as const;
+export type CardEffect = (typeof CardEffect)[keyof typeof CardEffect];
+
+export interface TournamentCard {
+	id: string;
+	name: string;
+	description: string;
+	effect: CardEffect;
+}
+
+export interface MatchCardUsage {
+	teamId: string;
+	cardDefinitionId: string;
+}
+
 export interface Tournament {
 	id: string;
 	name: string;
@@ -51,6 +69,7 @@ export interface CreateTournamentRequest {
 	goalThresholdBonus: number;
 	enableTenZeroBonus: boolean;
 	tenZeroBonus: number;
+	cards?: { name: string; description: string; effect: CardEffect }[];
 }
 
 export interface TournamentTeamPlayer {
@@ -81,12 +100,14 @@ export interface TournamentMatch {
 	datePlayed?: string;
 	rowVersion: string;
 	players: TournamentTeamPlayer[];
+	cardUsages: MatchCardUsage[];
 }
 
 export interface TournamentDetail extends Tournament {
 	registeredPlayers: TournamentTeamPlayer[];
 	teams: TournamentTeam[];
 	matches: TournamentMatch[];
+	cardDefinitions: TournamentCard[];
 	notes?: string;
 	scoringRules: ScoringRules;
 }

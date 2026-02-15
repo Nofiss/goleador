@@ -14,6 +14,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Match> Matches { get; set; }
     public DbSet<Tournament> Tournaments { get; set; }
     public DbSet<TournamentTeam> TournamentTeams { get; set; }
+    public DbSet<TournamentCardDefinition> TournamentCardDefinitions { get; set; }
+    public DbSet<MatchCardUsage> MatchCardUsages { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
 

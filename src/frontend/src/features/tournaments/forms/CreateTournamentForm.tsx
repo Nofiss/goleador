@@ -1,7 +1,18 @@
 // src/features/tournaments/CreateTournamentForm.tsx
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronUp, Loader2, Swords, Table, Trophy, Users } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronUp,
+	Loader2,
+	Plus,
+	Swords,
+	Table,
+	Trash2,
+	Trophy,
+	Users,
+	Zap,
+} from "lucide-react";
 import { useState } from "react";
 import { createTournament } from "@/api/tournaments";
 import { Button } from "@/components/ui/button";
@@ -17,7 +28,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { type CreateTournamentRequest, TournamentType } from "@/types";
+import { CardEffect, type CreateTournamentRequest, TournamentType } from "@/types";
 
 interface Props {
 	onSuccess: () => void;
@@ -53,6 +64,24 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		mutation.mutate(formData);
+	};
+
+	const addCard = () => {
+		const newCards = [...(formData.cards || [])];
+		newCards.push({ name: "", description: "", effect: CardEffect.none });
+		setFormData({ ...formData, cards: newCards });
+	};
+
+	const removeCard = (index: number) => {
+		const newCards = [...(formData.cards || [])];
+		newCards.splice(index, 1);
+		setFormData({ ...formData, cards: newCards });
+	};
+
+	const updateCard = (index: number, field: string, value: string | number) => {
+		const newCards = [...(formData.cards || [])];
+		newCards[index] = { ...newCards[index], [field]: value };
+		setFormData({ ...formData, cards: newCards });
 	};
 
 	return (
@@ -158,6 +187,90 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							}
 						/>
 						<Label htmlFor="returnMatches">Andata e Ritorno</Label>
+					</div>
+				</CardContent>
+			</Card>
+
+			{/* Sezione Carte Torneo */}
+			<Card className="border-dashed">
+				<CardContent className="pt-6">
+					<div className="flex items-center justify-between mb-4">
+						<div className="flex items-center gap-2">
+							<Zap className="h-5 w-5 text-yellow-500" />
+							<h3 className="font-semibold">Carte Torneo (Bonus/Malus)</h3>
+						</div>
+						<Button type="button" variant="outline" size="sm" onClick={addCard}>
+							<Plus className="h-4 w-4 mr-1" /> Aggiungi Carta
+						</Button>
+					</div>
+
+					<div className="space-y-4">
+						{formData.cards?.length === 0 || !formData.cards ? (
+							<p className="text-sm text-muted-foreground text-center py-4 border rounded-md border-dashed">
+								Nessuna carta definita per questo torneo.
+							</p>
+						) : (
+							formData.cards.map((card, index) => (
+								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: valid for form management
+									key={index}
+									className="grid grid-cols-12 gap-2 items-start border p-3 rounded-lg bg-muted/30"
+								>
+									<div className="col-span-4 space-y-1">
+										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+											Nome
+										</Label>
+										<Input
+											value={card.name}
+											placeholder="Es. Raddoppia Punti"
+											onChange={(e) => updateCard(index, "name", e.target.value)}
+										/>
+									</div>
+									<div className="col-span-4 space-y-1">
+										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+											Effetto
+										</Label>
+										<Select
+											value={card.effect.toString()}
+											onValueChange={(v) => updateCard(index, "effect", parseInt(v, 10))}
+										>
+											<SelectTrigger>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value={CardEffect.none.toString()}>
+													Nessun effetto (descrittivo)
+												</SelectItem>
+												<SelectItem value={CardEffect.doublePoints.toString()}>
+													Raddoppia Punti (se vince)
+												</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="col-span-3 space-y-1">
+										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+											Descrizione
+										</Label>
+										<Input
+											value={card.description}
+											placeholder="Es. Usala per raddoppiare i punti..."
+											onChange={(e) => updateCard(index, "description", e.target.value)}
+										/>
+									</div>
+									<div className="col-span-1 pt-6 flex justify-end">
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8 text-destructive"
+											onClick={() => removeCard(index)}
+										>
+											<Trash2 className="h-4 w-4" />
+										</Button>
+									</div>
+								</div>
+							))
+						)}
 					</div>
 				</CardContent>
 			</Card>

@@ -25,8 +25,11 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
                     .ThenInclude(tt => tt.Players)
                 .Include(t => t.Matches)
                     .ThenInclude(m => m.Participants)
+                .Include(t => t.CardDefinitions)
                 .Include(t => t.Matches)
                     .ThenInclude(m => m.Table)
+                .Include(t => t.Matches)
+                    .ThenInclude(m => m.CardUsages)
                 .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken)
             ?? throw new KeyNotFoundException("Tournament not found");
 

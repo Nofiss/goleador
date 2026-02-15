@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { History } from "lucide-react";
+import { History, Zap } from "lucide-react";
 import { memo } from "react";
 import { getRecentMatches } from "@/api/matches";
 import { Badge } from "@/components/ui/badge";
@@ -25,23 +25,29 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 				{new Date(match.datePlayed).toLocaleDateString()}
 			</TableCell>
 			<TableCell className="text-right font-medium text-blue-700">
-				{match.homeTeamName || "Player A"}
-				{match.scoreHome > match.scoreAway && (
-					<Badge variant="secondary" className="ml-2 text-[10px]">
-						W
-					</Badge>
-				)}
+				<div className="flex items-center justify-end gap-1">
+					{match.hasCardsHome && <Zap className="h-3 w-3 text-yellow-500" />}
+					{match.homeTeamName || "Player A"}
+					{match.scoreHome > match.scoreAway && (
+						<Badge variant="secondary" className="ml-2 text-[10px]">
+							W
+						</Badge>
+					)}
+				</div>
 			</TableCell>
 			<TableCell className="text-center font-mono font-bold text-lg bg-gray-50/50">
 				{match.scoreHome} - {match.scoreAway}
 			</TableCell>
 			<TableCell className="text-left font-medium text-red-700">
-				{match.scoreAway > match.scoreHome && (
-					<Badge variant="secondary" className="mr-2 text-[10px]">
-						W
-					</Badge>
-				)}
-				{match.awayTeamName || "Player B"}
+				<div className="flex items-center justify-start gap-1">
+					{match.scoreAway > match.scoreHome && (
+						<Badge variant="secondary" className="mr-2 text-[10px]">
+							W
+						</Badge>
+					)}
+					{match.awayTeamName || "Player B"}
+					{match.hasCardsAway && <Zap className="h-3 w-3 text-yellow-500" />}
+				</div>
 			</TableCell>
 		</TableRow>
 	);

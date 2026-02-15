@@ -7,5 +7,8 @@ public record UpdateMatchResultCommand(
     int ScoreHome,
     int ScoreAway,
     int? TableId,
-    string RowVersion
+    string RowVersion,
+    List<MatchCardUsageCommandDto>? UsedCards = null
 ) : IRequest<Unit>;
+
+public record MatchCardUsageCommandDto(Guid CardDefinitionId, Guid TeamId);
