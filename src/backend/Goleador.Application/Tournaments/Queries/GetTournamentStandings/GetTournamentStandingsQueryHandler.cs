@@ -1,5 +1,4 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using Goleador.Domain.ValueObjects;
 using MediatR;
@@ -16,17 +15,19 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         CancellationToken cancellationToken
     )
     {
-        // 1. CARICAMENTO DATI (EAGER LOADING)
-        var tournament = await GetTournamentWithDataAsync(request.TournamentId, cancellationToken);
+        // 1. CARICAMENTO DATI (PROJECTION)
+        // Ottimizzazione Bolt ⚡: Usiamo una proiezione mirata per caricare solo i campi necessari.
+        // Questo evita di scaricare centinaia di entità Player e Match complete, riducendo il traffico dati (O(1) transfer).
+        TournamentStandingsData data = await GetTournamentStandingsDataAsync(request.TournamentId, cancellationToken);
 
         // 2. CREA MAPPA: GIOCATORE ID -> SQUADRA ID
-        var playerTeamMap = BuildPlayerTeamMap(tournament.Teams);
+        Dictionary<Guid, Guid> playerTeamMap = BuildPlayerTeamMap(data.Teams);
 
         // 3. INIZIALIZZA CLASSIFICA (Tutti a zero)
-        var standingsMap = InitializeStandings(tournament.Teams);
+        Dictionary<Guid, TournamentStandingDto> standingsMap = InitializeStandings(data.Teams);
 
         // 4. CALCOLA STATISTICHE E TOTALI PARTITE
-        ProcessMatches(tournament.Matches, playerTeamMap, standingsMap, tournament.ScoringRules);
+        ProcessMatches(data.Matches, playerTeamMap, standingsMap, data.ScoringRules);
 
         // 5. CALCOLO PROIEZIONE
         CalculateProjections(standingsMap.Values);
@@ -35,35 +36,48 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         return RankStandings(standingsMap.Values);
     }
 
-    private async Task<Tournament> GetTournamentWithDataAsync(Guid tournamentId, CancellationToken cancellationToken)
+    async Task<TournamentStandingsData> GetTournamentStandingsDataAsync(Guid tournamentId, CancellationToken cancellationToken)
     {
-        return await context
-            .Tournaments.AsNoTracking()
-            .AsSplitQuery() // Ottimizzazione Bolt ⚡: Carica le collezioni separatamente per evitare il prodotto cartesiano
-            .Include(t => t.Teams)
-                .ThenInclude(tt => tt.Players)
-            .Include(t => t.Matches)
-                .ThenInclude(m => m.Participants)
-            .FirstOrDefaultAsync(t => t.Id == tournamentId, cancellationToken)
+        return await context.Tournaments
+            .AsNoTracking()
+            .Where(t => t.Id == tournamentId)
+            .Select(t => new TournamentStandingsData(
+                t.ScoringRules,
+                t.Teams.Select(team => new TeamData(
+                    team.Id,
+                    team.Name,
+                    team.Players.Select(p => p.Id).ToList()
+                )).ToList(),
+                t.Matches.Select(m => new MatchData(
+                    m.Status,
+                    m.ScoreHome,
+                    m.ScoreAway,
+                    m.Participants.Select(p => new ParticipantData(
+                        p.PlayerId,
+                        p.Side
+                    )).ToList()
+                )).ToList()
+            ))
+            .FirstOrDefaultAsync(cancellationToken)
             ?? throw new KeyNotFoundException("Tournament not found");
     }
 
-    private static Dictionary<Guid, Guid> BuildPlayerTeamMap(IEnumerable<TournamentTeam> teams)
+    static Dictionary<Guid, Guid> BuildPlayerTeamMap(IEnumerable<TeamData> teams)
     {
         var playerTeamMap = new Dictionary<Guid, Guid>();
 
-        foreach (TournamentTeam team in teams)
+        foreach (TeamData team in teams)
         {
-            foreach (Player player in team.Players)
+            foreach (Guid playerId in team.PlayerIds)
             {
-                playerTeamMap.TryAdd(player.Id, team.Id);
+                playerTeamMap.TryAdd(playerId, team.Id);
             }
         }
 
         return playerTeamMap;
     }
 
-    private static Dictionary<Guid, TournamentStandingDto> InitializeStandings(IEnumerable<TournamentTeam> teams)
+    static Dictionary<Guid, TournamentStandingDto> InitializeStandings(IEnumerable<TeamData> teams)
     {
         return teams.ToDictionary(
             team => team.Id,
@@ -71,39 +85,40 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         );
     }
 
-    private static void ProcessMatches(
-        IEnumerable<Match> matches,
+    static void ProcessMatches(
+        IEnumerable<MatchData> matches,
         IReadOnlyDictionary<Guid, Guid> playerTeamMap,
         IReadOnlyDictionary<Guid, TournamentStandingDto> standingsMap,
         TournamentScoringRules rules)
     {
-        foreach (Match match in matches)
+        foreach (MatchData match in matches)
         {
             // Risoluzione immediata delle squadre dai partecipanti.
-            // Se un match ha più partecipanti per lato (es. 2v2), usiamo il primo per identificare il team.
-            var homeParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Home);
-            var awayParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Away);
+            ParticipantData? homeParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Home);
+            ParticipantData? awayParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Away);
 
-            if (homeParticipant == null || awayParticipant == null) continue;
-
-            Guid homeTeamId = playerTeamMap.GetValueOrDefault(homeParticipant.PlayerId);
-            Guid awayTeamId = playerTeamMap.GetValueOrDefault(awayParticipant.PlayerId);
-
-            // Se non troviamo le squadre (dati sporchi o setup errato), saltiamo la partita
-            if (homeTeamId == Guid.Empty || awayTeamId == Guid.Empty) continue;
-
-            // Recuperiamo i DTO da aggiornare
-            if (!standingsMap.TryGetValue(homeTeamId, out var homeStats) ||
-                !standingsMap.TryGetValue(awayTeamId, out var awayStats))
+            if (homeParticipant == null || awayParticipant == null)
             {
                 continue;
             }
 
-            // Incrementiamo il totale delle partite programmate (temporaneamente in MatchesRemaining)
+            Guid homeTeamId = playerTeamMap.GetValueOrDefault(homeParticipant.PlayerId);
+            Guid awayTeamId = playerTeamMap.GetValueOrDefault(awayParticipant.PlayerId);
+
+            if (homeTeamId == Guid.Empty || awayTeamId == Guid.Empty)
+            {
+                continue;
+            }
+
+            if (!standingsMap.TryGetValue(homeTeamId, out TournamentStandingDto? homeStats) ||
+                !standingsMap.TryGetValue(awayTeamId, out TournamentStandingDto? awayStats))
+            {
+                continue;
+            }
+
             homeStats.MatchesRemaining++;
             awayStats.MatchesRemaining++;
 
-            // Se la partita è stata giocata, aggiorniamo le statistiche
             if (match.Status == MatchStatus.Played)
             {
                 UpdateMatchStats(match, homeStats, awayStats, rules);
@@ -111,8 +126,8 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         }
     }
 
-    private static void UpdateMatchStats(
-        Match match,
+    static void UpdateMatchStats(
+        MatchData match,
         TournamentStandingDto homeStats,
         TournamentStandingDto awayStats,
         TournamentScoringRules rules)
@@ -153,8 +168,8 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         ApplyBonuses(match, homeStats, awayStats, rules);
     }
 
-    private static void ApplyBonuses(
-        Match match,
+    static void ApplyBonuses(
+        MatchData match,
         TournamentStandingDto homeStats,
         TournamentStandingDto awayStats,
         TournamentScoringRules rules)
@@ -162,21 +177,35 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         // Bonus Goal Soglia
         if (rules.GoalThreshold.HasValue)
         {
-            if (match.ScoreHome >= rules.GoalThreshold.Value) homeStats.Points += rules.GoalThresholdBonus;
-            if (match.ScoreAway >= rules.GoalThreshold.Value) awayStats.Points += rules.GoalThresholdBonus;
+            if (match.ScoreHome >= rules.GoalThreshold.Value)
+            {
+                homeStats.Points += rules.GoalThresholdBonus;
+            }
+
+            if (match.ScoreAway >= rules.GoalThreshold.Value)
+            {
+                awayStats.Points += rules.GoalThresholdBonus;
+            }
         }
 
         // Bonus Cappotto (10-0)
         if (rules.EnableTenZeroBonus)
         {
-            if (match.ScoreHome >= 10 && match.ScoreAway == 0) homeStats.Points += rules.TenZeroBonus;
-            if (match.ScoreAway >= 10 && match.ScoreHome == 0) awayStats.Points += rules.TenZeroBonus;
+            if (match.ScoreHome >= 10 && match.ScoreAway == 0)
+            {
+                homeStats.Points += rules.TenZeroBonus;
+            }
+
+            if (match.ScoreAway >= 10 && match.ScoreHome == 0)
+            {
+                awayStats.Points += rules.TenZeroBonus;
+            }
         }
     }
 
-    private static void CalculateProjections(IEnumerable<TournamentStandingDto> standings)
+    static void CalculateProjections(IEnumerable<TournamentStandingDto> standings)
     {
-        foreach (var stats in standings)
+        foreach (TournamentStandingDto stats in standings)
         {
             // Sottraiamo le giocate per ottenere le rimanenti effettive.
             stats.MatchesRemaining -= stats.Played;
@@ -194,7 +223,7 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         }
     }
 
-    private static List<TournamentStandingDto> RankStandings(IEnumerable<TournamentStandingDto> standings)
+    static List<TournamentStandingDto> RankStandings(IEnumerable<TournamentStandingDto> standings)
     {
         var ranking = standings
             .OrderByDescending(x => x.Points) // 1. Punti
@@ -211,4 +240,21 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
 
         return ranking;
     }
+
+    record TournamentStandingsData(
+        TournamentScoringRules ScoringRules,
+        List<TeamData> Teams,
+        List<MatchData> Matches
+    );
+
+    record TeamData(Guid Id, string Name, List<Guid> PlayerIds);
+
+    record MatchData(
+        MatchStatus Status,
+        int ScoreHome,
+        int ScoreAway,
+        List<ParticipantData> Participants
+    );
+
+    record ParticipantData(Guid PlayerId, Side Side);
 }
