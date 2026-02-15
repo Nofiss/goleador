@@ -3,6 +3,7 @@ import { BarChart2, RefreshCcw, User } from "lucide-react";
 import { memo, useCallback, useState } from "react";
 import { getPlayers } from "@/api/players";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -164,36 +165,34 @@ export const PlayerList = () => {
 					</Button>
 				</div>
 
-				{/* Tabella */}
-				<div className="rounded-lg border border-border overflow-hidden bg-background/30">
-					<Table>
-						<TableHeader className="bg-muted/50">
-							<TableRow>
-								<TableHead className="font-bold text-foreground">Nickname</TableHead>
-								<TableHead className="hidden md:table-cell">Nome Completo</TableHead>
-								<TableHead className="hidden sm:table-cell">Email</TableHead>
-								<TableHead className="text-right">Iscritto il</TableHead>
-								<TableHead className="w-20" />
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{players?.length === 0 ? (
+				{/* Tabella / Empty State */}
+				{players?.length === 0 ? (
+					<EmptyState
+						icon={User}
+						title="Nessun giocatore trovato"
+						description="La rosa è attualmente vuota. Registra nuovi atleti per iniziare a organizzare partite."
+						className="py-20"
+					/>
+				) : (
+					<div className="rounded-lg border border-border overflow-hidden bg-background/30">
+						<Table>
+							<TableHeader className="bg-muted/50">
 								<TableRow>
-									<TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-										<div className="flex flex-col items-center gap-2">
-											<User className="h-8 w-8 opacity-10" />
-											<p>Nessun giocatore trovato.</p>
-										</div>
-									</TableCell>
+									<TableHead className="font-bold text-foreground">Nickname</TableHead>
+									<TableHead className="hidden md:table-cell">Nome Completo</TableHead>
+									<TableHead className="hidden sm:table-cell">Email</TableHead>
+									<TableHead className="text-right">Iscritto il</TableHead>
+									<TableHead className="w-20" />
 								</TableRow>
-							) : (
-								players?.map((player) => (
+							</TableHeader>
+							<TableBody>
+								{players?.map((player) => (
 									<PlayerRow key={player.id} player={player} onShowStats={handleShowStats} />
-								))
-							)}
-						</TableBody>
-					</Table>
-				</div>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				)}
 			</div>
 
 			<PlayerStatsDialog playerId={selectedPlayerId} onClose={() => setSelectedPlayerId(null)} />

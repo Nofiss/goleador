@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Trophy } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { getTournamentStandings } from "@/api/tournaments";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -128,16 +129,11 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 
 	if (status === TournamentStatus.setup) {
 		return (
-			<div className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-[2rem] bg-muted/5 border-muted-foreground/20">
-				<Trophy className="h-12 w-12 text-muted-foreground/20 mb-4" aria-hidden="true" />
-				<h3 className="text-xl font-semibold text-muted-foreground">
-					Classifica non ancora disponibile
-				</h3>
-				<p className="text-sm text-muted-foreground/60 max-w-[300px] text-center mt-2">
-					Il torneo è ancora in fase di configurazione. La classifica sarà visibile non appena
-					inizieranno le partite.
-				</p>
-			</div>
+			<EmptyState
+				icon={Trophy}
+				title="Classifica non ancora disponibile"
+				description="Il torneo è ancora in fase di configurazione. La classifica sarà visibile non appena inizieranno le partite."
+			/>
 		);
 	}
 
@@ -299,8 +295,11 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 					<TableBody>
 						{sortedStandings.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={11} className="text-center h-24 text-muted-foreground">
-									Nessuna partita giocata
+								<TableCell colSpan={11} className="text-center h-32 text-muted-foreground">
+									<div className="flex flex-col items-center gap-2">
+										<Trophy className="h-8 w-8 opacity-10" />
+										<p>Nessuna partita giocata</p>
+									</div>
 								</TableCell>
 							</TableRow>
 						) : (
