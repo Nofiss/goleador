@@ -10,6 +10,8 @@ public interface IApplicationDbContext
     DbSet<Match> Matches { get; }
     DbSet<Tournament> Tournaments { get; }
     DbSet<TournamentTeam> TournamentTeams { get; }
+    DbSet<TournamentCardDefinition> TournamentCardDefinitions { get; }
+    DbSet<MatchCardUsage> MatchCardUsages { get; }
     DbSet<Table> Tables { get; }
     DbSet<AuditLog> AuditLogs { get; }
 

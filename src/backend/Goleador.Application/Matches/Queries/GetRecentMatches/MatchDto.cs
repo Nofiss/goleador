@@ -11,4 +11,6 @@ public class MatchDto
     public string HomeTeamName { get; set; } = string.Empty;
     public string AwayTeamName { get; set; } = string.Empty;
     public MatchStatus Status { get; set; }
+    public bool HasCardsHome { get; set; }
+    public bool HasCardsAway { get; set; }
 }

@@ -20,6 +20,7 @@ public class TournamentDetailDto
     public List<TeamPlayerDto> RegisteredPlayers { get; set; } = [];
     public List<TeamDto> Teams { get; set; } = [];
     public List<TournamentMatchDto> Matches { get; set; } = [];
+    public List<TournamentCardDto> CardDefinitions { get; set; } = [];
 
     class Mapping : Profile
     {
@@ -27,6 +28,8 @@ public class TournamentDetailDto
         {
             CreateMap<Tournament, TournamentDetailDto>();
             CreateMap<TournamentTeam, TeamDto>();
+            CreateMap<TournamentCardDefinition, TournamentCardDto>();
+            CreateMap<MatchCardUsage, MatchCardUsageDto>();
             CreateMap<Player, TeamPlayerDto>();
             CreateMap<Match, TournamentMatchDto>()
                 // Mappiamo i nomi dei partecipanti per visualizzarli facilmente
@@ -76,6 +79,21 @@ public class TournamentMatchDto
     public string TableName { get; set; } = string.Empty;
     public DateTime DatePlayed { get; set; }
     public string RowVersion { get; set; } = string.Empty;
+    public List<MatchCardUsageDto> CardUsages { get; set; } = [];
+}
+
+public class TournamentCardDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public CardEffect Effect { get; set; }
+}
+
+public class MatchCardUsageDto
+{
+    public Guid TeamId { get; set; }
+    public Guid CardDefinitionId { get; set; }
 }
 
 public class ScoringRulesDto

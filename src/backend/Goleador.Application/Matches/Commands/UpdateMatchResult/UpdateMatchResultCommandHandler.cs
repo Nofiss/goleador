@@ -34,6 +34,26 @@ public class UpdateMatchResultCommandHandler(
         // 2. Aggiorna tramite metodo di dominio
         match.SetResult(request.ScoreHome, request.ScoreAway);
 
+        if (request.UsedCards != null)
+        {
+            match.ClearCards();
+            foreach (var cardUsage in request.UsedCards)
+            {
+                // Validazione: la carta non deve essere stata usata in altre partite dallo stesso team in questo torneo
+                var alreadyUsed = await context.MatchCardUsages
+                    .AnyAsync(cu => cu.TeamId == cardUsage.TeamId
+                                 && cu.CardDefinitionId == cardUsage.CardDefinitionId
+                                 && cu.MatchId != match.Id, cancellationToken);
+
+                if (alreadyUsed)
+                {
+                    throw new InvalidOperationException($"Card {cardUsage.CardDefinitionId} already used by team {cardUsage.TeamId}.");
+                }
+
+                match.PlayCard(cardUsage.TeamId, cardUsage.CardDefinitionId);
+            }
+        }
+
         // Impostiamo il valore originale per il controllo di concorrenza
         context.Entry(match).Property(x => x.RowVersion).OriginalValue = Convert.FromBase64String(
             request.RowVersion

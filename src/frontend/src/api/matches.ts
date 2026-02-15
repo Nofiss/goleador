@@ -23,6 +23,7 @@ export const setMatchResult = async (
 		scoreAway: number;
 		tableId: number | null;
 		rowVersion: string;
+		usedCards?: { cardDefinitionId: string; teamId: string }[];
 	},
 ) => {
 	return api.put(`/matches/${matchId}`, data);

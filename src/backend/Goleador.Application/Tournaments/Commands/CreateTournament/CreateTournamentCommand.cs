@@ -17,5 +17,8 @@ public record CreateTournamentCommand(
     int? GoalThreshold = null,
     int GoalThresholdBonus = 0,
     bool EnableTenZeroBonus = false,
-    int TenZeroBonus = 0
+    int TenZeroBonus = 0,
+    List<CreateTournamentCardDto>? Cards = null
 ) : IRequest<Guid>;
+
+public record CreateTournamentCardDto(string Name, string Description, CardEffect Effect);

@@ -1,4 +1,12 @@
-import { ArrowRightLeft, CalendarClock, LayoutGrid, List, MapPin, Search } from "lucide-react";
+import {
+	ArrowRightLeft,
+	CalendarClock,
+	LayoutGrid,
+	List,
+	MapPin,
+	Search,
+	Zap,
+} from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -78,21 +86,28 @@ const TeamScoreRow = memo(
 		score,
 		isPlayed,
 		isWinner,
+		hasCards = false,
 	}: {
 		teamName: string;
 		score: number;
 		isPlayed: boolean;
 		isWinner: boolean;
+		hasCards?: boolean;
 	}) => (
 		<div className="flex justify-between items-center group/team">
-			<span
-				className={cn(
-					"text-base font-semibold transition-colors truncate",
-					isWinner ? "text-foreground" : "text-muted-foreground",
+			<div className="flex items-center gap-2 truncate">
+				<span
+					className={cn(
+						"text-base font-semibold transition-colors truncate",
+						isWinner ? "text-foreground" : "text-muted-foreground",
+					)}
+				>
+					{teamName}
+				</span>
+				{hasCards && (
+					<Zap className="h-3 w-3 text-yellow-500 animate-pulse" aria-label="Carta Giocata" />
 				)}
-			>
-				{teamName}
-			</span>
+			</div>
 			<span
 				className={cn(
 					"font-mono text-xl tabular-nums min-w-8 text-center rounded bg-muted/50 px-2",
@@ -173,12 +188,14 @@ const MatchCard = memo(
 							score={match.scoreHome}
 							isPlayed={isPlayed}
 							isWinner={homeWon}
+							hasCards={(match.cardUsages || []).some((cu) => cu.teamId === match.homeTeamId)}
 						/>
 						<TeamScoreRow
 							teamName={match.awayTeamName}
 							score={match.scoreAway}
 							isPlayed={isPlayed}
 							isWinner={awayWon}
+							hasCards={(match.cardUsages || []).some((cu) => cu.teamId === match.awayTeamId)}
 						/>
 					</div>
 
@@ -428,6 +445,8 @@ export const MatchesTab = ({ tournament }: Props) => {
 				isOpen={!!selectedMatch}
 				onClose={() => setSelectedMatch(null)}
 				tournamentId={tournament.id}
+				cardDefinitions={tournament.cardDefinitions}
+				allMatches={tournament.matches}
 			/>
 
 			<BulkAssignTableDialog

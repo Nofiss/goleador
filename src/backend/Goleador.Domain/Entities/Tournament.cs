@@ -27,6 +27,10 @@ public class Tournament : BaseEntity
     readonly List<Match> _matches = [];
     public IReadOnlyCollection<Match> Matches => _matches.AsReadOnly();
 
+    readonly List<TournamentCardDefinition> _cardDefinitions = [];
+    public IReadOnlyCollection<TournamentCardDefinition> CardDefinitions =>
+        _cardDefinitions.AsReadOnly();
+
     Tournament() { }
 
     public Tournament(
@@ -105,5 +109,15 @@ public class Tournament : BaseEntity
         }
 
         Status = TournamentStatus.Active;
+    }
+
+    public void AddCardDefinition(string name, string description, CardEffect effect)
+    {
+        if (Status != TournamentStatus.Setup)
+        {
+            throw new InvalidOperationException("Cannot add card definitions once tournament has started.");
+        }
+
+        _cardDefinitions.Add(new TournamentCardDefinition(Id, name, description, effect));
     }
 }

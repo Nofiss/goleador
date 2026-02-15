@@ -55,6 +55,10 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
                     m.Participants.Select(p => new ParticipantData(
                         p.PlayerId,
                         p.Side
+                    )).ToList(),
+                    m.CardUsages.Select(cu => new CardUsageData(
+                        cu.TeamId,
+                        cu.CardDefinition!.Effect
                     )).ToList()
                 )).ToList()
             ))
@@ -146,14 +150,28 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         if (match.ScoreHome > match.ScoreAway)
         {
             homeStats.Won++;
-            homeStats.Points += rules.PointsForWin;
+
+            var points = rules.PointsForWin;
+            if (match.CardUsages.Any(cu => cu.TeamId == homeStats.TeamId && cu.Effect == CardEffect.DoublePoints))
+            {
+                points *= 2;
+            }
+            homeStats.Points += points;
+
             awayStats.Lost++;
             awayStats.Points += rules.PointsForLoss;
         }
         else if (match.ScoreHome < match.ScoreAway)
         {
             awayStats.Won++;
-            awayStats.Points += rules.PointsForWin;
+
+            var points = rules.PointsForWin;
+            if (match.CardUsages.Any(cu => cu.TeamId == awayStats.TeamId && cu.Effect == CardEffect.DoublePoints))
+            {
+                points *= 2;
+            }
+            awayStats.Points += points;
+
             homeStats.Lost++;
             homeStats.Points += rules.PointsForLoss;
         }
@@ -253,8 +271,11 @@ public class GetTournamentStandingsQueryHandler(IApplicationDbContext context)
         MatchStatus Status,
         int ScoreHome,
         int ScoreAway,
-        List<ParticipantData> Participants
+        List<ParticipantData> Participants,
+        List<CardUsageData> CardUsages
     );
 
     record ParticipantData(Guid PlayerId, Side Side);
+
+    record CardUsageData(Guid TeamId, CardEffect Effect);
 }

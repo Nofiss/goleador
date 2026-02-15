@@ -6,4 +6,6 @@ export interface MatchDto {
 	homeTeamName: string; // O playerHomeName se 1vs1
 	awayTeamName: string; // O playerAwayName
 	status: number; // 1 = Played
+	hasCardsHome?: boolean;
+	hasCardsAway?: boolean;
 }
