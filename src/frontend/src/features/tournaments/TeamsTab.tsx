@@ -1,6 +1,7 @@
 import { ShieldPlus, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useAuth } from "@/hooks/useAuth";
 import { type TournamentDetail, TournamentStatus } from "@/types";
 import { PlayerPool } from "./teams/PlayerPool";
@@ -25,7 +26,6 @@ export const TeamsTab = ({ tournament }: Props) => {
 		return { assignedPlayerIds: Array.from(assignedIds), availableCandidates: available };
 	}, [tournament.teams, tournament.registeredPlayers]);
 
-	const newLocal = "text-sm text-muted-foreground/60 max-w-[250px] text-center";
 	return (
 		<div className="space-y-8 animate-in fade-in duration-500">
 			{/* ADMIN TOOLBAR */}
@@ -76,15 +76,22 @@ export const TeamsTab = ({ tournament }: Props) => {
 				</div>
 
 				{tournament.teams.length === 0 ? (
-					<div className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-[2rem] bg-muted/5 border-muted-foreground/20">
-						<Users className="h-12 w-12 text-muted-foreground/20 mb-4" />
-						<p className="text-lg font-medium text-muted-foreground">Nessuna squadra formata</p>
-						<p className={newLocal}>
-							{isAdmin
+					<EmptyState
+						icon={Users}
+						title="Nessuna squadra formata"
+						description={
+							isAdmin
 								? "Inizia iscrivendo i giocatori al pool e poi crea le squadre."
-								: "L'organizzatore non ha ancora configurato le squadre."}
-						</p>
-					</div>
+								: "L'organizzatore non ha ancora configurato le squadre."
+						}
+						action={
+							isAdmin ? (
+								<Button variant="outline" onClick={() => setIsRegisterDialogOpen(true)}>
+									Crea la prima squadra
+								</Button>
+							) : undefined
+						}
+					/>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
 						{tournament.teams.map((team) => (

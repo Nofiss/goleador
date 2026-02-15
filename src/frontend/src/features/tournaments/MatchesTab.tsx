@@ -1,6 +1,7 @@
 import { ArrowRightLeft, CalendarClock, LayoutGrid, List, MapPin, Search } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -309,16 +310,11 @@ export const MatchesTab = ({ tournament }: Props) => {
 
 	if (tournament.status === TournamentStatus.setup) {
 		return (
-			<div className="flex flex-col items-center justify-center py-24 border-2 border-dashed rounded-[2rem] bg-muted/5 border-muted-foreground/20">
-				<CalendarClock className="h-12 w-12 text-muted-foreground/20 mb-4" aria-hidden="true" />
-				<h3 className="text-xl font-semibold text-muted-foreground">
-					Calendario non ancora generato
-				</h3>
-				<p className="text-sm text-muted-foreground/60 max-w-[300px] text-center mt-2">
-					Il calendario delle partite verrà creato automaticamente non appena l'amministratore
-					avvierà il torneo.
-				</p>
-			</div>
+			<EmptyState
+				icon={CalendarClock}
+				title="Calendario non ancora generato"
+				description="Il calendario delle partite verrà creato automaticamente non appena l'amministratore avvierà il torneo."
+			/>
 		);
 	}
 
@@ -379,25 +375,23 @@ export const MatchesTab = ({ tournament }: Props) => {
 			</div>
 
 			{filteredMatches.length === 0 ? (
-				<div className="text-center py-20 bg-muted/10 border border-dashed border-border rounded-xl animate-in fade-in zoom-in duration-300">
-					<Search
-						className="w-10 h-10 mx-auto mb-3 opacity-20 text-muted-foreground"
-						aria-hidden="true"
-					/>
-					<p className="text-muted-foreground font-medium">
-						Nessuna partita trovata con questi filtri.
-					</p>
-					<Button
-						variant="link"
-						onClick={() => {
-							setSearchQuery("");
-							setStatusFilter("ALL");
-						}}
-						className="mt-2 text-primary"
-					>
-						Resetta filtri
-					</Button>
-				</div>
+				<EmptyState
+					icon={Search}
+					title="Nessuna partita trovata"
+					description="Nessuna partita corrisponde ai criteri di ricerca impostati."
+					className="py-20"
+					action={
+						<Button
+							variant="outline"
+							onClick={() => {
+								setSearchQuery("");
+								setStatusFilter("ALL");
+							}}
+						>
+							Resetta filtri
+						</Button>
+					}
+				/>
 			) : viewMode === "matrix" ? (
 				<MatchesCrossTable
 					teams={tournament.teams}

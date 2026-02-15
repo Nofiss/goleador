@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
@@ -306,14 +307,13 @@ export const UserDashboard = () => {
 									<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
 								</div>
 							) : !pendingMatches || pendingMatches.length === 0 ? (
-								<div className="flex flex-col items-center justify-center h-64 text-center px-8">
-									<div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
-										<Gamepad2 className="h-8 w-8 text-muted-foreground opacity-30" />
-									</div>
-									<h3 className="font-bold text-foreground/80">Nessuna partita pendente</h3>
-									<p className="text-sm text-muted-foreground mt-1">
-										Tutto calmo sul fronte occidentale. Goditi la pausa!
-									</p>
+								<div className="p-6">
+									<EmptyState
+										icon={Gamepad2}
+										title="Nessuna partita pendente"
+										description="Tutto calmo sul fronte occidentale. Goditi la pausa!"
+										className="py-12"
+									/>
 								</div>
 							) : (
 								<div className="divide-y divide-border/50">
@@ -372,9 +372,13 @@ export const UserDashboard = () => {
 									<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
 								</div>
 							) : !recentMatches || recentMatches.length === 0 ? (
-								<div className="flex flex-col items-center justify-center h-64 text-center px-8">
-									<History className="h-12 w-12 text-muted-foreground opacity-10 mb-4" />
-									<p className="text-muted-foreground italic">Nessuna partita recente globale.</p>
+								<div className="p-6">
+									<EmptyState
+										icon={History}
+										title="Nessun'attività"
+										description="Non sono ancora state registrate partite globali recentemente."
+										className="py-12"
+									/>
 								</div>
 							) : (
 								<div className="divide-y divide-border/50">
