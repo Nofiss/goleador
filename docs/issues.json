@@ -8194,7 +8194,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-15"
 		},
 		{
 			"key": "e41b2465-0e57-48e0-bef4-5dbcc4cef705",

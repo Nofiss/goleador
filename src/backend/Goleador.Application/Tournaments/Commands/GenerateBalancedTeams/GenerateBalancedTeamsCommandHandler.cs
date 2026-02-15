@@ -13,14 +13,15 @@ public class GenerateBalancedTeamsCommandHandler(
     IMemoryCache cache
 ) : IRequestHandler<GenerateBalancedTeamsCommand, Unit>
 {
-    public async Task<Unit> Handle(GenerateBalancedTeamsCommand request, CancellationToken token)
+    // SonarQube Rule csharpsquid:S927 - Rename parameter 'token' to 'cancellationToken' to match the interface declaration.
+    public async Task<Unit> Handle(GenerateBalancedTeamsCommand request, CancellationToken cancellationToken)
     {
         // 1. Recupera Torneo e Iscritti Singoli
         Tournament tournament =
             await context
                 .Tournaments.Include(t => t.Teams)
                     .ThenInclude(tt => tt.Players)
-                .FirstOrDefaultAsync(t => t.Id == request.TournamentId, token)
+                .FirstOrDefaultAsync(t => t.Id == request.TournamentId, cancellationToken)
             ?? throw new KeyNotFoundException("Torneo non trovato.");
 
         // Prendi solo i team con 1 giocatore (quelli in attesa di pairing)
@@ -49,7 +50,7 @@ public class GenerateBalancedTeamsCommandHandler(
                 Draws = g.Count(p => p.Match.ScoreHome == p.Match.ScoreAway),
                 Total = g.Count()
             })
-            .ToDictionaryAsync(x => x.PlayerId, x => x, token);
+            .ToDictionaryAsync(x => x.PlayerId, x => x, cancellationToken);
 
         var playerSkills = new Dictionary<Guid, double>();
         foreach (var playerId in playerIds)
@@ -93,7 +94,7 @@ public class GenerateBalancedTeamsCommandHandler(
             context.TournamentTeams.Add(newTeam);
         }
 
-        await context.SaveChangesAsync(token);
+        await context.SaveChangesAsync(cancellationToken);
 
         // Optimization Bolt ⚡: Invalidate cache when teams are generated
         cache.Remove($"TournamentDetail-{tournament.Id}");
