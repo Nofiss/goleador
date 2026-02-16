@@ -19,15 +19,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Table> Tables { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // csharpsquid:S927 - Rename parameter to match the base class declaration.
+    protected override void OnModelCreating(ModelBuilder builder)
     {
         // Questo comando magico scansiona l'assembly corrente (Infrastructure)
         // e applica tutte le configurazioni che implementano IEntityTypeConfiguration (come PlayerConfiguration).
         // Così non dobbiamo aggiungerle una per una manualmente.
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        modelBuilder.ApplySoftDeleteQueryFilter();
+        builder.ApplySoftDeleteQueryFilter();
 
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
     }
 }
