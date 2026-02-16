@@ -4,6 +4,7 @@ import { memo } from "react";
 import { getRecentMatches } from "@/api/matches";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -13,6 +14,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import type { MatchDto } from "@/types";
 
 /**
@@ -107,38 +109,31 @@ export const MatchesListTable = () => {
 
 	return (
 		<Card>
-			<CardContent className="p-0">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Data</TableHead>
-							<TableHead className="text-right w-[40%]">Casa</TableHead>
-							<TableHead className="text-center w-25">Risultato</TableHead>
-							<TableHead className="text-left w-[40%]">Ospite</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{matches?.length === 0 ? (
+			<CardContent className={cn("p-0", matches?.length === 0 && "p-6")}>
+				{matches?.length === 0 ? (
+					<EmptyState
+						icon={History}
+						title="Nessuna partita registrata"
+						description="Le sfide amichevoli e i risultati dei tornei appariranno qui."
+						className="py-12"
+					/>
+				) : (
+					<Table>
+						<TableHeader>
 							<TableRow>
-								<TableCell colSpan={4} className="h-64">
-									<div className="flex flex-col items-center justify-center text-center space-y-3">
-										<div className="bg-muted/50 rounded-full p-4">
-											<History className="h-8 w-8 text-muted-foreground/40" />
-										</div>
-										<div className="space-y-1">
-											<p className="font-semibold text-foreground">Nessuna partita registrata</p>
-											<p className="text-sm text-muted-foreground max-w-[250px]">
-												Le sfide amichevoli e i risultati dei tornei appariranno qui.
-											</p>
-										</div>
-									</div>
-								</TableCell>
+								<TableHead>Data</TableHead>
+								<TableHead className="text-right w-[40%]">Casa</TableHead>
+								<TableHead className="text-center w-25">Risultato</TableHead>
+								<TableHead className="text-left w-[40%]">Ospite</TableHead>
 							</TableRow>
-						) : (
-							matches?.map((match) => <MatchRow key={match.id} match={match} />)
-						)}
-					</TableBody>
-				</Table>
+						</TableHeader>
+						<TableBody>
+							{matches?.map((match) => (
+								<MatchRow key={match.id} match={match} />
+							))}
+						</TableBody>
+					</Table>
+				)}
 			</CardContent>
 		</Card>
 	);

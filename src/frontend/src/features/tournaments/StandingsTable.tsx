@@ -295,11 +295,13 @@ export const StandingsTable = ({ tournamentId, status }: StandingsTableProps) =>
 					<TableBody>
 						{sortedStandings.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={11} className="text-center h-32 text-muted-foreground">
-									<div className="flex flex-col items-center gap-2">
-										<Trophy className="h-8 w-8 opacity-10" />
-										<p>Nessuna partita giocata</p>
-									</div>
+								<TableCell colSpan={11} className="p-0">
+									<EmptyState
+										icon={Trophy}
+										title="Nessuna partita giocata"
+										description="La classifica sarà popolata non appena verranno registrati i primi risultati."
+										className="border-none bg-transparent py-12"
+									/>
 								</TableCell>
 							</TableRow>
 						) : (
