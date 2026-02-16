@@ -45,3 +45,7 @@
 ## 2025-05-16 - [Tournament Standings Projection Optimization]
 **Learning:** Found that `GetTournamentStandingsQueryHandler` was using `Include` with `AsSplitQuery` to load full entity graphs for Teams, Players, and Matches. This resulted in over-fetching hundreds of unnecessary fields (Names, Emails, Dates) just to calculate a few scalar statistics.
 **Action:** Replaced eager loading with a targeted LINQ projection (`.Select()`) into private records. This reduced data transfer significantly by fetching only the minimal IDs and scores required for the standings algorithm, while maintaining O(1) in-memory resolution via dictionaries.
+
+## 2026-02-16 - [Recent Matches Dictionary-based Resolution]
+**Learning:** Found that `GetRecentMatchesQueryHandler` was performing an $O(N \times T)$ in-memory scan (where $N$ is matches and $T$ is teams) to resolve Team IDs. It also used redundant subqueries for participant nicknames.
+**Action:** Implemented a `Dictionary<(Guid TournamentId, Guid PlayerId), Guid>` for $O(1)$ team resolution and streamlined the database projection by combining participant data into a single collection. Added a conditional check to skip the teams query when no tournaments are involved, reducing database roundtrips.
