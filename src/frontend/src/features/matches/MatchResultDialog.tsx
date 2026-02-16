@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import { motion } from "framer-motion";
 import { ArrowLeftRight, Loader2, Table, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -226,8 +227,15 @@ export const MatchResultDialog = ({
 									setScoreAway(temp);
 								}}
 								aria-label="Scambia punteggi"
+								title="Scambia punteggi"
 							>
-								<ArrowLeftRight className="h-4 w-4" />
+								<motion.div
+									whileHover={{ rotate: 180 }}
+									whileTap={{ scale: 0.8, rotate: 180 }}
+									transition={{ type: "spring", stiffness: 300, damping: 15 }}
+								>
+									<ArrowLeftRight className="h-4 w-4" />
+								</motion.div>
 							</Button>
 						</div>
 

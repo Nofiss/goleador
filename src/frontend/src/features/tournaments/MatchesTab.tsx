@@ -1,12 +1,4 @@
-import {
-	ArrowRightLeft,
-	CalendarClock,
-	LayoutGrid,
-	List,
-	MapPin,
-	Search,
-	Zap,
-} from "lucide-react";
+import { ArrowRightLeft, CalendarClock, LayoutGrid, List, MapPin, Search, Zap } from "lucide-react";
 import { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
