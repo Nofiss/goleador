@@ -35,23 +35,25 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
                 m.Status,
                 HomeParticipantId = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).FirstOrDefault(),
                 AwayParticipantId = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).FirstOrDefault(),
-                HomeNicknames = m.Participants
-                    .Where(p => p.Side == Side.Home)
-                    .Select(p => p.Player.Nickname)
-                    .ToList(),
-                AwayNicknames = m.Participants
-                    .Where(p => p.Side == Side.Away)
-                    .Select(p => p.Player.Nickname)
-                    .ToList(),
+                Participants = m.Participants.Select(p => new { p.Side, p.Player.Nickname }).ToList(),
                 CardUsages = m.CardUsages.Select(cu => new { cu.TeamId }).ToList()
             })
             .ToListAsync(cancellationToken);
 
         var tournamentIds = matches.Where(m => m.TournamentId.HasValue).Select(m => m.TournamentId!.Value).Distinct().ToList();
-        var teams = await context.TournamentTeams
-            .Where(tt => tournamentIds.Contains(tt.TournamentId))
-            .Select(tt => new { tt.Id, tt.TournamentId, PlayerIds = tt.Players.Select(p => p.Id).ToList() })
-            .ToListAsync(cancellationToken);
+
+        // Skip query if no tournaments are involved
+        var teams = tournamentIds.Count == 0
+            ? []
+            : await context.TournamentTeams
+                .Where(tt => tournamentIds.Contains(tt.TournamentId))
+                .Select(tt => new { tt.Id, tt.TournamentId, PlayerIds = tt.Players.Select(p => p.Id).ToList() })
+                .ToListAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Build a lookup dictionary to achieve O(1) team resolution instead of O(T) scan per match.
+        var teamLookupMap = teams
+            .SelectMany(t => t.PlayerIds.Select(pId => new { Key = (t.TournamentId, pId), TeamId = t.Id }))
+            .ToDictionary(x => x.Key, x => x.TeamId);
 
         return matches.Select(m => {
             Guid? homeTeamId = null;
@@ -59,9 +61,16 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
 
             if (m.TournamentId.HasValue)
             {
-                homeTeamId = teams.FirstOrDefault(t => t.TournamentId == m.TournamentId && t.PlayerIds.Contains(m.HomeParticipantId))?.Id;
-                awayTeamId = teams.FirstOrDefault(t => t.TournamentId == m.TournamentId && t.PlayerIds.Contains(m.AwayParticipantId))?.Id;
+                homeTeamId = teamLookupMap.GetValueOrDefault((m.TournamentId.Value, m.HomeParticipantId));
+                awayTeamId = teamLookupMap.GetValueOrDefault((m.TournamentId.Value, m.AwayParticipantId));
+
+                // If GetValueOrDefault returns Guid.Empty (not found), we treat it as null for the DTO
+                if (homeTeamId == Guid.Empty) homeTeamId = null;
+                if (awayTeamId == Guid.Empty) awayTeamId = null;
             }
+
+            var homeNicks = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.Nickname).ToList();
+            var awayNicks = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.Nickname).ToList();
 
             return new MatchDto
             {
@@ -69,8 +78,8 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
                 DatePlayed = m.DatePlayed,
                 ScoreHome = m.ScoreHome,
                 ScoreAway = m.ScoreAway,
-                HomeTeamName = m.HomeNicknames.Count == 0 ? "Unknown" : string.Join(" - ", m.HomeNicknames),
-                AwayTeamName = m.AwayNicknames.Count == 0 ? "Unknown" : string.Join(" - ", m.AwayNicknames),
+                HomeTeamName = homeNicks.Count == 0 ? "Unknown" : string.Join(" - ", homeNicks),
+                AwayTeamName = awayNicks.Count == 0 ? "Unknown" : string.Join(" - ", awayNicks),
                 Status = m.Status,
                 HasCardsHome = homeTeamId.HasValue && m.CardUsages.Any(cu => cu.TeamId == homeTeamId),
                 HasCardsAway = awayTeamId.HasValue && m.CardUsages.Any(cu => cu.TeamId == awayTeamId)
