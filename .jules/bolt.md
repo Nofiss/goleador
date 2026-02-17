@@ -49,3 +49,7 @@
 ## 2026-02-16 - [Recent Matches Dictionary-based Resolution]
 **Learning:** Found that `GetRecentMatchesQueryHandler` was performing an $O(N \times T)$ in-memory scan (where $N$ is matches and $T$ is teams) to resolve Team IDs. It also used redundant subqueries for participant nicknames.
 **Action:** Implemented a `Dictionary<(Guid TournamentId, Guid PlayerId), Guid>` for $O(1)$ team resolution and streamlined the database projection by combining participant data into a single collection. Added a conditional check to skip the teams query when no tournaments are involved, reducing database roundtrips.
+
+## 2025-02-14 - [Frontend Memoization and Hook Placement]
+**Learning:** Found that `ProfilePage.tsx` was recalculating chart data and initials on every render, and lacked memoization for list items. Also, discovered that placing hooks after early returns violates React rules and triggers lint errors.
+**Action:** Extract list items into memoized sub-components and wrap derived data in `useMemo`. Always place hooks at the top of the component, before any conditional logic or early returns.

@@ -8,6 +8,7 @@ import {
 	Trophy,
 	Users,
 } from "lucide-react";
+import { memo, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { getPlayerProfile } from "@/api/players";
@@ -23,6 +24,36 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { MatchBriefDto } from "@/types";
+
+const RecentMatchRow = memo(({ match }: { match: MatchBriefDto }) => (
+	<TableRow>
+		<TableCell className="pl-6 text-xs text-muted-foreground">
+			{new Date(match.datePlayed).toLocaleDateString()}
+		</TableCell>
+		<TableCell className="text-sm font-medium">
+			<div className="flex flex-col gap-0.5">
+				<span className="text-blue-700">{match.homeTeamName}</span>
+				<span className="text-red-700">{match.awayTeamName}</span>
+			</div>
+		</TableCell>
+		<TableCell className="text-center font-mono font-bold">
+			{match.scoreHome} - {match.scoreAway}
+		</TableCell>
+		<TableCell className="text-center pr-6">
+			<Badge
+				variant={
+					match.result === "W" ? "default" : match.result === "L" ? "destructive" : "secondary"
+				}
+				className="w-8 justify-center"
+			>
+				{match.result}
+			</Badge>
+		</TableCell>
+	</TableRow>
+));
+
+RecentMatchRow.displayName = "RecentMatchRow";
 
 export const ProfilePage = () => {
 	const { id } = useParams<{ id: string }>();
@@ -35,6 +66,32 @@ export const ProfilePage = () => {
 		queryKey: ["player-profile", id || "me"],
 		queryFn: () => getPlayerProfile(id),
 	});
+
+	const initials = useMemo(
+		() => profile?.nickname.substring(0, 2).toUpperCase() || "",
+		[profile?.nickname],
+	);
+
+	const winLossData = useMemo(() => {
+		if (!profile) return [];
+		return [
+			{
+				name: "Vittorie",
+				value: profile.wins,
+				color: "hsl(var(--primary))",
+			},
+			{
+				name: "Sconfitte",
+				value: profile.losses,
+				color: "hsl(var(--destructive))",
+			},
+			{
+				name: "Pareggi",
+				value: Math.max(0, profile.totalMatches - profile.wins - profile.losses),
+				color: "hsl(var(--muted))",
+			},
+		].filter((d) => d.value > 0);
+	}, [profile]);
 
 	if (isLoading) {
 		return (
@@ -65,8 +122,6 @@ export const ProfilePage = () => {
 			</div>
 		);
 	}
-
-	const initials = profile.nickname.substring(0, 2).toUpperCase();
 
 	return (
 		<div className="container mx-auto max-w-7xl p-4 md:p-8 space-y-8">
@@ -153,23 +208,7 @@ export const ProfilePage = () => {
 							<ResponsiveContainer width="100%" height="100%">
 								<PieChart>
 									<Pie
-										data={[
-											{
-												name: "Vittorie",
-												value: profile.wins,
-												color: "hsl(var(--primary))",
-											},
-											{
-												name: "Sconfitte",
-												value: profile.losses,
-												color: "hsl(var(--destructive))",
-											},
-											{
-												name: "Pareggi",
-												value: profile.totalMatches - profile.wins - profile.losses,
-												color: "hsl(var(--muted))",
-											},
-										].filter((d) => d.value > 0)}
+										data={winLossData}
 										cx="50%"
 										cy="50%"
 										innerRadius={60}
@@ -177,31 +216,9 @@ export const ProfilePage = () => {
 										paddingAngle={5}
 										dataKey="value"
 									>
-										{[
-											{
-												name: "Vittorie",
-												value: profile.wins,
-												color: "hsl(var(--primary))",
-											},
-											{
-												name: "Sconfitte",
-												value: profile.losses,
-												color: "hsl(var(--destructive))",
-											},
-											{
-												name: "Pareggi",
-												value: profile.totalMatches - profile.wins - profile.losses,
-												color: "hsl(var(--muted))",
-											},
-										]
-											.filter((d) => d.value > 0)
-											.map((entry, index) => (
-												<Cell
-													// biome-ignore lint/suspicious/noArrayIndexKey: fixed categories
-													key={`cell-${index}`}
-													fill={entry.color}
-												/>
-											))}
+										{winLossData.map((entry) => (
+											<Cell key={entry.name} fill={entry.color} />
+										))}
 									</Pie>
 									<Tooltip
 										contentStyle={{
@@ -319,34 +336,7 @@ export const ProfilePage = () => {
 										</TableRow>
 									) : (
 										profile.recentMatches.map((match) => (
-											<TableRow key={match.id}>
-												<TableCell className="pl-6 text-xs text-muted-foreground">
-													{new Date(match.datePlayed).toLocaleDateString()}
-												</TableCell>
-												<TableCell className="text-sm font-medium">
-													<div className="flex flex-col gap-0.5">
-														<span className="text-blue-700">{match.homeTeamName}</span>
-														<span className="text-red-700">{match.awayTeamName}</span>
-													</div>
-												</TableCell>
-												<TableCell className="text-center font-mono font-bold">
-													{match.scoreHome} - {match.scoreAway}
-												</TableCell>
-												<TableCell className="text-center pr-6">
-													<Badge
-														variant={
-															match.result === "W"
-																? "default"
-																: match.result === "L"
-																	? "destructive"
-																	: "secondary"
-														}
-														className="w-8 justify-center"
-													>
-														{match.result}
-													</Badge>
-												</TableCell>
-											</TableRow>
+											<RecentMatchRow key={match.id} match={match} />
 										))
 									)}
 								</TableBody>
