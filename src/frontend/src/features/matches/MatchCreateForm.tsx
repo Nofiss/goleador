@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { ArrowLeftRight, Loader2, Swords, User } from "lucide-react";
 import { useState } from "react";
 import { createMatch } from "@/api/matches";
@@ -128,7 +129,13 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						title="Inverti Squadre"
 						aria-label="Inverti Squadre"
 					>
-						<ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+						<motion.div
+							whileHover={{ rotate: 180 }}
+							whileTap={{ scale: 0.8, rotate: 180 }}
+							transition={{ type: "spring", stiffness: 300, damping: 15 }}
+						>
+							<ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
+						</motion.div>
 					</Button>
 					<span className="font-bold text-sm text-gray-400">VS</span>
 				</div>

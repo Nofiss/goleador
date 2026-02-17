@@ -5,3 +5,7 @@
 ## 2025-05-28 - [Interactive Feedback & Global Consistency]
 **Learning:** Micro-interactions (like a subtle rotation on a swap button) combined with global visual consistency (standardized empty states) significantly increase the perceived quality of the application. Standardizing empty states across different views (Matches, Standings, Players) makes the app feel cohesive, while small animations provide immediate, delightful feedback that makes the interface feel alive.
 **Action:** Always look for opportunities to replace manual "no-data" states with the `EmptyState` component. When adding icon-only buttons, include a native `title` for tooltips and consider a simple `framer-motion` animation for hover/active states.
+
+## 2025-06-02 - [Icon-Only Button Accessibility and Interaction Polish]
+**Learning:** Icon-only buttons often suffer from missing accessibility labels, especially for primary navigation ("Back") or destructive actions ("Delete"). Unifying the "Swap" interaction pattern with `framer-motion` animations across different forms (Match Create vs. Match Result) while simultaneously fixing ARIA labels creates a more inclusive and professional experience.
+**Action:** Audit all icon-only buttons for `aria-label`. Use the `asChild` pattern with Radix buttons to ensure labels propagate correctly to links. Consistently apply the `ArrowLeftRight` rotation animation to all swap-like interactions for visual delight.
