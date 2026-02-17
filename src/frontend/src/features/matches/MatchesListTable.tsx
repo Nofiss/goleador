@@ -28,7 +28,13 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 			</TableCell>
 			<TableCell className="text-right font-medium text-blue-700">
 				<div className="flex items-center justify-end gap-1">
-					{match.hasCardsHome && <Zap className="h-3 w-3 text-yellow-500" />}
+					{match.hasCardsHome && (
+						<Zap
+							className="h-3 w-3 text-yellow-500"
+							role="img"
+							aria-label="Carte giocate"
+						/>
+					)}
 					{match.homeTeamName || "Player A"}
 					{match.scoreHome > match.scoreAway && (
 						<Badge variant="secondary" className="ml-2 text-[10px]">
@@ -48,7 +54,13 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 						</Badge>
 					)}
 					{match.awayTeamName || "Player B"}
-					{match.hasCardsAway && <Zap className="h-3 w-3 text-yellow-500" />}
+					{match.hasCardsAway && (
+						<Zap
+							className="h-3 w-3 text-yellow-500"
+							role="img"
+							aria-label="Carte giocate"
+						/>
+					)}
 				</div>
 			</TableCell>
 		</TableRow>

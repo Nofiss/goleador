@@ -97,7 +97,11 @@ const TeamScoreRow = memo(
 					{teamName}
 				</span>
 				{hasCards && (
-					<Zap className="h-3 w-3 text-yellow-500 animate-pulse" aria-label="Carta Giocata" />
+					<Zap
+						className="h-3 w-3 text-yellow-500 animate-pulse"
+						role="img"
+						aria-label="Carte giocate"
+					/>
 				)}
 			</div>
 			<span

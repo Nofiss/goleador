@@ -66,6 +66,7 @@ export const TablesPage = () => {
 										onClick={() => {
 											if (confirm("Sei sicuro?")) deleteMutation.mutate(table.id);
 										}}
+										aria-label="Elimina tavolo"
 									>
 										<Trash2 className="h-4 w-4" />
 									</Button>
