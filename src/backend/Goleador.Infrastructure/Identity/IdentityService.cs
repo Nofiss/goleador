@@ -40,7 +40,7 @@ public class IdentityService(
 
             IList<string> userRoles = await userManager.GetRolesAsync(user);
             JwtSecurityToken accessToken = CreateToken(user, userRoles);
-            string refreshToken = GenerateRefreshToken();
+            var refreshToken = GenerateRefreshToken();
 
             // Store the hashed refresh token in the database (Defense in Depth)
             user.RefreshToken = HashToken(refreshToken);
@@ -50,7 +50,7 @@ public class IdentityService(
             return new TokenResponse(
                 new JwtSecurityTokenHandler().WriteToken(accessToken),
                 refreshToken, // Return the plaintext token to the client
-                userRoles.ToArray()
+                [.. userRoles]
             );
         }
 
@@ -68,7 +68,7 @@ public class IdentityService(
             return null;
         }
 
-        string? userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
             return null;
@@ -97,7 +97,7 @@ public class IdentityService(
 
         IList<string> userRoles = await userManager.GetRolesAsync(user);
         JwtSecurityToken newAccessToken = CreateToken(user, userRoles);
-        string newRefreshToken = GenerateRefreshToken();
+        var newRefreshToken = GenerateRefreshToken();
 
         // Rotate and hash the new refresh token
         user.RefreshToken = HashToken(newRefreshToken);
@@ -107,11 +107,11 @@ public class IdentityService(
         return new TokenResponse(
             new JwtSecurityTokenHandler().WriteToken(newAccessToken),
             newRefreshToken,
-            userRoles.ToArray()
+            [.. userRoles]
         );
     }
 
-    private JwtSecurityToken CreateToken(ApplicationUser user, IList<string> roles)
+    JwtSecurityToken CreateToken(ApplicationUser user, IList<string> roles)
     {
         var authClaims = new List<Claim>
         {
@@ -120,7 +120,7 @@ public class IdentityService(
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        foreach (string role in roles)
+        foreach (var role in roles)
         {
             authClaims.Add(new Claim(ClaimTypes.Role, role));
         }
@@ -141,16 +141,13 @@ public class IdentityService(
         );
     }
 
-    private static string GenerateRefreshToken()
-    {
-        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-    }
+    static string GenerateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
     /// <summary>
     /// Hashes a token string using SHA256.
     /// Used for "Defense in Depth" to protect refresh tokens stored in the database.
     /// </summary>
-    private static string HashToken(string token)
+    static string HashToken(string token)
     {
         if (string.IsNullOrEmpty(token))
         {
@@ -161,7 +158,7 @@ public class IdentityService(
         return Convert.ToBase64String(hashedBytes);
     }
 
-    private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
+    ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
     {
         if (string.IsNullOrEmpty(token))
         {
@@ -190,18 +187,13 @@ public class IdentityService(
                 out SecurityToken securityToken
             );
 
-            if (
-                securityToken is not JwtSecurityToken jwtSecurityToken
+            return securityToken is not JwtSecurityToken jwtSecurityToken
                 || !jwtSecurityToken.Header.Alg.Equals(
                     SecurityAlgorithms.HmacSha256,
                     StringComparison.InvariantCultureIgnoreCase
                 )
-            )
-            {
-                return null;
-            }
-
-            return principal;
+                ? null
+                : principal;
         }
         catch
         {
@@ -241,22 +233,10 @@ public class IdentityService(
         string email,
         string username,
         string password
-    )
-    {
-        var user = new ApplicationUser { UserName = username, Email = email };
-
-        IdentityResult result = await userManager.CreateAsync(user, password);
-
-        if (!result.Succeeded)
-        {
-            return (false, string.Empty, result.Errors.Select(e => e.Description).ToArray());
-        }
-
-        // Assegna ruolo default
-        await userManager.AddToRoleAsync(user, "Player");
-
-        return (true, user.Id, Array.Empty<string>());
-    }
+    ) =>
+        // csharpsquid:S4144 - Consolidate duplicate implementation with CreateUserAsync.
+        // Both methods currently perform the same steps: create user and assign the default "Player" role.
+        await CreateUserAsync(email, username, password);
 
     public async Task<(bool Success, string[] Errors)> UpdateUserDetailsAsync(
         string userId,
@@ -331,14 +311,13 @@ public class IdentityService(
             })
             .ToListAsync();
 
-        return usersWithRoles
+        return [.. usersWithRoles
             .Select(x => (
                 x.Id,
                 x.Email ?? string.Empty,
                 x.UserName ?? string.Empty,
                 x.Roles.Cast<string>().ToArray()
-            ))
-            .ToList();
+            ))];
     }
 
     public async Task<(bool Success, string[] Errors)> UpdateUserRolesAsync(
@@ -388,12 +367,7 @@ public class IdentityService(
     {
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
         // Security: Prevent generating reset tokens for deleted accounts (Defense in Depth).
-        if (user == null || user.IsDeleted)
-        {
-            return null;
-        }
-
-        return await userManager.GeneratePasswordResetTokenAsync(user);
+        return user == null || user.IsDeleted ? null : await userManager.GeneratePasswordResetTokenAsync(user);
     }
 
     public async Task<(bool Success, string[] Errors)> ResetPasswordAsync(

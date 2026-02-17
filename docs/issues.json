@@ -4612,7 +4612,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-17"
 		},
 		{
 			"key": "4d32d959-7f47-4c40-b71d-8954a329a288",
