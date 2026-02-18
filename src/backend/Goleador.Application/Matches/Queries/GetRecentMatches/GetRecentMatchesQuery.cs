@@ -42,11 +42,21 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
 
         var tournamentIds = matches.Where(m => m.TournamentId.HasValue).Select(m => m.TournamentId!.Value).Distinct().ToList();
 
+        // Optimization Bolt ⚡: Targeted team resolution.
+        // Instead of fetching ALL teams for all involved tournaments (which could be hundreds),
+        // we only fetch teams that contain at least one of the players from the recent matches.
+        // This reduces records fetched from O(Teams in Tournaments) to O(Matches), significantly lowering memory and data transfer.
+        var playerIds = matches
+            .SelectMany(m => new[] { m.HomeParticipantId, m.AwayParticipantId })
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
         // Skip query if no tournaments are involved
         var teams = tournamentIds.Count == 0
             ? []
             : await context.TournamentTeams
-                .Where(tt => tournamentIds.Contains(tt.TournamentId))
+                .Where(tt => tournamentIds.Contains(tt.TournamentId) && tt.Players.Any(p => playerIds.Contains(p.Id)))
                 .Select(tt => new { tt.Id, tt.TournamentId, PlayerIds = tt.Players.Select(p => p.Id).ToList() })
                 .ToListAsync(cancellationToken);
 
