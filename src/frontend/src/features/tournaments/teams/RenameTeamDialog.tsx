@@ -62,7 +62,7 @@ export const RenameTeamDialog = ({ team, tournamentId, onClose }: Props) => {
 					<Button variant="outline" onClick={onClose}>
 						Annulla
 					</Button>
-					<Button onClick={handleSave} disabled={mutation.isPending || !name.trim()}>
+					<Button onClick={handleSave} loading={mutation.isPending} disabled={!name.trim()}>
 						Salva
 					</Button>
 				</DialogFooter>

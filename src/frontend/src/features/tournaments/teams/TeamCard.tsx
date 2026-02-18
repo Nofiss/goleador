@@ -60,6 +60,7 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 									className="h-8 w-8 text-muted-foreground hover:text-primary focus-visible:opacity-100"
 									onClick={() => setIsBrandingOpen(true)}
 									aria-label="Modifica branding squadra"
+									title="Modifica branding squadra"
 								>
 									<ImagePlus className="h-4 w-4" />
 								</Button>
@@ -69,6 +70,7 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 									className="h-8 w-8 text-muted-foreground hover:text-primary focus-visible:opacity-100"
 									onClick={() => setIsRenameOpen(true)}
 									aria-label="Modifica nome squadra"
+									title="Modifica nome squadra"
 								>
 									<Edit2 className="h-4 w-4" />
 								</Button>
@@ -80,6 +82,7 @@ export const TeamCard = ({ team, tournamentId, isAdmin, isSetup }: TeamCardProps
 								size="icon"
 								className="h-8 w-8 text-destructive hover:bg-destructive/10 focus-visible:opacity-100"
 								aria-label="Elimina squadra"
+								title="Elimina squadra"
 							>
 								<Trash2 className="h-4 w-4" />
 							</Button>

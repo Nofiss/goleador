@@ -1,5 +1,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { type HTMLMotionProps, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -34,26 +36,50 @@ const buttonVariants = cva(
 	},
 );
 
+export interface ButtonProps
+	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+		VariantProps<typeof buttonVariants> {
+	asChild?: boolean;
+	loading?: boolean;
+}
+
 function Button({
 	className,
 	variant = "default",
 	size = "default",
 	asChild = false,
+	loading = false,
+	children,
+	disabled,
 	...props
-}: React.ComponentProps<"button"> &
-	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
-	}) {
-	const Comp = asChild ? Slot : "button";
+}: ButtonProps) {
+	if (asChild) {
+		return (
+			<Slot
+				data-slot="button"
+				data-variant={variant}
+				data-size={size}
+				className={cn(buttonVariants({ variant, size, className }))}
+				{...(props as any)}
+			>
+				{children}
+			</Slot>
+		);
+	}
 
 	return (
-		<Comp
+		<motion.button
+			whileTap={{ scale: 0.98 }}
 			data-slot="button"
 			data-variant={variant}
 			data-size={size}
 			className={cn(buttonVariants({ variant, size, className }))}
-			{...props}
-		/>
+			disabled={disabled || loading}
+			{...(props as HTMLMotionProps<"button">)}
+		>
+			{loading && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+			{children}
+		</motion.button>
 	);
 }
 
