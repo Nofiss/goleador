@@ -116,51 +116,51 @@ const SingleCrossTable = memo(
 
 											const isPlayed = match.status === 1;
 
+											const cellContent = (
+												<div className="flex flex-col items-center justify-center min-h-[50px] gap-1">
+													{isPlayed ? (
+														<span className="text-lg font-black font-mono tracking-tighter text-foreground">
+															{match.scoreHome} - {match.scoreAway}
+														</span>
+													) : (
+														<span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-tighter leading-tight">
+															Da Giocare
+														</span>
+													)}
+
+													{match.tableName && (
+														<span className="flex items-center gap-0.5 text-[9px] font-bold text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded-md border border-primary/10 transition-transform group-hover/cell:scale-110">
+															<MapPin className="h-2.5 w-2.5" aria-hidden="true" />
+															{match.tableName}
+														</span>
+													)}
+												</div>
+											);
+
 											return (
 												<td
 													key={awayTeam.id}
-													role={isReferee ? "button" : undefined}
-													tabIndex={isReferee ? 0 : undefined}
 													title={`${homeTeam.name} vs ${awayTeam.name}`}
 													className={cn(
-														"border-b border-r p-2 text-center transition-all relative group/cell",
+														"border-b border-r p-0 text-center transition-all relative group/cell",
 														isPlayed
 															? "bg-green-500/5 dark:bg-green-500/10"
 															: isUpper
 																? "bg-primary/5 hover:bg-primary/10"
 																: "bg-background hover:bg-muted/30",
-														isReferee &&
-															"cursor-pointer active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-10",
 													)}
-													onClick={() => isReferee && onSelectMatch?.(match)}
-													onKeyDown={(e) => {
-														if (isReferee && (e.key === "Enter" || e.key === " ")) {
-															e.preventDefault();
-															onSelectMatch?.(match);
-														}
-													}}
 												>
-													<div className="flex flex-col items-center justify-center min-h-[50px] gap-1">
-														{isPlayed ? (
-															<span className="text-lg font-black font-mono tracking-tighter text-foreground">
-																{match.scoreHome} - {match.scoreAway}
-															</span>
-														) : (
-															<span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-tighter leading-tight">
-																Da Giocare
-															</span>
-														)}
-
-														{match.tableName && (
-															<span className="flex items-center gap-0.5 text-[9px] font-bold text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded-md border border-primary/10 transition-transform group-hover/cell:scale-110">
-																<MapPin className="h-2.5 w-2.5" aria-hidden="true" />
-																{match.tableName}
-															</span>
-														)}
-													</div>
-
-													{isReferee && (
-														<div className="absolute inset-0 border-2 border-primary/0 group-hover/cell:border-primary/20 transition-all pointer-events-none" />
+													{isReferee ? (
+														<button
+															type="button"
+															className="w-full h-full p-2 cursor-pointer active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:z-10"
+															onClick={() => onSelectMatch?.(match)}
+														>
+															{cellContent}
+															<div className="absolute inset-0 border-2 border-primary/0 group-hover/cell:border-primary/20 transition-all pointer-events-none" />
+														</button>
+													) : (
+														<div className="p-2">{cellContent}</div>
 													)}
 												</td>
 											);
