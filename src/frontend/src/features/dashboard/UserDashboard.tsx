@@ -163,29 +163,30 @@ export const UserDashboard = () => {
 							<span className="text-4xl font-black">{profile.winRate}%</span>
 							<span className="text-xs text-muted-foreground font-medium">Precisione di gioco</span>
 						</div>
-						<div
-							className="h-20 w-20"
-							role="img"
-							aria-label={`Win rate: ${profile.winRate}%. ${profile.wins} vittorie, ${profile.losses} sconfitte.`}
-						>
-							<ResponsiveContainer width="100%" height="100%">
-								<PieChart>
-									<Pie
-										data={winRateData}
-										cx="50%"
-										cy="50%"
-										innerRadius={25}
-										outerRadius={35}
-										paddingAngle={5}
-										dataKey="value"
-										stroke="none"
-									>
-										{winRateData.map((entry) => (
-											<Cell key={entry.name} fill={entry.color} />
-										))}
-									</Pie>
-								</PieChart>
-							</ResponsiveContainer>
+						<div className="h-20 w-20 relative">
+							<span className="sr-only">
+								{`Win rate: ${profile.winRate}%. ${profile.wins} vittorie, ${profile.losses} sconfitte.`}
+							</span>
+							<div className="w-full h-full" aria-hidden="true">
+								<ResponsiveContainer width="100%" height="100%">
+									<PieChart>
+										<Pie
+											data={winRateData}
+											cx="50%"
+											cy="50%"
+											innerRadius={25}
+											outerRadius={35}
+											paddingAngle={5}
+											dataKey="value"
+											stroke="none"
+										>
+											{winRateData.map((entry) => (
+												<Cell key={entry.name} fill={entry.color} />
+											))}
+										</Pie>
+									</PieChart>
+								</ResponsiveContainer>
+							</div>
 						</div>
 					</CardContent>
 				</Card>
@@ -215,7 +216,7 @@ export const UserDashboard = () => {
 								<span className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
 									Vittorie consecutive
 								</span>
-								<div className="flex gap-1 mt-1">
+								<ul className="flex gap-1 mt-1" aria-label="Ultimi risultati">
 									{profile.recentMatches.slice(0, 5).map((m) => {
 										const resultLabel =
 											m.result === "W" ? "Vittoria" : m.result === "L" ? "Sconfitta" : "Pareggio";
@@ -223,10 +224,8 @@ export const UserDashboard = () => {
 										const fullTitle = `${resultLabel}: ${scoreDisplay}`;
 
 										return (
-											<div
+											<li
 												key={m.id}
-												role="img"
-												aria-label={fullTitle}
 												title={fullTitle}
 												className={cn(
 													"h-1.5 w-6 rounded-full cursor-help",
@@ -236,10 +235,12 @@ export const UserDashboard = () => {
 															? "bg-red-500"
 															: "bg-muted",
 												)}
-											/>
+											>
+												<span className="sr-only">{fullTitle}</span>
+											</li>
 										);
 									})}
-								</div>
+								</ul>
 							</div>
 						</div>
 					</CardContent>
