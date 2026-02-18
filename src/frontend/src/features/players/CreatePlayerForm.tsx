@@ -165,8 +165,8 @@ export const CreatePlayerForm = ({ onSuccess }: CreatePlayerFormProps) => {
 					)}
 				/>
 
-				<Button type="submit" className="w-full" disabled={mutation.isPending}>
-					{mutation.isPending ? "Salvataggio..." : "Crea Giocatore"}
+				<Button type="submit" className="w-full" loading={mutation.isPending}>
+					Crea Giocatore
 				</Button>
 			</form>
 		</Form>
