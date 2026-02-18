@@ -59,25 +59,17 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 						<div className="space-y-6 py-4">
 							{/* Win Rate Circle (simulato con CSS) */}
 							<div className="flex flex-col items-center">
-								<div
-									className="relative flex items-center justify-center w-24 h-24 rounded-full border-4 border-primary/20 bg-primary/5"
-									role="progressbar"
-									aria-valuenow={stats.winRate}
-									aria-valuemin={0}
-									aria-valuemax={100}
-									aria-label={`Percentuale di vittorie: ${stats.winRate}%`}
-								>
-									<span className="text-xl font-bold text-primary">{stats.winRate}%</span>
+								<div className="relative flex items-center justify-center w-24 h-24 rounded-full border-4 border-primary/20 bg-primary/5">
+									<span className="sr-only">{`Percentuale di vittorie: ${stats.winRate}%`}</span>
+									<span className="text-xl font-bold text-primary" aria-hidden="true">
+										{stats.winRate}%
+									</span>
 								</div>
 								<span className="text-sm text-muted-foreground mt-2 font-medium">Win Rate</span>
 							</div>
 
 							<div className="grid grid-cols-3 gap-4 text-center">
-								<div
-									className="p-3 bg-emerald-500/10 rounded-lg"
-									role="img"
-									aria-label={`Vittorie: ${stats.wins}`}
-								>
+								<div className="p-3 bg-emerald-500/10 rounded-lg">
 									<div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
 										{stats.wins}
 									</div>
@@ -85,21 +77,13 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 										Vittorie
 									</div>
 								</div>
-								<div
-									className="p-3 bg-muted rounded-lg"
-									role="img"
-									aria-label={`Pareggi: ${stats.draws}`}
-								>
+								<div className="p-3 bg-muted rounded-lg">
 									<div className="text-2xl font-bold text-foreground">{stats.draws}</div>
 									<div className="text-xs text-muted-foreground font-semibold uppercase">
 										Pareggi
 									</div>
 								</div>
-								<div
-									className="p-3 bg-destructive/10 rounded-lg"
-									role="img"
-									aria-label={`Sconfitte: ${stats.losses}`}
-								>
+								<div className="p-3 bg-destructive/10 rounded-lg">
 									<div className="text-2xl font-bold text-destructive">{stats.losses}</div>
 									<div className="text-xs text-destructive/80 font-semibold uppercase">
 										Sconfitte
@@ -146,8 +130,6 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 											<div
 												// biome-ignore lint/suspicious/noArrayIndexKey: recent form is a short stable list
 												key={idx}
-												role="img"
-												aria-label={label}
 												title={label}
 												className={cn(
 													"w-8 h-8 flex items-center justify-center rounded font-bold text-white text-sm transition-transform hover:scale-110 cursor-default",
@@ -158,7 +140,8 @@ export const PlayerStatsDialog = ({ playerId, onClose }: PlayerStatsDialogProps)
 															: "bg-gray-400",
 												)}
 											>
-												{result}
+												<span className="sr-only">{label}</span>
+												<span aria-hidden="true">{result}</span>
 											</div>
 										);
 									})}
