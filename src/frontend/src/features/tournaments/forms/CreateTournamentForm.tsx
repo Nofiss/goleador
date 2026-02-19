@@ -1,6 +1,7 @@
 // src/features/tournaments/CreateTournamentForm.tsx
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
 	ChevronDown,
 	ChevronUp,
@@ -63,12 +64,24 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		mutation.mutate(formData);
+		// Rimuovo le chiavi temporanee usate per le animazioni prima di inviare al backend
+		const cleanCards = formData.cards?.map(({ name, description, effect }) => ({
+			name,
+			description,
+			effect,
+		}));
+		mutation.mutate({ ...formData, cards: cleanCards });
 	};
 
 	const addCard = () => {
 		const newCards = [...(formData.cards || [])];
-		newCards.push({ name: "", description: "", effect: CardEffect.none });
+		// Aggiungo una chiave unica per AnimatePresence
+		(newCards as any).push({
+			name: "",
+			description: "",
+			effect: CardEffect.none,
+			id: crypto.randomUUID(),
+		});
 		setFormData({ ...formData, cards: newCards });
 	};
 
@@ -200,7 +213,13 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 							<h3 className="font-semibold">Carte Torneo (Bonus/Malus)</h3>
 						</div>
 						<Button type="button" variant="outline" size="sm" onClick={addCard}>
-							<Plus className="h-4 w-4 mr-1" /> Aggiungi Carta
+							<motion.div
+								whileHover={{ rotate: 180, scale: 1.2 }}
+								transition={{ type: "spring", stiffness: 300, damping: 10 }}
+							>
+								<Plus className="h-4 w-4" />
+							</motion.div>
+							<span>Aggiungi Carta</span>
 						</Button>
 					</div>
 
@@ -210,67 +229,73 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 								Nessuna carta definita per questo torneo.
 							</p>
 						) : (
-							formData.cards.map((card, index) => (
-								<div
-									// biome-ignore lint/suspicious/noArrayIndexKey: valid for form management
-									key={index}
-									className="grid grid-cols-12 gap-2 items-start border p-3 rounded-lg bg-muted/30"
-								>
-									<div className="col-span-4 space-y-1">
-										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
-											Nome
-										</Label>
-										<Input
-											value={card.name}
-											placeholder="Es. Raddoppia Punti"
-											onChange={(e) => updateCard(index, "name", e.target.value)}
-										/>
-									</div>
-									<div className="col-span-4 space-y-1">
-										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
-											Effetto
-										</Label>
-										<Select
-											value={card.effect.toString()}
-											onValueChange={(v) => updateCard(index, "effect", parseInt(v, 10))}
-										>
-											<SelectTrigger>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value={CardEffect.none.toString()}>
-													Nessun effetto (descrittivo)
-												</SelectItem>
-												<SelectItem value={CardEffect.doublePoints.toString()}>
-													Raddoppia Punti (se vince)
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="col-span-3 space-y-1">
-										<Label className="text-[10px] uppercase font-bold text-muted-foreground">
-											Descrizione
-										</Label>
-										<Input
-											value={card.description}
-											placeholder="Es. Usala per raddoppiare i punti..."
-											onChange={(e) => updateCard(index, "description", e.target.value)}
-										/>
-									</div>
-									<div className="col-span-1 pt-6 flex justify-end">
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											className="h-8 w-8 text-destructive"
-											onClick={() => removeCard(index)}
-											aria-label="Rimuovi carta"
-										>
-											<Trash2 className="h-4 w-4" />
-										</Button>
-									</div>
-								</div>
-							))
+							<AnimatePresence initial={false}>
+								{formData.cards.map((card, index) => (
+									<motion.div
+										key={(card as any).id || index}
+										initial={{ opacity: 0, height: 0, marginTop: 0 }}
+										animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+										exit={{ opacity: 0, height: 0, marginTop: 0 }}
+										transition={{ duration: 0.2 }}
+										className="grid grid-cols-12 gap-2 items-start border p-3 rounded-lg bg-muted/30 overflow-hidden"
+									>
+										<div className="col-span-4 space-y-1">
+											<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+												Nome
+											</Label>
+											<Input
+												value={card.name}
+												placeholder="Es. Raddoppia Punti"
+												onChange={(e) => updateCard(index, "name", e.target.value)}
+											/>
+										</div>
+										<div className="col-span-4 space-y-1">
+											<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+												Effetto
+											</Label>
+											<Select
+												value={card.effect.toString()}
+												onValueChange={(v) => updateCard(index, "effect", parseInt(v, 10))}
+											>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value={CardEffect.none.toString()}>
+														Nessun effetto (descrittivo)
+													</SelectItem>
+													<SelectItem value={CardEffect.doublePoints.toString()}>
+														Raddoppia Punti (se vince)
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+										<div className="col-span-3 space-y-1">
+											<Label className="text-[10px] uppercase font-bold text-muted-foreground">
+												Descrizione
+											</Label>
+											<Input
+												value={card.description}
+												placeholder="Es. Usala per raddoppiare i punti..."
+												onChange={(e) => updateCard(index, "description", e.target.value)}
+											/>
+										</div>
+										<div className="col-span-1 pt-6 flex justify-end">
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-destructive"
+												onClick={() => removeCard(index)}
+												aria-label="Rimuovi carta"
+												title="Rimuovi carta"
+											>
+												<Trash2 className="h-4 w-4" />
+											</Button>
+										</div>
+									</motion.div>
+								))}
+							</AnimatePresence>
 						)}
 					</div>
 				</CardContent>
@@ -420,14 +445,22 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 			</Card>
 
 			<div className="flex justify-end gap-4">
-				<Button type="submit" size="lg" disabled={mutation.isPending}>
+				<Button type="submit" size="lg" disabled={mutation.isPending} className="group">
 					{mutation.isPending ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 							Creazione...
 						</>
 					) : (
-						"Crea Torneo"
+						<>
+							<motion.div
+								whileHover={{ rotate: [0, -10, 10, -10, 10, 0] }}
+								transition={{ duration: 0.5 }}
+							>
+								<Trophy className="mr-2 h-4 w-4" aria-hidden="true" />
+							</motion.div>
+							Crea Torneo
+						</>
 					)}
 				</Button>
 			</div>
