@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using MediatR;
 
@@ -13,6 +14,7 @@ public class CreateUserCommandHandler(IIdentityService identityService) : IReque
             request.Password
         );
 
-        return !success ? throw new Exception(string.Join(", ", errors)) : userId;
+        // csharpsquid:S112 - Using ValidationException instead of generic Exception
+        return !success ? throw new ValidationException("Identity", errors) : userId;
     }
 }
