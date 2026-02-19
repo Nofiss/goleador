@@ -1,12 +1,12 @@
 using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
+using Goleador.Application.Matches.Events;
 using Goleador.Domain.Entities;
+using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Goleador.Application.Matches.Events;
-using Goleador.Domain.Enums;
 
 namespace Goleador.Application.Matches.Commands.UpdateMatchResult;
 
@@ -26,7 +26,9 @@ public class UpdateMatchResultCommandHandler(
     {
         // 1. Recupera la partita
         Match match =
-            await context.Matches.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken)
+            await context.Matches
+                .Include(m => m.Participants)
+                .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Match), request.Id);
 
         var wasPlayed = match.Status == MatchStatus.Played;
@@ -91,6 +93,13 @@ public class UpdateMatchResultCommandHandler(
         // Invalida cache partite recenti (per la home page)
         cache.Remove("RecentMatches");
 
+        // Optimization Bolt ⚡: Invalidate player profile and statistics caches for all participants
+        foreach (var participant in match.Participants)
+        {
+            cache.Remove($"PlayerProfile-{participant.PlayerId}");
+            cache.Remove($"PlayerStats-{participant.PlayerId}");
+        }
+
         // 5. Trigger ELO se la partita è stata appena conclusa
         if (!wasPlayed && match.Status == MatchStatus.Played)
         {
@@ -104,7 +113,7 @@ public class UpdateMatchResultCommandHandler(
             match.ScoreHome,
             match.ScoreAway
         );
-        
+
         // 6. Notifica Real-Time tramite SignalR
         if (match.TournamentId.HasValue)
         {

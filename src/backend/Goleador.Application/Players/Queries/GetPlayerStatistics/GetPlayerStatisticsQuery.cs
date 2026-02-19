@@ -1,12 +1,15 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Goleador.Application.Players.Queries.GetPlayerStatistics;
 
-public record GetPlayerStatisticsQuery(Guid PlayerId) : IRequest<PlayerStatisticsDto>;
+public record GetPlayerStatisticsQuery(Guid PlayerId) : ICacheableQuery<PlayerStatisticsDto>
+{
+    public string CacheKey => $"PlayerStats-{PlayerId}";
+    public TimeSpan? Expiration => TimeSpan.FromMinutes(1);
+}
 
 public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
     : IRequestHandler<GetPlayerStatisticsQuery, PlayerStatisticsDto>
@@ -17,20 +20,26 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
         CancellationToken cancellationToken
     )
     {
-        var player = await GetPlayerAsync(request.PlayerId, cancellationToken);
+        var playerInfo = await GetPlayerInfoAsync(request.PlayerId, cancellationToken);
 
         var aggregateStats = await GetAggregateStatsAsync(request.PlayerId, cancellationToken);
 
         var recentMatches = await GetRecentMatchesAsync(request.PlayerId, cancellationToken);
 
-        return MapToDto(player, aggregateStats, recentMatches);
+        return MapToDto(playerInfo, aggregateStats, recentMatches);
     }
 
-    private async Task<Player> GetPlayerAsync(Guid playerId, CancellationToken cancellationToken)
+    private async Task<(Guid Id, string Nickname)> GetPlayerInfoAsync(Guid playerId, CancellationToken cancellationToken)
     {
-        return await context.Players.AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == playerId, cancellationToken)
+        // Ottimizzazione Bolt ⚡: Usiamo una proiezione per caricare solo i campi necessari (Id, Nickname).
+        // Evitiamo di caricare l'intera entità Player (Email, FirstName, LastName, etc.), riducendo l'uso di memoria (O(1) transfer).
+        var player = await context.Players.AsNoTracking()
+            .Where(p => p.Id == playerId)
+            .Select(p => new { p.Id, p.Nickname })
+            .FirstOrDefaultAsync(cancellationToken)
             ?? throw new KeyNotFoundException("Player not found");
+
+        return (player.Id, player.Nickname);
     }
 
     private async Task<AggregateStats?> GetAggregateStatsAsync(Guid playerId, CancellationToken cancellationToken)
@@ -73,7 +82,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
             .ToListAsync(cancellationToken);
     }
 
-    private static PlayerStatisticsDto MapToDto(Player player, AggregateStats? aggregateStats, List<RecentMatchInfo> recentMatches)
+    private static PlayerStatisticsDto MapToDto((Guid Id, string Nickname) player, AggregateStats? aggregateStats, List<RecentMatchInfo> recentMatches)
     {
         return new PlayerStatisticsDto
         {
@@ -85,7 +94,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
             Losses = aggregateStats?.Losses ?? 0,
             GoalsFor = aggregateStats?.GoalsFor ?? 0,
             GoalsAgainst = aggregateStats?.GoalsAgainst ?? 0,
-            RecentForm = recentMatches.Select(m => MapToResult(m.IsHome, m.ScoreHome, m.ScoreAway)).ToList()
+            RecentForm = [.. recentMatches.Select(m => MapToResult(m.IsHome, m.ScoreHome, m.ScoreAway))]
         };
     }
 

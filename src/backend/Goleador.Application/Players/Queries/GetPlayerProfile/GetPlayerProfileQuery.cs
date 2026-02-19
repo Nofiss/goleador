@@ -1,12 +1,15 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Goleador.Application.Players.Queries.GetPlayerProfile;
 
-public record GetPlayerProfileQuery(Guid PlayerId) : IRequest<PlayerProfileDto>;
+public record GetPlayerProfileQuery(Guid PlayerId) : ICacheableQuery<PlayerProfileDto>
+{
+    public string CacheKey => $"PlayerProfile-{PlayerId}";
+    public TimeSpan? Expiration => TimeSpan.FromMinutes(1);
+}
 
 public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
     : IRequestHandler<GetPlayerProfileQuery, PlayerProfileDto>
@@ -91,13 +94,14 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             })
             .ToListAsync(cancellationToken);
 
-        return matches.Select(m => {
+        return [.. matches.Select(m =>
+        {
             var myParticipant = m.Participants.First(p => p.PlayerId == playerId);
             var mySide = myParticipant.Side;
             var myScore = mySide == Side.Home ? m.ScoreHome : m.ScoreAway;
             var opponentScore = mySide == Side.Home ? m.ScoreAway : m.ScoreHome;
 
-            string result = myScore > opponentScore ? "W" : (myScore < opponentScore ? "L" : "D");
+            var result = myScore > opponentScore ? "W" : (myScore < opponentScore ? "L" : "D");
 
             return new MatchBriefDto
             {
@@ -109,7 +113,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
                 AwayTeamName = string.Join(" - ", m.Participants.Where(p => p.Side == Side.Away).Select(p => p.Nickname)),
                 Result = result
             };
-        }).ToList();
+        })];
     }
 
     private async Task<RelatedPlayerDto?> GetNemesisAsync(Guid playerId, CancellationToken cancellationToken)
