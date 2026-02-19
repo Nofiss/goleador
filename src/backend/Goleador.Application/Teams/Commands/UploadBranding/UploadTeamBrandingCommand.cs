@@ -67,12 +67,14 @@ public class UploadTeamBrandingCommandHandler(
 
         if (!allowedExtensions.Contains(extension))
         {
-            throw new Exception($"{propertyName}: Invalid file extension. Only jpg, png and webp are allowed.");
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException(propertyName, "Invalid file extension. Only jpg, png and webp are allowed.");
         }
 
         if (file.Length > 2 * 1024 * 1024)
         {
-            throw new Exception($"{propertyName}: File size exceeds 2MB limit.");
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException(propertyName, "File size exceeds 2MB limit.");
         }
     }
 }

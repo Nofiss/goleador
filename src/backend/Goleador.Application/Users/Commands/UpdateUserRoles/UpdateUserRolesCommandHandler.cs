@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using MediatR;
 
@@ -23,6 +24,7 @@ public class UpdateUserRolesCommandHandler(
             [.. request.NewRoles]
         );
 
-        return !success ? throw new Exception(string.Join(", ", errors)) : Unit.Value;
+        // csharpsquid:S112 - Using ValidationException instead of generic Exception
+        return !success ? throw new ValidationException("Identity", errors) : Unit.Value;
     }
 }

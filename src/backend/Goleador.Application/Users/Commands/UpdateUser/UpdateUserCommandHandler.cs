@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using MediatR;
 
@@ -15,7 +16,8 @@ public class UpdateUserCommandHandler(IIdentityService identityService) : IReque
 
         if (!success)
         {
-            throw new Exception(string.Join(", ", errors));
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException("Identity", errors);
         }
 
         return Unit.Value;

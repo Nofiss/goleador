@@ -20,7 +20,8 @@ public class DeleteUserCommandHandler(
 
         if (!success)
         {
-            throw new Exception(string.Join(", ", errors));
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException("Identity", errors);
         }
 
         return Unit.Value;

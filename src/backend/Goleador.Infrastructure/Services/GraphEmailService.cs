@@ -32,7 +32,8 @@ public class GraphEmailService : IEmailService
             || string.IsNullOrWhiteSpace(clientSecret)
         )
         {
-            throw new Exception("Configurazione AzureAd mancante in appsettings.json");
+            // csharpsquid:S112 - Using InvalidOperationException for configuration errors
+            throw new InvalidOperationException("Configurazione AzureAd mancante in appsettings.json");
         }
 
         // Configurazione OAuth2 Client Credentials

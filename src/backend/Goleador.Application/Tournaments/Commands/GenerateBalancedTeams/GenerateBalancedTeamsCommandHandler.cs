@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
@@ -29,7 +30,8 @@ public class GenerateBalancedTeamsCommandHandler(
 
         if (pendingTeams.Count < 2)
         {
-            throw new Exception("Servono almeno 2 giocatori per generare squadre.");
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException("Tournament", "Servono almeno 2 giocatori per generare squadre.");
         }
 
         // 2. Calcola Skill Score per ogni giocatore in batch (Bolt ⚡ Optimization)

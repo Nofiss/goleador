@@ -4470,7 +4470,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "f13e36c9-6edf-4142-a82a-f18177db776a",
@@ -4515,7 +4517,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "fede7a69-9ca0-452b-8634-011223bed95a",
@@ -4560,7 +4564,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "b69d1aa8-6ac6-4bfb-a8f0-de263aee753b",
@@ -6792,7 +6798,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "14a304b4-279b-46ec-b198-10e647bed9ae",
@@ -6881,7 +6889,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "48bb9561-49dd-4db2-9b8a-a902f8ec718d",
@@ -7803,7 +7813,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "6679fff2-ba01-4154-84b3-3f1dcfb76223",
@@ -7982,7 +7994,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "1fd27a2b-49a2-41c8-9a42-d3ce9c8f23d2",
@@ -8253,7 +8267,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "cb7db0d9-2f92-4feb-9bb9-85c95f9edc42",
@@ -8298,7 +8314,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-19"
 		},
 		{
 			"key": "aeccbdfb-473e-4c72-a99b-90422bbccf4f",

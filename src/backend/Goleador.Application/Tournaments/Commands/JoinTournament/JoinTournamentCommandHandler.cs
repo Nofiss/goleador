@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
@@ -27,7 +28,8 @@ public class JoinTournamentCommandHandler(
         // 1. Trova il Player collegato all'Utente
         Player player =
             await context.Players.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken)
-            ?? throw new Exception("Nessun profilo giocatore associato al tuo utente.");
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            ?? throw new ValidationException("Player", "Nessun profilo giocatore associato al tuo utente.");
 
         // 2. Trova il Torneo
         Tournament tournament =

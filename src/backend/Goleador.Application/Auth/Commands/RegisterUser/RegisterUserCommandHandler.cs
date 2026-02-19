@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using MediatR;
@@ -50,7 +51,8 @@ public class RegisterUserCommandHandler(
 
         if (!success)
         {
-            throw new Exception(string.Join(",", errors));
+            // csharpsquid:S112 - Using ValidationException instead of generic Exception
+            throw new ValidationException("Identity", errors);
         }
 
         if (existingPlayer != null)
