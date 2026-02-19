@@ -53,3 +53,7 @@
 ## 2025-02-14 - [Frontend Memoization and Hook Placement]
 **Learning:** Found that `ProfilePage.tsx` was recalculating chart data and initials on every render, and lacked memoization for list items. Also, discovered that placing hooks after early returns violates React rules and triggers lint errors.
 **Action:** Extract list items into memoized sub-components and wrap derived data in `useMemo`. Always place hooks at the top of the component, before any conditional logic or early returns.
+
+## 2025-02-17 - [Player Data Caching & Efficient Invalidation]
+**Learning:** Frequently visited player pages (Profile, Statistics) benefit from caching. However, invalidation must be handled in command handlers that modify match results. Eager loading participants during match retrieval allows for O(1) in-memory resolution of player IDs for cache invalidation, avoiding redundant database roundtrips.
+**Action:** Implement `ICacheableQuery` for player-specific queries and use `Include(m => m.Participants)` in `UpdateMatchResultCommandHandler` to perform efficient cache purging for all involved players.
