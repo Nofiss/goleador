@@ -472,7 +472,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-20"
 		},
 		{
 			"key": "df5a51a6-df2a-4593-a5d9-d5daef8c7f04",
@@ -563,7 +565,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-20"
 		},
 		{
 			"key": "248ba740-76c3-4ea4-8646-ce208bf0e0a1",
@@ -607,7 +611,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-20"
 		},
 		{
 			"key": "b806d955-d1f9-4322-a4f9-6ca2afe1c464",
@@ -1805,7 +1811,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-20"
 		},
 		{
 			"key": "3af2f104-7e4c-4781-8e38-b467ed3656bf",

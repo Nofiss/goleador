@@ -15,3 +15,7 @@
 ## 2026-02-18 - Accessibility over ARIA Roles (S6819)
 **Learning:** Using `role="img"` or `role="button"` on generic elements like `div` or `td` is flagged by SonarQube as a MAJOR accessibility debt. Assistive technologies and various devices have better built-in support for semantic HTML tags.
 **Action:** Prefer native semantic tags (e.g., `<button>` for interactions) or the `sr-only` pattern (hidden text + `aria-hidden="true"` on the visual element) to provide accessible descriptions without resorting to ARIA roles on non-semantic tags.
+
+## 2026-02-20 - Nested Ternary Remediation (S3358)
+**Learning:** Complex conditional rendering in JSX using nested ternaries is a major code smell (S3358) that hurts readability and maintainability.
+**Action:** Replace nested ternaries with mapping objects for simple configuration-driven values, or use Immediately Invoked Function Expressions (IIFEs) with standard 'if' statements for more complex multi-branch rendering logic.
