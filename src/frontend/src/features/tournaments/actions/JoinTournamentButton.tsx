@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, User, UserPlus } from "lucide-react";
+import { User, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { joinTournament } from "@/api/tournaments";
@@ -68,16 +68,10 @@ export const JoinTournamentButton = ({ tournamentId }: { tournamentId: string })
 					<Button
 						className="w-full"
 						onClick={() => mutation.mutate()}
-						disabled={mutation.isPending || !teamName.trim()}
+						loading={mutation.isPending}
+						disabled={!teamName.trim()}
 					>
-						{mutation.isPending ? (
-							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-								Iscrizione in corso...
-							</>
-						) : (
-							"Conferma Iscrizione"
-						)}
+						Conferma Iscrizione
 					</Button>
 				</div>
 			</DialogContent>

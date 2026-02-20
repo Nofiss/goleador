@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { motion } from "framer-motion";
-import { ArrowLeftRight, Loader2, Table, Zap } from "lucide-react";
+import { ArrowLeftRight, Table, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
@@ -374,7 +374,7 @@ export const MatchResultDialog = ({
 						Annulla
 					</Button>
 					<Button
-						disabled={mutation.isPending}
+						loading={mutation.isPending}
 						onClick={() => {
 							if (!match) return;
 
@@ -399,14 +399,7 @@ export const MatchResultDialog = ({
 							});
 						}}
 					>
-						{mutation.isPending ? (
-							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								Salvataggio...
-							</>
-						) : (
-							"Conferma Risultato"
-						)}
+						Conferma Risultato
 					</Button>
 				</DialogFooter>
 			</DialogContent>

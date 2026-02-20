@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ArrowLeftRight, Loader2, Swords, User } from "lucide-react";
+import { ArrowLeftRight, Swords, User } from "lucide-react";
 import { useState } from "react";
 import { createMatch } from "@/api/matches";
 import { getPlayers } from "@/api/players";
@@ -205,18 +205,10 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 					size="lg"
 					className="w-full md:w-1/3 text-lg h-12"
 					type="submit"
-					disabled={
-						mutation.isPending || isSamePlayer || !formData.playerHomeId || !formData.playerAwayId
-					}
+					loading={mutation.isPending}
+					disabled={isSamePlayer || !formData.playerHomeId || !formData.playerAwayId}
 				>
-					{mutation.isPending ? (
-						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-							Salvataggio...
-						</>
-					) : (
-						"Registra Risultato"
-					)}
+					Registra Risultato
 				</Button>
 			</div>
 		</form>
