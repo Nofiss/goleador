@@ -28,6 +28,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
+// SonarQube Rule: typescript:S3358 - Mapping to avoid nested ternaries
+const RESULT_CONFIG: Record<string, { label: string; color: string }> = {
+	// biome-ignore lint/style/useNamingConvention: Keys match API result values
+	W: { label: "Vittoria", color: "bg-green-500" },
+	// biome-ignore lint/style/useNamingConvention: Keys match API result values
+	L: { label: "Sconfitta", color: "bg-red-500" },
+	// biome-ignore lint/style/useNamingConvention: Keys match API result values
+	D: { label: "Pareggio", color: "bg-muted" },
+};
+
 export const UserDashboard = () => {
 	const { userId: _userId } = useAuth();
 
@@ -218,23 +228,16 @@ export const UserDashboard = () => {
 								</span>
 								<ul className="flex gap-1 mt-1" aria-label="Ultimi risultati">
 									{profile.recentMatches.slice(0, 5).map((m) => {
-										const resultLabel =
-											m.result === "W" ? "Vittoria" : m.result === "L" ? "Sconfitta" : "Pareggio";
+										// SonarQube Rule: typescript:S3358 - Extracted to independent statement/config
+										const config = RESULT_CONFIG[m.result] || RESULT_CONFIG.D;
 										const scoreDisplay = `${m.homeTeamName} ${m.scoreHome}-${m.scoreAway} ${m.awayTeamName}`;
-										const fullTitle = `${resultLabel}: ${scoreDisplay}`;
+										const fullTitle = `${config.label}: ${scoreDisplay}`;
 
 										return (
 											<li
 												key={m.id}
 												title={fullTitle}
-												className={cn(
-													"h-1.5 w-6 rounded-full cursor-help",
-													m.result === "W"
-														? "bg-green-500"
-														: m.result === "L"
-															? "bg-red-500"
-															: "bg-muted",
-												)}
+												className={cn("h-1.5 w-6 rounded-full cursor-help", config.color)}
 											>
 												<span className="sr-only">{fullTitle}</span>
 											</li>
@@ -303,58 +306,69 @@ export const UserDashboard = () => {
 					</CardHeader>
 					<CardContent className="p-0 flex-1">
 						<ScrollArea className="h-[400px]">
-							{isPendingLoading && !pendingMatches ? (
-								<div className="flex items-center justify-center h-48">
-									<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-								</div>
-							) : !pendingMatches || pendingMatches.length === 0 ? (
-								<div className="p-6">
-									<EmptyState
-										icon={Gamepad2}
-										title="Nessuna partita pendente"
-										description="Tutto calmo sul fronte occidentale. Goditi la pausa!"
-										className="py-12"
-									/>
-								</div>
-							) : (
-								<div className="divide-y divide-border/50">
-									{pendingMatches.map((match) => (
-										<Link
-											key={match.id}
-											to={`/tournaments/${match.tournamentId}`}
-											className="block p-5 hover:bg-muted/50 transition-colors group"
-										>
-											<div className="flex items-center justify-between gap-4">
-												<div className="space-y-1">
-													<div className="flex items-center gap-2">
-														<span className="text-xs font-bold text-primary uppercase tracking-tighter bg-primary/10 px-2 py-0.5 rounded">
-															Round {match.round}
-														</span>
-														<span className="text-xs font-medium text-muted-foreground">
-															{match.tournamentName}
-														</span>
+							{(() => {
+								// SonarQube Rule: typescript:S3358 - Extracted nested ternary from JSX
+								if (isPendingLoading && !pendingMatches) {
+									return (
+										<div className="flex items-center justify-center h-48">
+											<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
+										</div>
+									);
+								}
+
+								if (!pendingMatches || pendingMatches.length === 0) {
+									return (
+										<div className="p-6">
+											<EmptyState
+												icon={Gamepad2}
+												title="Nessuna partita pendente"
+												description="Tutto calmo sul fronte occidentale. Goditi la pausa!"
+												className="py-12"
+											/>
+										</div>
+									);
+								}
+
+								return (
+									<div className="divide-y divide-border/50">
+										{pendingMatches.map((match) => (
+											<Link
+												key={match.id}
+												to={`/tournaments/${match.tournamentId}`}
+												className="block p-5 hover:bg-muted/50 transition-colors group"
+											>
+												<div className="flex items-center justify-between gap-4">
+													<div className="space-y-1">
+														<div className="flex items-center gap-2">
+															<span className="text-xs font-bold text-primary uppercase tracking-tighter bg-primary/10 px-2 py-0.5 rounded">
+																Round {match.round}
+															</span>
+															<span className="text-xs font-medium text-muted-foreground">
+																{match.tournamentName}
+															</span>
+														</div>
+														<div className="text-lg font-bold flex items-center gap-3">
+															<span className="text-blue-700 dark:text-blue-400 truncate max-w-[120px]">
+																{match.homeTeamName}
+															</span>
+															<span className="text-muted-foreground text-xs font-normal">vs</span>
+															<span className="text-red-700 dark:text-red-400 truncate max-w-[120px]">
+																{match.awayTeamName}
+															</span>
+														</div>
 													</div>
-													<div className="text-lg font-bold flex items-center gap-3">
-														<span className="text-blue-700 dark:text-blue-400 truncate max-w-[120px]">
-															{match.homeTeamName}
-														</span>
-														<span className="text-muted-foreground text-xs font-normal">vs</span>
-														<span className="text-red-700 dark:text-red-400 truncate max-w-[120px]">
-															{match.awayTeamName}
-														</span>
+													<div
+														className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"
+														aria-hidden="true"
+													>
+														<ArrowRight className="h-5 w-5" />
 													</div>
 												</div>
-												<div
-													className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors"
-													aria-hidden="true"
-												>
-													<ArrowRight className="h-5 w-5" />
-												</div>
-											</div>
-										</Link>
-									))}
-								</div>
-							)}
+											</Link>
+										))}
+									</div>
+								);
+							})()}
 						</ScrollArea>
 					</CardContent>
 				</Card>
@@ -368,64 +382,75 @@ export const UserDashboard = () => {
 					</CardHeader>
 					<CardContent className="p-0 flex-1">
 						<ScrollArea className="h-[400px]">
-							{isRecentLoading ? (
-								<div className="flex items-center justify-center h-48">
-									<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-								</div>
-							) : !recentMatches || recentMatches.length === 0 ? (
-								<div className="p-6">
-									<EmptyState
-										icon={History}
-										title="Nessun'attività"
-										description="Non sono ancora state registrate partite globali recentemente."
-										className="py-12"
-									/>
-								</div>
-							) : (
-								<div className="divide-y divide-border/50">
-									{recentMatches.slice(0, 10).map((match) => {
-										const isHomeWinner = match.scoreHome > match.scoreAway;
-										const winner = isHomeWinner ? match.homeTeamName : match.awayTeamName;
-										const loser = isHomeWinner ? match.awayTeamName : match.homeTeamName;
-										const score = isHomeWinner
-											? `${match.scoreHome}-${match.scoreAway}`
-											: `${match.scoreAway}-${match.scoreHome}`;
+							{(() => {
+								// SonarQube Rule: typescript:S3358 - Extracted nested ternary from JSX
+								if (isRecentLoading) {
+									return (
+										<div className="flex items-center justify-center h-48">
+											<Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
+										</div>
+									);
+								}
 
-										return (
-											<div key={match.id} className="p-5 flex items-start gap-4">
-												<div
-													className={cn(
-														"h-10 w-10 rounded-full flex items-center justify-center shrink-0",
-														isHomeWinner
-															? "bg-blue-500/10 text-blue-600"
-															: "bg-red-500/10 text-red-600",
-													)}
-													aria-hidden="true"
-												>
-													<Trophy className="h-5 w-5" />
-												</div>
-												<div className="flex-1 space-y-1">
-													<p className="text-sm font-medium leading-relaxed">
-														<span className="font-bold">{winner}</span>
-														<span className="text-muted-foreground mx-1">ha sconfitto</span>
-														<span className="font-bold">{loser}</span>
-														<span className="ml-2 font-mono font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
-															({score})
-														</span>
-													</p>
-													<div className="flex items-center gap-2 text-xs text-muted-foreground">
-														<Calendar className="h-3 w-3" />
-														{formatDistanceToNow(new Date(match.datePlayed), {
-															addSuffix: true,
-															locale: it,
-														})}
+								if (!recentMatches || recentMatches.length === 0) {
+									return (
+										<div className="p-6">
+											<EmptyState
+												icon={History}
+												title="Nessun'attività"
+												description="Non sono ancora state registrate partite globali recentemente."
+												className="py-12"
+											/>
+										</div>
+									);
+								}
+
+								return (
+									<div className="divide-y divide-border/50">
+										{recentMatches.slice(0, 10).map((match) => {
+											const isHomeWinner = match.scoreHome > match.scoreAway;
+											const winner = isHomeWinner ? match.homeTeamName : match.awayTeamName;
+											const loser = isHomeWinner ? match.awayTeamName : match.homeTeamName;
+											const score = isHomeWinner
+												? `${match.scoreHome}-${match.scoreAway}`
+												: `${match.scoreAway}-${match.scoreHome}`;
+
+											return (
+												<div key={match.id} className="p-5 flex items-start gap-4">
+													<div
+														className={cn(
+															"h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+															isHomeWinner
+																? "bg-blue-500/10 text-blue-600"
+																: "bg-red-500/10 text-red-600",
+														)}
+														aria-hidden="true"
+													>
+														<Trophy className="h-5 w-5" />
+													</div>
+													<div className="flex-1 space-y-1">
+														<p className="text-sm font-medium leading-relaxed">
+															<span className="font-bold">{winner}</span>
+															<span className="text-muted-foreground mx-1">ha sconfitto</span>
+															<span className="font-bold">{loser}</span>
+															<span className="ml-2 font-mono font-black text-primary bg-primary/5 px-2 py-0.5 rounded">
+																({score})
+															</span>
+														</p>
+														<div className="flex items-center gap-2 text-xs text-muted-foreground">
+															<Calendar className="h-3 w-3" />
+															{formatDistanceToNow(new Date(match.datePlayed), {
+																addSuffix: true,
+																locale: it,
+															})}
+														</div>
 													</div>
 												</div>
-											</div>
-										);
-									})}
-								</div>
-							)}
+											);
+										})}
+									</div>
+								);
+							})()}
 						</ScrollArea>
 					</CardContent>
 				</Card>
