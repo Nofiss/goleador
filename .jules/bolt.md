@@ -57,3 +57,11 @@
 ## 2025-02-17 - [Player Data Caching & Efficient Invalidation]
 **Learning:** Frequently visited player pages (Profile, Statistics) benefit from caching. However, invalidation must be handled in command handlers that modify match results. Eager loading participants during match retrieval allows for O(1) in-memory resolution of player IDs for cache invalidation, avoiding redundant database roundtrips.
 **Action:** Implement `ICacheableQuery` for player-specific queries and use `Include(m => m.Participants)` in `UpdateMatchResultCommandHandler` to perform efficient cache purging for all involved players.
+
+## 2026-02-20 - [Pending Matches Projection Optimization]
+**Learning:** Found that  was using deep  chains to load full entity graphs for tournaments, teams, and players. This caused a massive over-fetch of data (e.g., loading all 32 teams of a tournament) just to resolve a few team names for a single match.
+**Action:** Replaced eager loading with a targeted LINQ projection into a private record and implemented a dictionary-based resolution pattern for team names. This reduced data transfer from O(Total Entities in Graph) to O(Relevant Entities), significantly improving response time and memory efficiency.
+
+## 2026-02-20 - [Pending Matches Projection Optimization]
+**Learning:** Found that GetMyPendingMatchesQueryHandler was using deep .Include() chains to load full entity graphs for tournaments, teams, and players. This caused a massive over-fetch of data just to resolve a few team names.
+**Action:** Replaced eager loading with a targeted LINQ projection and implemented a dictionary-based resolution pattern for team names. This reduced data transfer significantly and improved memory efficiency.

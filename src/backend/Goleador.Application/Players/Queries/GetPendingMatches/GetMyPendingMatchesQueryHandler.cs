@@ -10,14 +10,18 @@ public class GetMyPendingMatchesQueryHandler(
     ICurrentUserService currentUserService)
     : IRequestHandler<GetMyPendingMatchesQuery, List<PendingMatchDto>>
 {
-    // SonarQube: csharpsquid:S3776 - Cognitive Complexity reduced by extracting methods
     public async Task<List<PendingMatchDto>> Handle(GetMyPendingMatchesQuery request, CancellationToken cancellationToken)
     {
         var player = await GetPlayerByUserIdAsync(cancellationToken);
 
+        // Optimization Bolt ⚡: Replace eager loading (Include) with targeted projection.
+        // This avoids loading full entity graphs (Tournaments, Teams, Players, Tables) which can be massive.
+        // We only fetch the minimal fields required for the DTO.
         var pendingMatches = await GetPendingMatchesWithDetailsAsync(player.Id, cancellationToken);
 
-        var playerTeamMap = CreatePlayerTeamMap(pendingMatches);
+        // Optimization Bolt ⚡: Targeted team resolution.
+        // Instead of loading ALL teams from the database, we only fetch the names of teams involved in the pending matches.
+        var playerTeamMap = await CreatePlayerTeamMapAsync(pendingMatches, cancellationToken);
 
         return pendingMatches
             .Select(m => MapToPendingMatchDto(m, player.Id, playerTeamMap))
@@ -44,43 +48,58 @@ public class GetMyPendingMatchesQueryHandler(
         return player;
     }
 
-    private async Task<List<Goleador.Domain.Entities.Match>> GetPendingMatchesWithDetailsAsync(Guid playerId, CancellationToken cancellationToken)
+    private async Task<List<ProjectedMatch>> GetPendingMatchesWithDetailsAsync(Guid playerId, CancellationToken cancellationToken)
     {
+        // Optimization Bolt ⚡: Selective projection reduces data transfer from O(Full Graph) to O(1) per record.
         return await context.Matches
             .AsNoTracking()
-            .AsSplitQuery() // Optimization Bolt ⚡: Prevents Cartesian product by loading collections in separate queries
-            .Include(m => m.Tournament)
-                .ThenInclude(t => t!.Teams)
-                    .ThenInclude(tt => tt.Players)
-            .Include(m => m.Table)
-            .Include(m => m.Participants)
-                .ThenInclude(p => p.Player)
             .Where(m => m.Status == MatchStatus.Scheduled &&
                         m.Participants.Any(p => p.PlayerId == playerId))
             .OrderBy(m => m.Tournament != null ? m.Tournament.Name : string.Empty)
             .ThenBy(m => m.Round)
+            .Select(m => new ProjectedMatch(
+                m.Id,
+                m.TournamentId,
+                m.Tournament != null ? m.Tournament.Name : "Individual Match",
+                m.Round,
+                m.Table != null ? m.Table.Name : null,
+                m.Participants.Select(p => new ProjectedParticipant(p.PlayerId, p.Side, p.Player.Nickname)).ToList()
+            ))
             .ToListAsync(cancellationToken);
     }
 
-    private static Dictionary<(Guid TournamentId, Guid PlayerId), string> CreatePlayerTeamMap(IEnumerable<Goleador.Domain.Entities.Match> matches)
+    private async Task<Dictionary<(Guid TournamentId, Guid PlayerId), string>> CreatePlayerTeamMapAsync(
+        IEnumerable<ProjectedMatch> matches,
+        CancellationToken cancellationToken)
     {
-        // Optimization Bolt ⚡: Composite Relational Data Resolution Pattern
-        // Build a dictionary of (TournamentId, PlayerId) -> TeamName in a single pass
-        // to achieve O(1) lookups during projection, avoiding O(N*M) LINQ scans.
-        var playerTeamMap = new Dictionary<(Guid TournamentId, Guid PlayerId), string>();
-        var tournaments = matches
-            .Where(m => m.Tournament != null)
-            .Select(m => m.Tournament!)
-            .DistinctBy(t => t.Id);
+        var tournamentIds = matches
+            .Where(m => m.TournamentId.HasValue)
+            .Select(m => m.TournamentId!.Value)
+            .Distinct()
+            .ToList();
 
-        foreach (var tournament in tournaments)
+        if (tournamentIds.Count == 0) return [];
+
+        var playerIds = matches
+            .SelectMany(m => m.Participants.Select(p => p.PlayerId))
+            .Distinct()
+            .ToList();
+
+        // Optimization Bolt ⚡: Targeted query for teams involved in these tournaments and containing these players.
+        // Reduces database fetch from O(Total Teams in Tournament) to O(Involved Teams).
+        var teams = await context.TournamentTeams
+            .AsNoTracking()
+            .Where(tt => tournamentIds.Contains(tt.TournamentId) && tt.Players.Any(p => playerIds.Contains(p.Id)))
+            .Select(tt => new { tt.TournamentId, tt.Name, PlayerIds = tt.Players.Select(p => p.Id).ToList() })
+            .ToListAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Build a lookup dictionary to achieve O(1) team resolution.
+        var playerTeamMap = new Dictionary<(Guid TournamentId, Guid PlayerId), string>();
+        foreach (var team in teams)
         {
-            foreach (var team in tournament.Teams)
+            foreach (var pId in team.PlayerIds)
             {
-                foreach (var teamPlayer in team.Players)
-                {
-                    playerTeamMap[(tournament.Id, teamPlayer.Id)] = team.Name;
-                }
+                playerTeamMap.TryAdd((team.TournamentId, pId), team.Name);
             }
         }
 
@@ -88,7 +107,7 @@ public class GetMyPendingMatchesQueryHandler(
     }
 
     private static PendingMatchDto MapToPendingMatchDto(
-        Goleador.Domain.Entities.Match match,
+        ProjectedMatch match,
         Guid currentPlayerId,
         IReadOnlyDictionary<(Guid TournamentId, Guid PlayerId), string> playerTeamMap)
     {
@@ -101,20 +120,20 @@ public class GetMyPendingMatchesQueryHandler(
         {
             Id = match.Id,
             TournamentId = match.TournamentId ?? Guid.Empty,
-            TournamentName = match.Tournament?.Name ?? "Individual Match",
+            TournamentName = match.TournamentName,
             HomeTeamName = homeTeamName,
             AwayTeamName = awayTeamName,
             Round = match.Round,
-            TableName = match.Table?.Name,
-            OpponentName = string.Join(" - ", opponentParticipants.Select(p => p.Player.Nickname))
+            TableName = match.TableName,
+            OpponentName = string.Join(" - ", opponentParticipants.Select(p => p.Nickname))
         };
     }
 
     private static (string HomeTeamName, string AwayTeamName) ResolveTeamNames(
-        Goleador.Domain.Entities.Match match,
+        ProjectedMatch match,
         IReadOnlyDictionary<(Guid TournamentId, Guid PlayerId), string> playerTeamMap)
     {
-        if (match.Tournament == null)
+        if (!match.TournamentId.HasValue)
         {
             return ("Home Team", "Away Team");
         }
@@ -125,15 +144,26 @@ public class GetMyPendingMatchesQueryHandler(
         string homeTeamName = "Home Team";
         if (homeParticipant != null)
         {
-            homeTeamName = playerTeamMap.GetValueOrDefault((match.Tournament.Id, homeParticipant.PlayerId)) ?? "Home Team";
+            homeTeamName = playerTeamMap.GetValueOrDefault((match.TournamentId.Value, homeParticipant.PlayerId)) ?? "Home Team";
         }
 
         string awayTeamName = "Away Team";
         if (awayParticipant != null)
         {
-            awayTeamName = playerTeamMap.GetValueOrDefault((match.Tournament.Id, awayParticipant.PlayerId)) ?? "Away Team";
+            awayTeamName = playerTeamMap.GetValueOrDefault((match.TournamentId.Value, awayParticipant.PlayerId)) ?? "Away Team";
         }
 
         return (homeTeamName, awayTeamName) ;
     }
+
+    private record ProjectedMatch(
+        Guid Id,
+        Guid? TournamentId,
+        string TournamentName,
+        int Round,
+        string? TableName,
+        List<ProjectedParticipant> Participants
+    );
+
+    private record ProjectedParticipant(Guid PlayerId, Side Side, string Nickname);
 }
