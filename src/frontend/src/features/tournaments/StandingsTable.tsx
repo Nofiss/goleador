@@ -40,7 +40,7 @@ const StandingRow = memo(
 				<TableCell className="font-medium">
 					<div className="flex items-center justify-center">
 						{index < 3 ? (
-							<>
+							<span title={`${index + 1}° Posto`} className="flex items-center">
 								<Trophy
 									className={cn(
 										"h-5 w-5",
@@ -53,7 +53,7 @@ const StandingRow = memo(
 									aria-hidden="true"
 								/>
 								<span className="sr-only">{row.position}</span>
-							</>
+							</span>
 						) : (
 							<div className="w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold bg-muted text-muted-foreground">
 								{row.position}

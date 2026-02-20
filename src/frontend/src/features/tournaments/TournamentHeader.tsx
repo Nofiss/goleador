@@ -75,10 +75,12 @@ export const TournamentHeader = ({ tournament }: Props) => {
 				{isAdmin && tournament.status === TournamentStatus.setup && (
 					<Button
 						onClick={() => startMutation.mutate(tournament.id)}
-						disabled={tournament.teams.length < 2 || startMutation.isPending}
+						loading={startMutation.isPending}
+						disabled={tournament.teams.length < 2}
 						className="bg-green-600 hover:bg-green-700"
 					>
-						<PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Avvia Torneo
+						{!startMutation.isPending && <PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" />}
+						Avvia Torneo
 					</Button>
 				)}
 

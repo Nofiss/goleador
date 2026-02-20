@@ -9,3 +9,7 @@
 ## 2025-06-02 - [Icon-Only Button Accessibility and Interaction Polish]
 **Learning:** Icon-only buttons often suffer from missing accessibility labels, especially for primary navigation ("Back") or destructive actions ("Delete"). Unifying the "Swap" interaction pattern with `framer-motion` animations across different forms (Match Create vs. Match Result) while simultaneously fixing ARIA labels creates a more inclusive and professional experience.
 **Action:** Audit all icon-only buttons for `aria-label`. Use the `asChild` pattern with Radix buttons to ensure labels propagate correctly to links. Consistently apply the `ArrowLeftRight` rotation animation to all swap-like interactions for visual delight.
+
+## 2025-06-05 - [Consistent Interaction & Informational Tooltips]
+**Learning:** Standardizing asynchronous button states (using a `loading` prop) and providing discoverable tooltips for informational icons significantly reduces cognitive load. Users benefit from immediate, predictable feedback during actions and clear context for visual symbols (like status badges or card usage icons) that would otherwise remain ambiguous.
+**Action:** Always prefer the `loading` prop on `Button` components for async operations. To provide tooltips for Lucide icons without build errors, wrap them in a container (e.g., `<span title="...">`) and ensure `aria-hidden="true"` is set on the icon itself.
