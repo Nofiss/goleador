@@ -82,7 +82,8 @@ public class GraphEmailService : IEmailService
             // Nota: L'App Registration deve avere i permessi Mail.Send
             await _graphClient.Users[_senderEmail].SendMail.PostAsync(requestBody);
 
-            _logger.LogInformation($"Email inviata con successo a {to} tramite Graph API.");
+            // csharpsquid:S2629 - Using structured logging instead of string interpolation
+            _logger.LogInformation("Email inviata con successo a {To} tramite Graph API.", to);
         }
         catch (Exception ex)
         {
