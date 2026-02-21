@@ -65,3 +65,7 @@
 ## 2026-02-20 - [Pending Matches Projection Optimization]
 **Learning:** Found that GetMyPendingMatchesQueryHandler was using deep .Include() chains to load full entity graphs for tournaments, teams, and players. This caused a massive over-fetch of data just to resolve a few team names.
 **Action:** Replaced eager loading with a targeted LINQ projection and implemented a dictionary-based resolution pattern for team names. This reduced data transfer significantly and improved memory efficiency.
+
+## 2025-02-17 - [User Management Projection Optimization]
+**Learning:** Found that GetUsersQueryHandler was fetching full Player entities just to resolve a few names and IDs. Materializing full entity graphs (including unused fields like ELO, Emails, and Timestamps) is a significant overhead when only 3 scalar properties are needed.
+**Action:** Use a targeted LINQ projection .Select(p => new { p.UserId, p.Id, p.Nickname }) to fetch only required fields. This minimizes database I/O and memory pressure while maintaining the O(1) dictionary-based resolution pattern.
