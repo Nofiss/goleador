@@ -16,9 +16,12 @@ public class GetUsersQueryHandler(IIdentityService identityService, IApplication
         List<(string Id, string Email, string Username, string[] Roles)> identityUsers =
             await identityService.GetAllUsersAsync();
 
-        List<Player> linkedPlayers = await context
+        // Optimization Bolt ⚡: Use a selective projection to fetch only required fields (UserId, Id, Nickname).
+        // This avoids over-fetching full Player entities (O(1) columns) and reduces memory usage (O(N) objects).
+        var linkedPlayers = await context
             .Players.AsNoTracking()
             .Where(p => p.UserId != null)
+            .Select(p => new { p.UserId, p.Id, p.Nickname })
             .ToListAsync(cancellationToken);
 
         var result = new List<UserDto>();
