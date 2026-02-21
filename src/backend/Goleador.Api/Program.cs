@@ -290,31 +290,27 @@ app.MapHealthChecks(
 
 if (builder.Configuration.GetValue("EfCore:ApplyMigrationsOnStartup", true))
 {
-    using (IServiceScope scope = app.Services.CreateScope())
-    {
-        ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    using IServiceScope scope = app.Services.CreateScope();
+    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        try
-        {
-            logger.LogInformation("Applying EF Core migrations on startup.");
-            await db.Database.MigrateAsync();
-            logger.LogInformation("EF Core migrations applied successfully.");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "EF Core migrations failed during startup.");
-            throw;
-        }
+    try
+    {
+        logger.LogInformation("Applying EF Core migrations on startup.");
+        await db.Database.MigrateAsync();
+        logger.LogInformation("EF Core migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "EF Core migrations failed during startup.");
+        throw;
     }
 }
 else
 {
-    using (IServiceScope scope = app.Services.CreateScope())
-    {
-        ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("EF Core migrations on startup are disabled by configuration.");
-    }
+    using IServiceScope scope = app.Services.CreateScope();
+    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("EF Core migrations on startup are disabled by configuration.");
 }
 
 using (IServiceScope scope = app.Services.CreateScope())
