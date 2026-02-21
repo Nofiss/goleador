@@ -17,6 +17,7 @@ import { useTheme } from "@/components/ThemeProvider"; // Importa useTheme
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserDashboard } from "@/features/dashboard/UserDashboard";
@@ -208,9 +209,12 @@ export const DashboardPage = () => {
 										</div>
 									))
 								) : activeTournaments.length === 0 ? (
-									<div className="h-full flex items-center justify-center text-muted-foreground italic border border-dashed border-border rounded-lg min-h-30">
-										Nessun torneo attivo. Accendi la miccia!
-									</div>
+									<EmptyState
+										icon={Flame}
+										title="Nessun torneo attivo"
+										description="Accendi la miccia e sfida i tuoi colleghi!"
+										className="border-none bg-transparent py-6"
+									/>
 								) : (
 									activeTournaments.map((t) => (
 										<Link key={t.id} to={`/tournaments/${t.id}`}>
@@ -267,9 +271,12 @@ export const DashboardPage = () => {
 										</div>
 									))
 								) : setupTournaments.length === 0 ? (
-									<div className="h-full flex items-center justify-center text-muted-foreground italic border border-dashed border-border rounded-lg min-h-30">
-										Tutto tranquillo... Troppo tranquillo.
-									</div>
+									<EmptyState
+										icon={CalendarDays}
+										title="Tutto tranquillo..."
+										description="Troppo tranquillo... Iscriviti appena apre un nuovo torneo!"
+										className="border-none bg-transparent py-6"
+									/>
 								) : (
 									setupTournaments.map((t) => (
 										<div

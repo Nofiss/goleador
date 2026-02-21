@@ -13,3 +13,7 @@
 ## 2025-06-05 - [Consistent Interaction & Informational Tooltips]
 **Learning:** Standardizing asynchronous button states (using a `loading` prop) and providing discoverable tooltips for informational icons significantly reduces cognitive load. Users benefit from immediate, predictable feedback during actions and clear context for visual symbols (like status badges or card usage icons) that would otherwise remain ambiguous.
 **Action:** Always prefer the `loading` prop on `Button` components for async operations. To provide tooltips for Lucide icons without build errors, wrap them in a container (e.g., `<span title="...">`) and ensure `aria-hidden="true"` is set on the icon itself.
+
+## 2025-06-10 - [Standardizing Empty States & Global Icon Shadowing]
+**Learning:** Standardizing empty states across high-visibility pages (Dashboard, Tournaments, Tables) using the `EmptyState` component ensures visual consistency and reinforces the application's design language. When using icons from `lucide-react`, beware of shadowing global JavaScript objects like `Map`; always alias them (e.g., `MapIcon`) to maintain code quality and avoid linting errors.
+**Action:** Replace all manual "no-data" placeholders with `EmptyState`. Use `border-none bg-transparent` when nesting `EmptyState` inside existing card containers to maintain a clean layout. Always check for global namespace conflicts when importing icons.
