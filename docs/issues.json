@@ -7030,7 +7030,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-21"
 		},
 		{
 			"key": "6c5794ed-177f-4aac-ada0-39169b57030e",
