@@ -7,6 +7,7 @@ using Goleador.Application.Tournaments.Commands.JoinTournament;
 using Goleador.Application.Tournaments.Commands.RegisterPlayer;
 using Goleador.Application.Tournaments.Commands.RegisterTeam;
 using Goleador.Application.Tournaments.Commands.StartTournament;
+using Goleador.Application.Tournaments.Commands.UpdateTournamentRules;
 using Goleador.Application.Tournaments.Commands.BulkAssignTable;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
 using Goleador.Application.Tournaments.Queries.GetTournaments;
@@ -142,4 +143,14 @@ public class TournamentsController : ApiControllerBase
         await Mediator.Send(new BulkAssignTableCommand(id, request.TableId, request.Phase));
         return NoContent();
     }
+
+    [HttpPut("{id}/rules")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateRules(Guid id, [FromBody] UpdateTournamentRulesRequest request)
+    {
+        await Mediator.Send(new UpdateTournamentRulesCommand(id, request.Rules));
+        return NoContent();
+    }
 }
+
+public record UpdateTournamentRulesRequest(string? Rules);

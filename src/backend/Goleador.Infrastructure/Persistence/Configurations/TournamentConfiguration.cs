@@ -10,7 +10,7 @@ public class TournamentConfiguration : IEntityTypeConfiguration<Tournament>
     {
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Name).IsRequired().HasMaxLength(100);
-        builder.Property(t => t.Notes).HasMaxLength(2000); // Max 2000 caratteri
+        builder.Property(t => t.Rules).HasMaxLength(4000); // Max 4000 caratteri per Markdown
 
         // Relazione con le squadre: Se cancello il torneo, cancello le iscrizioni
         builder

@@ -19,3 +19,6 @@
 ## 2026-02-20 - Nested Ternary Remediation (S3358)
 **Learning:** Complex conditional rendering in JSX using nested ternaries is a major code smell (S3358) that hurts readability and maintainability.
 **Action:** Replace nested ternaries with mapping objects for simple configuration-driven values, or use Immediately Invoked Function Expressions (IIFEs) with standard 'if' statements for more complex multi-branch rendering logic.
+## 2026-02-22 - Raw String API Body DTO
+**Learning:** Sending raw strings as the body of a PUT/POST request in ASP.NET Core with default JSON formatters fails if the string is not wrapped in a DTO, as the raw string (e.g., Markdown) is not valid JSON.
+**Action:** Always wrap raw string inputs in a DTO object (e.g., `UpdateRulesRequest(string? Rules)`) to ensure compatibility with standard JSON serializers and frontend API clients like Axios.

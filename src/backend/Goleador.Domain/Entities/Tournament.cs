@@ -13,7 +13,7 @@ public class Tournament : BaseEntity
     // Configurazione
     public int TeamSize { get; private set; } // 1 per 1vs1, 2 per 2vs2
     public bool HasReturnMatches { get; private set; } // Andata e Ritorno?
-    public string? Notes { get; private set; }
+    public string? Rules { get; private set; }
     public TournamentScoringRules ScoringRules { get; private set; } =
         TournamentScoringRules.Default();
 
@@ -38,7 +38,7 @@ public class Tournament : BaseEntity
         TournamentType type,
         int teamSize,
         bool hasReturnMatches,
-        string? notes,
+        string? rules,
         TournamentScoringRules? scoringRules
     )
     {
@@ -46,9 +46,14 @@ public class Tournament : BaseEntity
         Type = type;
         TeamSize = teamSize;
         HasReturnMatches = hasReturnMatches;
-        Notes = notes;
+        Rules = rules;
         ScoringRules = scoringRules ?? TournamentScoringRules.Default();
         Status = TournamentStatus.Setup;
+    }
+
+    public void UpdateRules(string? rules)
+    {
+        Rules = rules;
     }
 
     // Metodi di dominio
