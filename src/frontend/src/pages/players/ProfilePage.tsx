@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import {
 	Activity,
 	ArrowDownCircle,
@@ -26,32 +27,40 @@ import {
 } from "@/components/ui/table";
 import type { MatchBriefDto } from "@/types";
 
-const RecentMatchRow = memo(({ match }: { match: MatchBriefDto }) => (
-	<TableRow>
-		<TableCell className="pl-6 text-xs text-muted-foreground">
-			{new Date(match.datePlayed).toLocaleDateString()}
-		</TableCell>
-		<TableCell className="text-sm font-medium">
-			<div className="flex flex-col gap-0.5">
-				<span className="text-blue-700">{match.homeTeamName}</span>
-				<span className="text-red-700">{match.awayTeamName}</span>
-			</div>
-		</TableCell>
-		<TableCell className="text-center font-mono font-bold">
-			{match.scoreHome} - {match.scoreAway}
-		</TableCell>
-		<TableCell className="text-center pr-6">
-			<Badge
-				variant={
-					match.result === "W" ? "default" : match.result === "L" ? "destructive" : "secondary"
-				}
-				className="w-8 justify-center"
-			>
-				{match.result}
-			</Badge>
-		</TableCell>
-	</TableRow>
-));
+const RecentMatchRow = memo(({ match }: { match: MatchBriefDto }) => {
+	const label = match.result === "W" ? "Vittoria" : match.result === "L" ? "Sconfitta" : "Pareggio";
+
+	return (
+		<TableRow>
+			<TableCell className="pl-6 text-xs text-muted-foreground">
+				{new Date(match.datePlayed).toLocaleDateString()}
+			</TableCell>
+			<TableCell className="text-sm font-medium">
+				<div className="flex flex-col gap-0.5">
+					<span className="text-blue-600 dark:text-blue-400">{match.homeTeamName}</span>
+					<span className="text-red-600 dark:text-red-400">{match.awayTeamName}</span>
+				</div>
+			</TableCell>
+			<TableCell className="text-center font-mono font-bold">
+				{match.scoreHome} - {match.scoreAway}
+			</TableCell>
+			<TableCell className="text-center pr-6">
+				<motion.div whileHover={{ scale: 1.15 }} transition={{ type: "spring", stiffness: 400 }}>
+					<Badge
+						variant={
+							match.result === "W" ? "default" : match.result === "L" ? "destructive" : "secondary"
+						}
+						className="w-8 justify-center cursor-default"
+						title={label}
+						aria-label={label}
+					>
+						{match.result}
+					</Badge>
+				</motion.div>
+			</TableCell>
+		</TableRow>
+	);
+});
 
 RecentMatchRow.displayName = "RecentMatchRow";
 
