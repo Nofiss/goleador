@@ -60,7 +60,7 @@ export interface CreateTournamentRequest {
 	type: TournamentType;
 	teamSize: number; // 1 o 2
 	hasReturnMatches: boolean;
-	notes?: string;
+	rules?: string;
 	// Scoring fields (appiattiti nel command backend, appiattiamoli anche qui per semplicità di form)
 	pointsForWin: number;
 	pointsForDraw: number;
@@ -108,7 +108,7 @@ export interface TournamentDetail extends Tournament {
 	teams: TournamentTeam[];
 	matches: TournamentMatch[];
 	cardDefinitions: TournamentCard[];
-	notes?: string;
+	rules?: string;
 	scoringRules: ScoringRules;
 }
 

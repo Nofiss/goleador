@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
 	ChevronDown,
 	ChevronUp,
+	FileText,
 	Loader2,
 	Plus,
 	Swords,
-	Table,
 	Trash2,
 	Trophy,
 	Users,
@@ -44,7 +44,7 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 		type: TournamentType.roundRobin,
 		teamSize: 1, // Default 1vs1
 		hasReturnMatches: false,
-		notes: "",
+		rules: "",
 		pointsForWin: 3,
 		pointsForDraw: 1,
 		pointsForLoss: 0,
@@ -175,20 +175,29 @@ export const CreateTournamentForm = ({ onSuccess }: Props) => {
 						</div>
 
 						<div className="space-y-2 col-span-2">
-							<Label htmlFor="tournament-notes">Note (Opzionale)</Label>
+							<div className="flex justify-between items-center">
+								<Label htmlFor="tournament-rules">Regole (Opzionale)</Label>
+								<span className="text-[10px] text-muted-foreground uppercase font-bold bg-muted px-2 py-0.5 rounded">
+									Supporta Markdown
+								</span>
+							</div>
 							<div className="relative">
 								<Textarea
-									id="tournament-notes"
-									className="pl-9 min-h-[100px]"
-									placeholder="Regole speciali, premi in palio..."
-									value={formData.notes}
-									onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+									id="tournament-rules"
+									className="pl-9 min-h-[120px] font-mono text-sm"
+									placeholder="# Regolamento\n\n1. Fair play prima di tutto\n2. ..."
+									value={formData.rules}
+									onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
 								/>
-								<Table
+								<FileText
 									className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/50 pointer-events-none"
 									aria-hidden="true"
 								/>
 							</div>
+							<p className="text-[10px] text-muted-foreground">
+								Puoi usare il linguaggio Markdown per formattare il testo (grassetti, elenchi,
+								titoli).
+							</p>
 						</div>
 					</div>
 					<div className="flex items-center space-x-2 pt-2">

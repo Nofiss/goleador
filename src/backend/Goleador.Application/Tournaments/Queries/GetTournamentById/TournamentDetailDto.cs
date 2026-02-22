@@ -12,7 +12,7 @@ public class TournamentDetailDto
     public TournamentStatus Status { get; set; }
     public TournamentType Type { get; set; }
     public int TeamSize { get; set; }
-    public string? Notes { get; set; }
+    public string? Rules { get; set; }
     public ScoringRulesDto ScoringRules { get; set; } = new();
     public bool HasReturnMatches { get; set; }
 

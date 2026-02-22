@@ -8,7 +8,7 @@ public record CreateTournamentCommand(
     TournamentType Type,
     int TeamSize, // 1 o 2
     bool HasReturnMatches,
-    string? Notes,
+    string? Rules,
 
     // Opzioni Scoring
     int PointsForWin = 3,

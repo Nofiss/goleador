@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { getTournamentById } from "@/api/tournaments";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RulesTab } from "@/features/tournaments/detail/RulesTab";
 import { MatchesTab, MatchesTabSkeleton } from "@/features/tournaments/MatchesTab";
 import { StandingsTable } from "@/features/tournaments/StandingsTable";
 import { TeamsTab } from "@/features/tournaments/TeamsTab";
@@ -29,7 +30,10 @@ export const TournamentDetailPage = () => {
 			<div className="container mx-auto max-w-7xl p-4 md:p-8 space-y-8 pb-20">
 				<TournamentHeaderSkeleton />
 				<Tabs defaultValue="matches" className="w-full">
-					<TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+					<TabsList className="grid w-full grid-cols-4 md:w-[500px]">
+						<TabsTrigger value="rules" disabled>
+							Regole
+						</TabsTrigger>
 						<TabsTrigger value="teams" disabled>
 							Squadre
 						</TabsTrigger>
@@ -39,7 +43,15 @@ export const TournamentDetailPage = () => {
 						</TabsTrigger>
 					</TabsList>
 					<div className="mt-6">
-						<MatchesTabSkeleton />
+						<TabsContent value="rules">
+							<div className="space-y-4">
+								<div className="h-8 w-48 bg-muted animate-pulse rounded" />
+								<div className="h-64 w-full bg-muted animate-pulse rounded-2xl" />
+							</div>
+						</TabsContent>
+						<TabsContent value="matches">
+							<MatchesTabSkeleton />
+						</TabsContent>
 					</div>
 				</Tabs>
 			</div>
@@ -55,13 +67,18 @@ export const TournamentDetailPage = () => {
 			<TournamentHeader tournament={tournament} />
 
 			<Tabs defaultValue={defaultTab} className="w-full">
-				<TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+				<TabsList className="grid w-full grid-cols-4 md:w-[500px]">
+					<TabsTrigger value="rules">Regole</TabsTrigger>
 					<TabsTrigger value="teams">Squadre</TabsTrigger>
 					<TabsTrigger value="matches">Partite</TabsTrigger>
 					<TabsTrigger value="standings">Classifica</TabsTrigger>
 				</TabsList>
 
 				<div className="mt-6">
+					<TabsContent value="rules">
+						<RulesTab tournament={tournament} />
+					</TabsContent>
+
 					<TabsContent value="teams">
 						<TeamsTab tournament={tournament} />
 					</TabsContent>

@@ -28,7 +28,7 @@ public class CreateTournamentCommandHandler(IApplicationDbContext context)
             request.Type,
             request.TeamSize,
             request.HasReturnMatches,
-            request.Notes,
+            request.Rules,
             rules
         );
 

@@ -77,3 +77,7 @@ export const bulkAssignTable = async (params: {
 		phase: params.phase,
 	});
 };
+
+export const updateTournamentRules = async (id: string, rules: string | null) => {
+	return api.put(`/tournaments/${id}/rules`, { rules });
+};
