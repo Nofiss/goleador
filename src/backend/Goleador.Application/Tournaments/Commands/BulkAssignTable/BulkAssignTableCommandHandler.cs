@@ -1,3 +1,4 @@
+using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Enums;
 using MediatR;
@@ -31,7 +32,8 @@ public class BulkAssignTableCommandHandler(IApplicationDbContext context, IMemor
             TournamentPhase.All => matches,
             TournamentPhase.FirstLeg => matches.Where(m => m.Round <= splitRound),
             TournamentPhase.SecondLeg => matches.Where(m => m.Round > splitRound),
-            _ => throw new ArgumentOutOfRangeException(nameof(request.Phase), "Invalid tournament phase")
+            // csharpsquid:S3928 - Using ValidationException instead of ArgumentOutOfRangeException for property validation
+            _ => throw new ValidationException(nameof(request.Phase), "Invalid tournament phase")
         };
 
         foreach (var match in targetMatches)
