@@ -69,3 +69,7 @@
 ## 2025-02-17 - [User Management Projection Optimization]
 **Learning:** Found that GetUsersQueryHandler was fetching full Player entities just to resolve a few names and IDs. Materializing full entity graphs (including unused fields like ELO, Emails, and Timestamps) is a significant overhead when only 3 scalar properties are needed.
 **Action:** Use a targeted LINQ projection .Select(p => new { p.UserId, p.Id, p.Nickname }) to fetch only required fields. This minimizes database I/O and memory pressure while maintaining the O(1) dictionary-based resolution pattern.
+
+## 2025-02-14 - [Dashboard Parallelization & Perceived Speed]
+**Learning:** Found that `UserDashboard.tsx` had a sequential query waterfall because `pending-matches` was only enabled after `player-profile` loaded. This doubled the time-to-interactive for the main list.
+**Action:** Remove query dependencies when they are not strictly required for the API call (e.g. using server-side session instead of frontend IDs). Pair this with independent loading states in the UI to allow parts of the page to render as soon as their specific data arrives, improving perceived speed.

@@ -54,11 +54,11 @@ export const UserDashboard = () => {
 	});
 
 	// 3. Fetch User's Pending Matches
-	// Optimized: Uses a dedicated endpoint instead of fetching all tournaments and their details
+	// Bolt ⚡ Optimization: Removed 'enabled: !!profile' to allow parallel fetching with the profile query.
+	// This eliminates a network waterfall, improving dashboard load time by O(1) request duration.
 	const { data: pendingMatches, isLoading: isPendingLoading } = useQuery({
 		queryKey: ["pending-matches", "me"],
 		queryFn: getMyPendingMatches,
-		enabled: !!profile,
 	});
 
 	// Calculate Current Streak from profile.recentMatches
@@ -89,7 +89,16 @@ export const UserDashboard = () => {
 		].filter((d) => d.value > 0);
 	}, [profile]);
 
-	if (isProfileLoading || isPendingLoading) {
+	// Bolt ⚡ Optimization: Memoized initials to avoid redundant string operations on every render.
+	// Hook placed here (at top level) to comply with React's Hook rules.
+	const initials = useMemo(
+		() => profile?.nickname.slice(0, 2).toUpperCase() || "",
+		[profile?.nickname],
+	);
+
+	// Bolt ⚡ Optimization: Changed early return to block only on profile loading.
+	// This allows the Hero section and Stats to show immediately while pending matches load in the background.
+	if (isProfileLoading) {
 		return (
 			<div className="container mx-auto px-4 py-8 space-y-8">
 				<Skeleton className="h-48 w-full rounded-3xl" />
@@ -107,8 +116,6 @@ export const UserDashboard = () => {
 	}
 
 	if (!profile) return null;
-
-	const initials = profile.nickname.slice(0, 2).toUpperCase();
 
 	return (
 		<div className="container mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-700">
