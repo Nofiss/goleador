@@ -198,7 +198,7 @@ export const MatchResultDialog = ({
 						<div className="text-center w-1/3">
 							<Label
 								htmlFor="score-home"
-								className="block mb-2 font-bold text-blue-700 truncate"
+								className="block mb-2 font-bold text-blue-600 dark:text-blue-400 truncate"
 								title={match.homeTeamName}
 							>
 								{match.homeTeamName || "Casa"}
@@ -243,7 +243,7 @@ export const MatchResultDialog = ({
 						<div className="text-center w-1/3">
 							<Label
 								htmlFor="score-away"
-								className="block mb-2 font-bold text-red-700 truncate"
+								className="block mb-2 font-bold text-red-600 dark:text-red-400 truncate"
 								title={match.awayTeamName}
 							>
 								{match.awayTeamName || "Ospiti"}
@@ -271,7 +271,7 @@ export const MatchResultDialog = ({
 							<div className="grid grid-cols-2 gap-8">
 								{/* CARTE CASA */}
 								<div className="space-y-2">
-									<p className="text-[10px] uppercase font-bold text-blue-700 mb-1">
+									<p className="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-1">
 										Carte {match.homeTeamName}
 									</p>
 									{cardDefinitions.map((card) => {
@@ -319,7 +319,7 @@ export const MatchResultDialog = ({
 
 								{/* CARTE OSPITE */}
 								<div className="space-y-2">
-									<p className="text-[10px] uppercase font-bold text-red-700 mb-1">
+									<p className="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 mb-1">
 										Carte {match.awayTeamName}
 									</p>
 									{cardDefinitions.map((card) => {

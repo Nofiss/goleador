@@ -26,7 +26,7 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 			<TableCell className="text-muted-foreground text-xs">
 				{new Date(match.datePlayed).toLocaleDateString()}
 			</TableCell>
-			<TableCell className="text-right font-medium text-blue-700">
+			<TableCell className="text-right font-medium text-blue-600 dark:text-blue-400">
 				<div className="flex items-center justify-end gap-1">
 					{match.hasCardsHome && (
 						<span title="Carte giocate" className="flex items-center">
@@ -36,19 +36,29 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 					)}
 					{match.homeTeamName || "Player A"}
 					{match.scoreHome > match.scoreAway && (
-						<Badge variant="secondary" className="ml-2 text-[10px]" title="Vincitore">
+						<Badge
+							variant="default"
+							className="ml-2 text-[10px] h-4 px-1"
+							title="Vincitore"
+							aria-label="Vincitore"
+						>
 							W
 						</Badge>
 					)}
 				</div>
 			</TableCell>
-			<TableCell className="text-center font-mono font-bold text-lg bg-gray-50/50">
+			<TableCell className="text-center font-mono font-bold text-lg bg-gray-50/50 dark:bg-white/5">
 				{match.scoreHome} - {match.scoreAway}
 			</TableCell>
-			<TableCell className="text-left font-medium text-red-700">
+			<TableCell className="text-left font-medium text-red-600 dark:text-red-400">
 				<div className="flex items-center justify-start gap-1">
 					{match.scoreAway > match.scoreHome && (
-						<Badge variant="secondary" className="mr-2 text-[10px]" title="Vincitore">
+						<Badge
+							variant="default"
+							className="mr-2 text-[10px] h-4 px-1"
+							title="Vincitore"
+							aria-label="Vincitore"
+						>
 							W
 						</Badge>
 					)}

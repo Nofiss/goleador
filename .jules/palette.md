@@ -17,3 +17,7 @@
 ## 2025-06-10 - [Standardizing Empty States & Global Icon Shadowing]
 **Learning:** Standardizing empty states across high-visibility pages (Dashboard, Tournaments, Tables) using the `EmptyState` component ensures visual consistency and reinforces the application's design language. When using icons from `lucide-react`, beware of shadowing global JavaScript objects like `Map`; always alias them (e.g., `MapIcon`) to maintain code quality and avoid linting errors.
 **Action:** Replace all manual "no-data" placeholders with `EmptyState`. Use `border-none bg-transparent` when nesting `EmptyState` inside existing card containers to maintain a clean layout. Always check for global namespace conflicts when importing icons.
+
+## 2025-06-15 - [Accessible Team Branding & Outcome Prominence]
+**Learning:** Hardcoded brand colors (like `blue-700`) often fail accessibility standards in dark mode. Standardizing these across the app using responsive Tailwind classes (`blue-600 dark:text-blue-400`) ensures inclusive design. Furthermore, enhancing "win" indicators from secondary to primary variants with clear descriptive labels (aria-label) and subtle hover animations (`framer-motion`) significantly improves both accessibility and interaction delight.
+**Action:** Audit and replace hardcoded brand colors with dark-mode responsive equivalents. Ensure match outcomes have descriptive `title` and `aria-label` attributes. Add `motion.div` hover effects to small status badges for a more polished feel.
