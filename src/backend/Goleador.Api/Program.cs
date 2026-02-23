@@ -319,4 +319,5 @@ using (IServiceScope scope = app.Services.CreateScope())
     await DbSeeder.SeedUsersAndRolesAsync(services);
 }
 
-app.Run();
+// csharpsquid:S6966 - Await RunAsync instead of synchronous Run to ensure asynchronous application startup
+await app.RunAsync();
