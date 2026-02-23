@@ -73,3 +73,7 @@
 ## 2025-02-14 - [Dashboard Parallelization & Perceived Speed]
 **Learning:** Found that `UserDashboard.tsx` had a sequential query waterfall because `pending-matches` was only enabled after `player-profile` loaded. This doubled the time-to-interactive for the main list.
 **Action:** Remove query dependencies when they are not strictly required for the API call (e.g. using server-side session instead of frontend IDs). Pair this with independent loading states in the UI to allow parts of the page to render as soon as their specific data arrives, improving perceived speed.
+
+## 2026-02-23 - [Recent Matches SQL Optimization]
+**Learning:** Found that using correlated subqueries in a LINQ projection (e.g., `.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).FirstOrDefault()`) to resolve participant IDs created redundant SQL overhead, especially when the `Participants` collection was already being fetched.
+**Action:** Include `PlayerId` in the projected `Participants` collection and resolve the specific side IDs (Home/Away) in memory after materialization. This simplifies the SQL from O(N) correlated subqueries to a single clean join/projection.

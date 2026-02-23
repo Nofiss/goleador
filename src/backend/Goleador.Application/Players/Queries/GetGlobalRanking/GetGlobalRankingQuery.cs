@@ -1,5 +1,4 @@
 using Goleador.Application.Common.Interfaces;
-using MediatR;
 
 namespace Goleador.Application.Players.Queries.GetGlobalRanking;
 

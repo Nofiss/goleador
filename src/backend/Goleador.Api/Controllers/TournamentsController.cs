@@ -1,6 +1,7 @@
 using Goleador.Application.Teams.Commands.RenameTeam;
 using Goleador.Application.Teams.Commands.UploadBranding;
 using Goleador.Application.Tournaments.Commands.AddLateTeam;
+using Goleador.Application.Tournaments.Commands.BulkAssignTable;
 using Goleador.Application.Tournaments.Commands.CreateTournament;
 using Goleador.Application.Tournaments.Commands.GenerateBalancedTeams;
 using Goleador.Application.Tournaments.Commands.JoinTournament;
@@ -8,7 +9,6 @@ using Goleador.Application.Tournaments.Commands.RegisterPlayer;
 using Goleador.Application.Tournaments.Commands.RegisterTeam;
 using Goleador.Application.Tournaments.Commands.StartTournament;
 using Goleador.Application.Tournaments.Commands.UpdateTournamentRules;
-using Goleador.Application.Tournaments.Commands.BulkAssignTable;
 using Goleador.Application.Tournaments.Queries.GetTournamentById;
 using Goleador.Application.Tournaments.Queries.GetTournaments;
 using Goleador.Application.Tournaments.Queries.GetTournamentStandings;

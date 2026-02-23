@@ -82,8 +82,5 @@ public class Player : BaseEntity
 
     public void RemoveUserLink() => UserId = null;
 
-    public void UpdateElo(int pointsChange)
-    {
-        EloRating += pointsChange;
-    }
+    public void UpdateElo(int pointsChange) => EloRating += pointsChange;
 }

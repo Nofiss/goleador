@@ -24,7 +24,7 @@ public class CachingBehavior<TRequest, TResponse>(
 
         logger.LogInformation("Cache miss for {CacheKey}. Fetching from source.", request.CacheKey);
 
-        var response = await next();
+        TResponse? response = await next();
 
         var cacheOptions = new MemoryCacheEntryOptions
         {

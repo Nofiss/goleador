@@ -17,16 +17,10 @@ public class ValidationException : Exception
     }
 
     public ValidationException(string propertyName, string errorMessage)
-        : this()
-    {
-        Errors.Add(propertyName, [errorMessage]);
-    }
+        : this() => Errors.Add(propertyName, [errorMessage]);
 
     public ValidationException(string propertyName, string[] errorMessages)
-        : this()
-    {
-        Errors.Add(propertyName, errorMessages);
-    }
+        : this() => Errors.Add(propertyName, errorMessages);
 
     public IDictionary<string, string[]> Errors { get; }
 }

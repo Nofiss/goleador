@@ -10,13 +10,13 @@ namespace Goleador.Tests.Application.Auth.Commands.RegisterUser;
 
 public class RegisterUserCommandHandlerTests : IDisposable
 {
-    private readonly ApplicationDbContext _context;
-    private readonly Mock<IIdentityService> _mockIdentityService;
-    private readonly RegisterUserCommandHandler _handler;
+    readonly ApplicationDbContext _context;
+    readonly Mock<IIdentityService> _mockIdentityService;
+    readonly RegisterUserCommandHandler _handler;
 
     public RegisterUserCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _context = new ApplicationDbContext(options);
@@ -38,7 +38,7 @@ public class RegisterUserCommandHandlerTests : IDisposable
         _mockIdentityService.Setup(s => s.ExistsByUsernameAsync("MRossi1")).ReturnsAsync(false);
 
         _mockIdentityService.Setup(s => s.CreateUserAsync(command.Email, "MRossi1", command.Password))
-            .ReturnsAsync((true, "user-id", Array.Empty<string>()));
+            .ReturnsAsync((true, "user-id", []));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -50,7 +50,7 @@ public class RegisterUserCommandHandlerTests : IDisposable
         _mockIdentityService.Verify(s => s.CreateUserAsync(command.Email, "MRossi1", command.Password), Times.Once());
 
         // Verifica che sia stato creato un Player con Nickname MRossi1
-        var player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == "user-id");
+        Player? player = await _context.Players.FirstOrDefaultAsync(p => p.UserId == "user-id");
         player.Should().NotBeNull();
         player!.Nickname.Should().Be("MRossi1");
     }
@@ -65,7 +65,7 @@ public class RegisterUserCommandHandlerTests : IDisposable
         _mockIdentityService.Setup(s => s.ExistsByUsernameAsync("MR")).ReturnsAsync(false);
 
         _mockIdentityService.Setup(s => s.CreateUserAsync(command.Email, "MR", command.Password))
-            .ReturnsAsync((true, "user-id", Array.Empty<string>()));
+            .ReturnsAsync((true, "user-id", []));
 
         // Act
         await _handler.Handle(command, CancellationToken.None);

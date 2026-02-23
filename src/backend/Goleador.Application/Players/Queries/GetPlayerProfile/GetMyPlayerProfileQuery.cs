@@ -1,4 +1,5 @@
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,15 +21,12 @@ public class GetMyPlayerProfileQueryHandler(
             throw new UnauthorizedAccessException();
         }
 
-        var player = await context.Players
+        Player? player = await context.Players
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
 
-        if (player == null)
-        {
-            throw new KeyNotFoundException("Player not found for current user");
-        }
-
-        return await mediator.Send(new GetPlayerProfileQuery(player.Id), cancellationToken);
+        return player == null
+            ? throw new KeyNotFoundException("Player not found for current user")
+            : await mediator.Send(new GetPlayerProfileQuery(player.Id), cancellationToken);
     }
 }

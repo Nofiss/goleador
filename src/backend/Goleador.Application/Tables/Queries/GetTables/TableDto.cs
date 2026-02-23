@@ -1,5 +1,5 @@
-using Goleador.Domain.Entities;
 using AutoMapper;
+using Goleador.Domain.Entities;
 
 namespace Goleador.Application.Tables.Queries.GetTables;
 

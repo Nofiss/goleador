@@ -1,5 +1,4 @@
 using Goleador.Application.Common.Interfaces;
-using MediatR;
 
 namespace Goleador.Application.Tournaments.Queries.GetTournamentById;
 

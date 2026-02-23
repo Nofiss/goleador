@@ -12,7 +12,7 @@ public class AddLateTeamCommandHandler(IApplicationDbContext context, IMemoryCac
 {
     public async Task<Guid> Handle(AddLateTeamCommand request, CancellationToken cancellationToken)
     {
-        var tournament = await context.Tournaments
+        Tournament tournament = await context.Tournaments
             .Include(t => t.Teams)
                 .ThenInclude(tt => tt.Players)
             .Include(t => t.Registrations)
@@ -59,18 +59,18 @@ public class AddLateTeamCommandHandler(IApplicationDbContext context, IMemoryCac
         var currentRoundOffset = 1;
         var newMatches = new List<Match>();
 
-        foreach (var existingTeam in existingTeams)
+        foreach (TournamentTeam? existingTeam in existingTeams)
         {
             // Partita Andata
             var roundHome = maxRound + currentRoundOffset;
-            var matchHome = CreateMatch(tournament.Id, newTeam, existingTeam, roundHome);
+            Match matchHome = CreateMatch(tournament.Id, newTeam, existingTeam, roundHome);
             newMatches.Add(matchHome);
 
             if (tournament.HasReturnMatches)
             {
                 // Partita Ritorno
                 var roundAway = maxRound + currentRoundOffset + 1;
-                var matchAway = CreateMatch(tournament.Id, existingTeam, newTeam, roundAway);
+                Match matchAway = CreateMatch(tournament.Id, existingTeam, newTeam, roundAway);
                 newMatches.Add(matchAway);
                 currentRoundOffset += 2;
             }
@@ -89,16 +89,16 @@ public class AddLateTeamCommandHandler(IApplicationDbContext context, IMemoryCac
         return newTeam.Id;
     }
 
-    private static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
+    static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
     {
         var match = new Match(0, 0, tournamentId, null, round);
 
-        foreach (var player in home.Players)
+        foreach (Player player in home.Players)
         {
             match.AddParticipant(player.Id, Side.Home);
         }
 
-        foreach (var player in away.Players)
+        foreach (Player player in away.Players)
         {
             match.AddParticipant(player.Id, Side.Away);
         }

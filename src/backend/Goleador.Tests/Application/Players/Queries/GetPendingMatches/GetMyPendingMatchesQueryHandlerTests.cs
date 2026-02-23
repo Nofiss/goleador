@@ -15,7 +15,7 @@ public class GetMyPendingMatchesQueryHandlerTests
     public async Task Handle_Should_Return_Only_Scheduled_Matches_For_Current_User()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -34,12 +34,12 @@ public class GetMyPendingMatchesQueryHandlerTests
         await context.SaveChangesAsync(); // Need to save to get table Id
 
         // Match 1: Scheduled, current user is participant
-        var m1 = new Goleador.Domain.Entities.Match(0, 0, tournament.Id, table.Id, 1);
+        var m1 = new Domain.Entities.Match(0, 0, tournament.Id, table.Id, 1);
         m1.AddParticipant(player.Id, Side.Home);
         m1.AddParticipant(opponent.Id, Side.Away);
 
         // Match 2: Played, current user is participant
-        var m2 = new Goleador.Domain.Entities.Match(0, 0, tournament.Id, table.Id, 2);
+        var m2 = new Domain.Entities.Match(0, 0, tournament.Id, table.Id, 2);
         m2.AddParticipant(player.Id, Side.Home);
         m2.AddParticipant(opponent.Id, Side.Away);
         m2.SetResult(3, 1);
@@ -48,7 +48,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         var otherPlayer1 = new Player("Other1", "O1", "O1", "o1@e.c");
         var otherPlayer2 = new Player("Other2", "O2", "O2", "o2@e.c");
         context.Players.AddRange(otherPlayer1, otherPlayer2);
-        var m3 = new Goleador.Domain.Entities.Match(0, 0, tournament.Id, table.Id, 3);
+        var m3 = new Domain.Entities.Match(0, 0, tournament.Id, table.Id, 3);
         m3.AddParticipant(otherPlayer1.Id, Side.Home);
         m3.AddParticipant(otherPlayer2.Id, Side.Away);
 
@@ -61,7 +61,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         var handler = new GetMyPendingMatchesQueryHandler(context, mockCurrentUserService.Object);
 
         // Act
-        var result = await handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
+        List<PendingMatchDto> result = await handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(1);
@@ -76,7 +76,7 @@ public class GetMyPendingMatchesQueryHandlerTests
     public async Task Handle_Should_Resolve_Team_Names_Correctly()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -102,7 +102,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         context.Tables.Add(table);
         await context.SaveChangesAsync();
 
-        var match = new Goleador.Domain.Entities.Match(0, 0, tournament.Id, table.Id, 1);
+        var match = new Domain.Entities.Match(0, 0, tournament.Id, table.Id, 1);
         match.AddParticipant(player.Id, Side.Home);
         match.AddParticipant(teammate.Id, Side.Home);
         match.AddParticipant(opponent1.Id, Side.Away);
@@ -117,7 +117,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         var handler = new GetMyPendingMatchesQueryHandler(context, mockCurrentUserService.Object);
 
         // Act
-        var result = await handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
+        List<PendingMatchDto> result = await handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(1);
@@ -131,7 +131,7 @@ public class GetMyPendingMatchesQueryHandlerTests
     public async Task Handle_Should_Throw_UnauthorizedAccessException_When_No_Current_User()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -143,7 +143,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         var handler = new GetMyPendingMatchesQueryHandler(context, mockCurrentUserService.Object);
 
         // Act
-        var act = () => handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
+        Func<Task<List<PendingMatchDto>>> act = () => handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
@@ -153,7 +153,7 @@ public class GetMyPendingMatchesQueryHandlerTests
     public async Task Handle_Should_Throw_KeyNotFoundException_When_Player_Not_Found()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -165,7 +165,7 @@ public class GetMyPendingMatchesQueryHandlerTests
         var handler = new GetMyPendingMatchesQueryHandler(context, mockCurrentUserService.Object);
 
         // Act
-        var act = () => handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
+        Func<Task<List<PendingMatchDto>>> act = () => handler.Handle(new GetMyPendingMatchesQuery(), CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();

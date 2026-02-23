@@ -9,27 +9,32 @@ namespace Goleador.Infrastructure.Persistence.Interceptors;
 
 public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveChangesInterceptor
 {
-    private List<AuditEntry>? _auditEntries;
+    List<AuditEntry>? _auditEntries;
 
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    public async override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        if (eventData.Context == null) return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        if (eventData.Context == null)
+        {
+            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        }
 
         _auditEntries = OnBeforeSaveChanges(eventData.Context);
 
         return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    public override async ValueTask<int> SavedChangesAsync(
+    public async override ValueTask<int> SavedChangesAsync(
         SaveChangesCompletedEventData eventData,
         int result,
         CancellationToken cancellationToken = default)
     {
         if (eventData.Context == null || _auditEntries == null || _auditEntries.Count == 0)
+        {
             return await base.SavedChangesAsync(eventData, result, cancellationToken);
+        }
 
         await OnAfterSaveChanges(eventData.Context, _auditEntries, cancellationToken);
 
@@ -37,32 +42,34 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
     }
 
     // SonarQube: csharpsquid:S3776 - Refactored to reduce cognitive complexity
-    private List<AuditEntry> OnBeforeSaveChanges(DbContext context)
+    List<AuditEntry> OnBeforeSaveChanges(DbContext context)
     {
         context.ChangeTracker.DetectChanges();
         var auditEntries = new List<AuditEntry>();
 
-        foreach (var entry in context.ChangeTracker.Entries())
+        foreach (EntityEntry entry in context.ChangeTracker.Entries())
         {
-            var auditEntry = CreateAuditEntry(entry);
+            AuditEntry? auditEntry = CreateAuditEntry(entry);
             if (auditEntry != null)
             {
                 auditEntries.Add(auditEntry);
             }
         }
 
-        foreach (var auditEntry in auditEntries.Where(_ => !_.HasTemporaryProperties))
+        foreach (AuditEntry? auditEntry in auditEntries.Where(_ => !_.HasTemporaryProperties))
         {
             context.Set<AuditLog>().Add(auditEntry.ToAudit());
         }
 
-        return auditEntries.Where(_ => _.HasTemporaryProperties).ToList();
+        return [.. auditEntries.Where(_ => _.HasTemporaryProperties)];
     }
 
-    private AuditEntry? CreateAuditEntry(EntityEntry entry)
+    AuditEntry? CreateAuditEntry(EntityEntry entry)
     {
         if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+        {
             return null;
+        }
 
         var auditEntry = new AuditEntry(entry)
         {
@@ -73,11 +80,13 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
                 EntityState.Added => "Create",
                 EntityState.Modified => "Update",
                 EntityState.Deleted => "Delete",
+                EntityState.Detached => throw new NotImplementedException(),
+                EntityState.Unchanged => throw new NotImplementedException(),
                 _ => entry.State.ToString()
             }
         };
 
-        foreach (var property in entry.Properties)
+        foreach (PropertyEntry property in entry.Properties)
         {
             ProcessProperty(entry, auditEntry, property);
         }
@@ -85,7 +94,7 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
         return auditEntry;
     }
 
-    private static void ProcessProperty(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property)
+    static void ProcessProperty(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property)
     {
         if (property.IsTemporary)
         {
@@ -93,7 +102,7 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
             return;
         }
 
-        string propertyName = property.Metadata.Name;
+        var propertyName = property.Metadata.Name;
         if (property.Metadata.IsPrimaryKey())
         {
             auditEntry.KeyValues[propertyName] = property.CurrentValue;
@@ -101,12 +110,14 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
         }
 
         if (IsSensitive(propertyName))
+        {
             return;
+        }
 
         MapPropertyValue(entry, auditEntry, property, propertyName);
     }
 
-    private static void MapPropertyValue(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property, string propertyName)
+    static void MapPropertyValue(EntityEntry entry, AuditEntry auditEntry, PropertyEntry property, string propertyName)
     {
         switch (entry.State)
         {
@@ -126,17 +137,23 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
                     auditEntry.NewValues[propertyName] = property.CurrentValue;
                 }
                 break;
+            case EntityState.Detached:
+                break;
+            case EntityState.Unchanged:
+                break;
+            default:
+                break;
         }
     }
 
-    private static bool IsSensitive(string propertyName) =>
+    static bool IsSensitive(string propertyName) =>
         propertyName is "PasswordHash" or "SecurityStamp" or "RefreshToken" or "ConcurrencyStamp";
 
-    private async Task OnAfterSaveChanges(DbContext context, List<AuditEntry> auditEntries, CancellationToken cancellationToken)
+    async Task OnAfterSaveChanges(DbContext context, List<AuditEntry> auditEntries, CancellationToken cancellationToken)
     {
-        foreach (var auditEntry in auditEntries)
+        foreach (AuditEntry auditEntry in auditEntries)
         {
-            foreach (var prop in auditEntry.TemporaryProperties)
+            foreach (PropertyEntry prop in auditEntry.TemporaryProperties)
             {
                 if (prop.Metadata.IsPrimaryKey())
                 {
@@ -154,17 +171,17 @@ public class AuditLogInterceptor(ICurrentUserService currentUserService) : SaveC
     }
 }
 
-internal class AuditEntry(EntityEntry entry)
+class AuditEntry(EntityEntry entry)
 {
     public EntityEntry Entry { get; } = entry;
     public string? UserId { get; set; }
     public string TableName { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
-    public Dictionary<string, object?> KeyValues { get; } = new();
-    public Dictionary<string, object?> OldValues { get; } = new();
-    public Dictionary<string, object?> NewValues { get; } = new();
-    public List<PropertyEntry> TemporaryProperties { get; } = new();
-    public List<string> ChangedColumns { get; } = new();
+    public Dictionary<string, object?> KeyValues { get; } = [];
+    public Dictionary<string, object?> OldValues { get; } = [];
+    public Dictionary<string, object?> NewValues { get; } = [];
+    public List<PropertyEntry> TemporaryProperties { get; } = [];
+    public List<string> ChangedColumns { get; } = [];
 
     public bool HasTemporaryProperties => TemporaryProperties.Any();
 

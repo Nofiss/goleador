@@ -1,4 +1,5 @@
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +10,7 @@ public class UpdateTournamentRulesCommandHandler(IApplicationDbContext context)
 {
     public async Task Handle(UpdateTournamentRulesCommand request, CancellationToken cancellationToken)
     {
-        var tournament = await context.Tournaments
+        Tournament tournament = await context.Tournaments
             .FirstOrDefaultAsync(t => t.Id == request.TournamentId, cancellationToken)
             ?? throw new KeyNotFoundException("Tournament not found");
 

@@ -34,7 +34,7 @@ public class CreateTournamentCommandHandler(IApplicationDbContext context)
 
         if (request.Cards != null)
         {
-            foreach (var card in request.Cards)
+            foreach (CreateTournamentCardDto card in request.Cards)
             {
                 entity.AddCardDefinition(card.Name, card.Description, card.Effect);
             }

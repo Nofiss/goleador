@@ -3,14 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Goleador.Infrastructure.Services;
 
-public class LocalFileStorageService : IFileStorageService
+public class LocalFileStorageService(IWebHostEnvironment env) : IFileStorageService
 {
-    private readonly string _basePath;
-
-    public LocalFileStorageService(IWebHostEnvironment env)
-    {
-        _basePath = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-    }
+    readonly string _basePath = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
     public async Task<string> SaveFileAsync(Stream fileStream, string fileName, string folderName)
     {
@@ -34,7 +29,10 @@ public class LocalFileStorageService : IFileStorageService
 
     public Task DeleteFileAsync(string fileUrl)
     {
-        if (string.IsNullOrEmpty(fileUrl)) return Task.CompletedTask;
+        if (string.IsNullOrEmpty(fileUrl))
+        {
+            return Task.CompletedTask;
+        }
 
         // L'URL inizia con /, lo togliamo per combinare con il path fisico
         var relativePath = fileUrl.TrimStart('/');

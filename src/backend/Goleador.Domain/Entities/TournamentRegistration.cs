@@ -1,5 +1,3 @@
-using Goleador.Domain.Common;
-
 namespace Goleador.Domain.Entities;
 
 public class TournamentRegistration

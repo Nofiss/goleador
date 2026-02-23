@@ -1,4 +1,5 @@
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using Goleador.Domain.Services;
 using MediatR;
@@ -10,7 +11,7 @@ public class UpdateEloOnMatchFinish(IApplicationDbContext context) : INotificati
 {
     public async Task Handle(MatchFinishedEvent notification, CancellationToken cancellationToken)
     {
-        var match = await context.Matches
+        Match? match = await context.Matches
             .Include(m => m.Participants)
                 .ThenInclude(p => p.Player)
             .FirstOrDefaultAsync(m => m.Id == notification.MatchId, cancellationToken);
@@ -28,10 +29,10 @@ public class UpdateEloOnMatchFinish(IApplicationDbContext context) : INotificati
             return;
         }
 
-        double ratingHome = homeParticipants.Average(p => p.Player.EloRating);
-        double ratingAway = awayParticipants.Average(p => p.Player.EloRating);
+        var ratingHome = homeParticipants.Average(p => p.Player.EloRating);
+        var ratingAway = awayParticipants.Average(p => p.Player.EloRating);
 
-        double actualScoreHome = 0.5;
+        var actualScoreHome = 0.5;
         if (match.ScoreHome > match.ScoreAway)
         {
             actualScoreHome = 1.0;
@@ -41,15 +42,15 @@ public class UpdateEloOnMatchFinish(IApplicationDbContext context) : INotificati
             actualScoreHome = 0.0;
         }
 
-        int deltaHome = EloCalculator.CalculateDelta(ratingHome, ratingAway, actualScoreHome);
-        int deltaAway = -deltaHome;
+        var deltaHome = EloCalculator.CalculateDelta(ratingHome, ratingAway, actualScoreHome);
+        var deltaAway = -deltaHome;
 
-        foreach (var p in homeParticipants)
+        foreach (MatchParticipant? p in homeParticipants)
         {
             p.Player.UpdateElo(deltaHome);
         }
 
-        foreach (var p in awayParticipants)
+        foreach (MatchParticipant? p in awayParticipants)
         {
             p.Player.UpdateElo(deltaAway);
         }

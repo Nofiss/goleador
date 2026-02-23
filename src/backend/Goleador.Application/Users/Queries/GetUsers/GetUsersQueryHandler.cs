@@ -1,5 +1,4 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

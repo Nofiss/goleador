@@ -49,7 +49,7 @@ public class GetPlayerStatisticsQueryTests
         var handler = new GetPlayerStatisticsQueryHandler(context);
 
         // Act
-        var result = await handler.Handle(new GetPlayerStatisticsQuery(player.Id), CancellationToken.None);
+        PlayerStatisticsDto result = await handler.Handle(new GetPlayerStatisticsQuery(player.Id), CancellationToken.None);
 
         // Assert
         result.Nickname.Should().Be("Bolt");
@@ -80,7 +80,7 @@ public class GetPlayerStatisticsQueryTests
         await context.SaveChangesAsync();
 
         // Aggiungiamo 1000 partite
-        for (int i = 0; i < 1000; i++)
+        for (var i = 0; i < 1000; i++)
         {
             var m = new Match(1, 0);
             m.AddParticipant(player.Id, Side.Home);
@@ -93,7 +93,7 @@ public class GetPlayerStatisticsQueryTests
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         // Act
-        var result = await handler.Handle(new GetPlayerStatisticsQuery(player.Id), CancellationToken.None);
+        PlayerStatisticsDto result = await handler.Handle(new GetPlayerStatisticsQuery(player.Id), CancellationToken.None);
 
         sw.Stop();
 

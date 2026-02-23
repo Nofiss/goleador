@@ -20,16 +20,16 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
         CancellationToken cancellationToken
     )
     {
-        var playerInfo = await GetPlayerInfoAsync(request.PlayerId, cancellationToken);
+        (Guid Id, string Nickname) playerInfo = await GetPlayerInfoAsync(request.PlayerId, cancellationToken);
 
-        var aggregateStats = await GetAggregateStatsAsync(request.PlayerId, cancellationToken);
+        AggregateStats? aggregateStats = await GetAggregateStatsAsync(request.PlayerId, cancellationToken);
 
-        var recentMatches = await GetRecentMatchesAsync(request.PlayerId, cancellationToken);
+        List<RecentMatchInfo> recentMatches = await GetRecentMatchesAsync(request.PlayerId, cancellationToken);
 
         return MapToDto(playerInfo, aggregateStats, recentMatches);
     }
 
-    private async Task<(Guid Id, string Nickname)> GetPlayerInfoAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<(Guid Id, string Nickname)> GetPlayerInfoAsync(Guid playerId, CancellationToken cancellationToken)
     {
         // Ottimizzazione Bolt ⚡: Usiamo una proiezione per caricare solo i campi necessari (Id, Nickname).
         // Evitiamo di caricare l'intera entità Player (Email, FirstName, LastName, etc.), riducendo l'uso di memoria (O(1) transfer).
@@ -42,7 +42,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
         return (player.Id, player.Nickname);
     }
 
-    private async Task<AggregateStats?> GetAggregateStatsAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<AggregateStats?> GetAggregateStatsAsync(Guid playerId, CancellationToken cancellationToken)
     {
         // Ottimizzazione Bolt ⚡: Calcolo statistiche aggregate direttamente nel Database (O(1) transfer).
         return await context.Matches
@@ -66,7 +66,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task<List<RecentMatchInfo>> GetRecentMatchesAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<List<RecentMatchInfo>> GetRecentMatchesAsync(Guid playerId, CancellationToken cancellationToken)
     {
         // Ottimizzazione Bolt ⚡: Recupero solo le ultime 5 partite per la forma recente.
         return await context.Matches
@@ -82,7 +82,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
             .ToListAsync(cancellationToken);
     }
 
-    private static PlayerStatisticsDto MapToDto((Guid Id, string Nickname) player, AggregateStats? aggregateStats, List<RecentMatchInfo> recentMatches)
+    static PlayerStatisticsDto MapToDto((Guid Id, string Nickname) player, AggregateStats? aggregateStats, List<RecentMatchInfo> recentMatches)
     {
         return new PlayerStatisticsDto
         {
@@ -98,17 +98,20 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
         };
     }
 
-    private static string MapToResult(bool isHome, int scoreHome, int scoreAway)
+    static string MapToResult(bool isHome, int scoreHome, int scoreAway)
     {
         var myScore = isHome ? scoreHome : scoreAway;
         var opponentScore = isHome ? scoreAway : scoreHome;
 
-        if (myScore > opponentScore) return "W";
-        if (myScore < opponentScore) return "L";
-        return "D";
+        if (myScore > opponentScore)
+        {
+            return "W";
+        }
+
+        return myScore < opponentScore ? "L" : "D";
     }
 
-    private record AggregateStats(
+    record AggregateStats(
         int MatchesPlayed,
         int Wins,
         int Draws,
@@ -117,7 +120,7 @@ public class GetPlayerStatisticsQueryHandler(IApplicationDbContext context)
         int GoalsAgainst
     );
 
-    private record RecentMatchInfo(
+    record RecentMatchInfo(
         bool IsHome,
         int ScoreHome,
         int ScoreAway

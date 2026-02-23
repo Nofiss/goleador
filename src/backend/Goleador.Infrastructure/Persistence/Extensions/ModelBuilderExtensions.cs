@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Goleador.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -9,7 +10,7 @@ public static class ModelBuilderExtensions
 {
     public static void ApplySoftDeleteQueryFilter(this ModelBuilder modelBuilder)
     {
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
@@ -18,9 +19,9 @@ public static class ModelBuilderExtensions
         }
     }
 
-    private static void AddSoftDeleteQueryFilter(this IMutableEntityType entityType)
+    static void AddSoftDeleteQueryFilter(this IMutableEntityType entityType)
     {
-        var methodToCall = typeof(ModelBuilderExtensions)
+        MethodInfo? methodToCall = typeof(ModelBuilderExtensions)
             .GetMethod(nameof(GetSoftDeleteFilter), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
             ?.MakeGenericMethod(entityType.ClrType);
 
@@ -28,7 +29,7 @@ public static class ModelBuilderExtensions
         entityType.SetQueryFilter((LambdaExpression)filter!);
     }
 
-    private static LambdaExpression GetSoftDeleteFilter<TEntity>() where TEntity : class, ISoftDelete
+    static LambdaExpression GetSoftDeleteFilter<TEntity>() where TEntity : class, ISoftDelete
     {
         Expression<Func<TEntity, bool>> filter = x => !x.IsDeleted;
         return filter;

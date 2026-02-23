@@ -1,30 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Goleador.Infrastructure.Migrations
+namespace Goleador.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class AddMatchConcurrency : Migration
 {
     /// <inheritdoc />
-    public partial class AddMatchConcurrency : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<byte[]>(
-                name: "RowVersion",
-                table: "Matches",
-                type: "rowversion",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
-        }
+        migrationBuilder.AddColumn<byte[]>(
+            name: "RowVersion",
+            table: "Matches",
+            type: "rowversion",
+            rowVersion: true,
+            nullable: false,
+            defaultValue: new byte[0]);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "RowVersion",
-                table: "Matches");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "RowVersion",
+            table: "Matches");
     }
 }

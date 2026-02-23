@@ -1,29 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Goleador.Infrastructure.Migrations
+namespace Goleador.Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class AddEloRating : Migration
 {
     /// <inheritdoc />
-    public partial class AddEloRating : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "EloRating",
-                table: "Players",
-                type: "int",
-                nullable: false,
-                defaultValue: 1200);
-        }
+        migrationBuilder.AddColumn<int>(
+            name: "EloRating",
+            table: "Players",
+            type: "int",
+            nullable: false,
+            defaultValue: 1200);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "EloRating",
-                table: "Players");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "EloRating",
+            table: "Players");
     }
 }

@@ -36,7 +36,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         // 2. Mappa base con AutoMapper
         TournamentDetailDto dto = mapper.Map<TournamentDetailDto>(tournament);
 
-        var playerTeamMap = GetPlayerTeamMap(tournament);
+        Dictionary<Guid, (string Name, Guid Id)> playerTeamMap = GetPlayerTeamMap(tournament);
 
         // Ottimizzazione Bolt ⚡: Usiamo un dizionario per evitare una ricerca O(N) dentro un loop O(N),
         // portando la complessità totale da O(N^2) a O(N).
@@ -45,7 +45,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         foreach (TournamentMatchDto matchDto in dto.Matches)
         {
             // SonarQube: csharpsquid:S3776 - Refactor logic to reduce cognitive complexity
-            if (matchMap.TryGetValue(matchDto.Id, out var matchEntity))
+            if (matchMap.TryGetValue(matchDto.Id, out Match? matchEntity))
             {
                 EnrichMatch(matchDto, matchEntity, playerTeamMap);
             }
@@ -66,7 +66,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         return dto;
     }
 
-    private static Dictionary<Guid, (string Name, Guid Id)> GetPlayerTeamMap(Tournament tournament)
+    static Dictionary<Guid, (string Name, Guid Id)> GetPlayerTeamMap(Tournament tournament)
     {
         var playerTeamMap = new Dictionary<Guid, (string Name, Guid Id)>();
         foreach (TournamentTeam team in tournament.Teams)
@@ -79,7 +79,7 @@ public class GetTournamentByIdQueryHandler(IApplicationDbContext context, IMappe
         return playerTeamMap;
     }
 
-    private static void EnrichMatch(
+    static void EnrichMatch(
         TournamentMatchDto matchDto,
         Match matchEntity,
         Dictionary<Guid, (string Name, Guid Id)> playerTeamMap

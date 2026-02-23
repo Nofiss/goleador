@@ -13,7 +13,7 @@ public class GetRecentMatchesQueryHandlerTests
     public async Task Handle_Should_Return_Last_10_Played_Matches_With_Correct_Names()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        DbContextOptions<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -25,7 +25,7 @@ public class GetRecentMatchesQueryHandlerTests
         await context.SaveChangesAsync();
 
         // Create 12 matches, 11 played, 1 scheduled
-        for (int i = 1; i <= 11; i++)
+        for (var i = 1; i <= 11; i++)
         {
             var match = new Match(0, 0);
             match.AddParticipant(p1.Id, Side.Home);
@@ -46,7 +46,7 @@ public class GetRecentMatchesQueryHandlerTests
         var handler = new GetRecentMatchesQueryHandler(context);
 
         // Act
-        var result = await handler.Handle(new GetRecentMatchesQuery(), CancellationToken.None);
+        List<MatchDto> result = await handler.Handle(new GetRecentMatchesQuery(), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(10);

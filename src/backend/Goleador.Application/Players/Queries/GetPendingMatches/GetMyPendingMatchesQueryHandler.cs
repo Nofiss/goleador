@@ -1,4 +1,5 @@
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,23 +13,21 @@ public class GetMyPendingMatchesQueryHandler(
 {
     public async Task<List<PendingMatchDto>> Handle(GetMyPendingMatchesQuery request, CancellationToken cancellationToken)
     {
-        var player = await GetPlayerByUserIdAsync(cancellationToken);
+        Player player = await GetPlayerByUserIdAsync(cancellationToken);
 
         // Optimization Bolt ⚡: Replace eager loading (Include) with targeted projection.
         // This avoids loading full entity graphs (Tournaments, Teams, Players, Tables) which can be massive.
         // We only fetch the minimal fields required for the DTO.
-        var pendingMatches = await GetPendingMatchesWithDetailsAsync(player.Id, cancellationToken);
+        List<ProjectedMatch> pendingMatches = await GetPendingMatchesWithDetailsAsync(player.Id, cancellationToken);
 
         // Optimization Bolt ⚡: Targeted team resolution.
         // Instead of loading ALL teams from the database, we only fetch the names of teams involved in the pending matches.
-        var playerTeamMap = await CreatePlayerTeamMapAsync(pendingMatches, cancellationToken);
+        Dictionary<(Guid TournamentId, Guid PlayerId), string> playerTeamMap = await CreatePlayerTeamMapAsync(pendingMatches, cancellationToken);
 
-        return pendingMatches
-            .Select(m => MapToPendingMatchDto(m, player.Id, playerTeamMap))
-            .ToList();
+        return [.. pendingMatches.Select(m => MapToPendingMatchDto(m, player.Id, playerTeamMap))];
     }
 
-    private async Task<Goleador.Domain.Entities.Player> GetPlayerByUserIdAsync(CancellationToken cancellationToken)
+    async Task<Player> GetPlayerByUserIdAsync(CancellationToken cancellationToken)
     {
         var userId = currentUserService.UserId;
         if (string.IsNullOrEmpty(userId))
@@ -36,19 +35,14 @@ public class GetMyPendingMatchesQueryHandler(
             throw new UnauthorizedAccessException();
         }
 
-        var player = await context.Players
+        Player? player = await context.Players
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
 
-        if (player == null)
-        {
-            throw new KeyNotFoundException("Player not found for current user");
-        }
-
-        return player;
+        return player == null ? throw new KeyNotFoundException("Player not found for current user") : player;
     }
 
-    private async Task<List<ProjectedMatch>> GetPendingMatchesWithDetailsAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<List<ProjectedMatch>> GetPendingMatchesWithDetailsAsync(Guid playerId, CancellationToken cancellationToken)
     {
         // Optimization Bolt ⚡: Selective projection reduces data transfer from O(Full Graph) to O(1) per record.
         return await context.Matches
@@ -68,7 +62,7 @@ public class GetMyPendingMatchesQueryHandler(
             .ToListAsync(cancellationToken);
     }
 
-    private async Task<Dictionary<(Guid TournamentId, Guid PlayerId), string>> CreatePlayerTeamMapAsync(
+    async Task<Dictionary<(Guid TournamentId, Guid PlayerId), string>> CreatePlayerTeamMapAsync(
         IEnumerable<ProjectedMatch> matches,
         CancellationToken cancellationToken)
     {
@@ -78,7 +72,10 @@ public class GetMyPendingMatchesQueryHandler(
             .Distinct()
             .ToList();
 
-        if (tournamentIds.Count == 0) return [];
+        if (tournamentIds.Count == 0)
+        {
+            return [];
+        }
 
         var playerIds = matches
             .SelectMany(m => m.Participants.Select(p => p.PlayerId))
@@ -97,7 +94,7 @@ public class GetMyPendingMatchesQueryHandler(
         var playerTeamMap = new Dictionary<(Guid TournamentId, Guid PlayerId), string>();
         foreach (var team in teams)
         {
-            foreach (var pId in team.PlayerIds)
+            foreach (Guid pId in team.PlayerIds)
             {
                 playerTeamMap.TryAdd((team.TournamentId, pId), team.Name);
             }
@@ -106,15 +103,15 @@ public class GetMyPendingMatchesQueryHandler(
         return playerTeamMap;
     }
 
-    private static PendingMatchDto MapToPendingMatchDto(
+    static PendingMatchDto MapToPendingMatchDto(
         ProjectedMatch match,
         Guid currentPlayerId,
         IReadOnlyDictionary<(Guid TournamentId, Guid PlayerId), string> playerTeamMap)
     {
-        var myParticipant = match.Participants.First(p => p.PlayerId == currentPlayerId);
+        ProjectedParticipant myParticipant = match.Participants.First(p => p.PlayerId == currentPlayerId);
         var opponentParticipants = match.Participants.Where(p => p.Side != myParticipant.Side).ToList();
 
-        var (homeTeamName, awayTeamName) = ResolveTeamNames(match, playerTeamMap);
+        (string? homeTeamName, string? awayTeamName) = ResolveTeamNames(match, playerTeamMap);
 
         return new PendingMatchDto
         {
@@ -129,7 +126,7 @@ public class GetMyPendingMatchesQueryHandler(
         };
     }
 
-    private static (string HomeTeamName, string AwayTeamName) ResolveTeamNames(
+    static (string HomeTeamName, string AwayTeamName) ResolveTeamNames(
         ProjectedMatch match,
         IReadOnlyDictionary<(Guid TournamentId, Guid PlayerId), string> playerTeamMap)
     {
@@ -138,25 +135,25 @@ public class GetMyPendingMatchesQueryHandler(
             return ("Home Team", "Away Team");
         }
 
-        var homeParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Home);
-        var awayParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Away);
+        ProjectedParticipant? homeParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Home);
+        ProjectedParticipant? awayParticipant = match.Participants.FirstOrDefault(p => p.Side == Side.Away);
 
-        string homeTeamName = "Home Team";
+        var homeTeamName = "Home Team";
         if (homeParticipant != null)
         {
             homeTeamName = playerTeamMap.GetValueOrDefault((match.TournamentId.Value, homeParticipant.PlayerId)) ?? "Home Team";
         }
 
-        string awayTeamName = "Away Team";
+        var awayTeamName = "Away Team";
         if (awayParticipant != null)
         {
             awayTeamName = playerTeamMap.GetValueOrDefault((match.TournamentId.Value, awayParticipant.PlayerId)) ?? "Away Team";
         }
 
-        return (homeTeamName, awayTeamName) ;
+        return (homeTeamName, awayTeamName);
     }
 
-    private record ProjectedMatch(
+    record ProjectedMatch(
         Guid Id,
         Guid? TournamentId,
         string TournamentName,
@@ -165,5 +162,5 @@ public class GetMyPendingMatchesQueryHandler(
         List<ProjectedParticipant> Participants
     );
 
-    private record ProjectedParticipant(Guid PlayerId, Side Side, string Nickname);
+    record ProjectedParticipant(Guid PlayerId, Side Side, string Nickname);
 }

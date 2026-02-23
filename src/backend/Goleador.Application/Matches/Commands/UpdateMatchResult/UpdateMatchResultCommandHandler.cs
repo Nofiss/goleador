@@ -39,7 +39,7 @@ public class UpdateMatchResultCommandHandler(
         if (request.UsedCards != null)
         {
             match.ClearCards();
-            foreach (var cardUsage in request.UsedCards)
+            foreach (MatchCardUsageCommandDto cardUsage in request.UsedCards)
             {
                 // Validazione: la carta non deve essere stata usata in altre partite dallo stesso team in questo torneo
                 var alreadyUsed = await context.MatchCardUsages
@@ -94,7 +94,7 @@ public class UpdateMatchResultCommandHandler(
         cache.Remove("RecentMatches");
 
         // Optimization Bolt ⚡: Invalidate player profile and statistics caches for all participants
-        foreach (var participant in match.Participants)
+        foreach (MatchParticipant participant in match.Participants)
         {
             cache.Remove($"PlayerProfile-{participant.PlayerId}");
             cache.Remove($"PlayerStats-{participant.PlayerId}");

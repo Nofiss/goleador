@@ -63,12 +63,10 @@ public class Match : BaseEntity
         DatePlayed = DateTime.UtcNow; // Aggiorniamo la data all'effettivo momento dell'inserimento
     }
 
-    public void AssignTable(int? tableId)
-    {
+    public void AssignTable(int? tableId) =>
         // Qui potresti aggiungere logica di validazione se necessario
         // Es. verificare se lo stato è già Played e impedire il cambio tavolo, se vuoi.
         TableId = tableId;
-    }
 
     public void PlayCard(Guid teamId, Guid cardDefinitionId)
     {
@@ -80,8 +78,5 @@ public class Match : BaseEntity
         _cardUsages.Add(new MatchCardUsage(Id, teamId, cardDefinitionId));
     }
 
-    public void ClearCards()
-    {
-        _cardUsages.Clear();
-    }
+    public void ClearCards() => _cardUsages.Clear();
 }
