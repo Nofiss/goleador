@@ -1,16 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Goleador.Application.Auth.Commands.ForgotPassword;
 using Goleador.Application.Auth.Commands.RegisterUser;
 using Goleador.Application.Auth.Commands.ResetPassword;
 using Goleador.Application.Common.Interfaces;
 using Goleador.Application.Common.Models;
-using Goleador.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Goleador.Api.Controllers;
 
@@ -20,40 +15,36 @@ public class AuthController(IIdentityService identityService) : ApiControllerBas
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var result = await identityService.LoginAsync(model.Email, model.Password);
-        if (result != null)
-        {
-            return Ok(
+        TokenResponse? result = await identityService.LoginAsync(model.Email, model.Password);
+        return result != null
+            ? Ok(
                 new
                 {
                     token = result.AccessToken,
                     refreshToken = result.RefreshToken,
                     roles = result.Roles,
                 }
-            );
-        }
-        return Unauthorized();
+            )
+            : Unauthorized();
     }
 
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
     {
-        var result = await identityService.RefreshTokenAsync(
+        TokenResponse? result = await identityService.RefreshTokenAsync(
             request.AccessToken,
             request.RefreshToken
         );
-        if (result != null)
-        {
-            return Ok(
+        return result != null
+            ? Ok(
                 new
                 {
                     token = result.AccessToken,
                     refreshToken = result.RefreshToken,
                     roles = result.Roles,
                 }
-            );
-        }
-        return BadRequest("Invalid token or refresh token.");
+            )
+            : BadRequest("Invalid token or refresh token.");
     }
 
     [HttpPost("register")]

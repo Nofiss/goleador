@@ -107,11 +107,11 @@ public class GetTournamentStandingsQueryTests
 
         // Act
         var handler = new GetTournamentStandingsQueryHandler(context);
-        var result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
+        List<TournamentStandingDto> result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
 
         // Assert
-        var stats1 = result.First(x => x.TeamName == "Team1");
-        var stats2 = result.First(x => x.TeamName == "Team2");
+        TournamentStandingDto stats1 = result.First(x => x.TeamName == "Team1");
+        TournamentStandingDto stats2 = result.First(x => x.TeamName == "Team2");
 
         // Team 1: 3 punti in 1 partita. PPG = 3. Remaining = 1. Projected = 3 + 3*1 = 6.
         stats1.Points.Should().Be(3);

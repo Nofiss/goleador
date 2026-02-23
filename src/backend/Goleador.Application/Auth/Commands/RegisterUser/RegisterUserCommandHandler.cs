@@ -17,10 +17,10 @@ public class RegisterUserCommandHandler(
     )
     {
         // 1. Generazione Username Univoco
-        string baseUsername =
+        var baseUsername =
             $"{char.ToUpper(request.FirstName[0])}{char.ToUpper(request.LastName[0])}{request.LastName[1..]}";
-        string username = baseUsername;
-        int counter = 1;
+        var username = baseUsername;
+        var counter = 1;
 
         while (await identityService.ExistsByUsernameAsync(username))
         {

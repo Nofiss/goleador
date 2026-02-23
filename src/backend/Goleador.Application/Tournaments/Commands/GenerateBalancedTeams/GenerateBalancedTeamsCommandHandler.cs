@@ -55,13 +55,13 @@ public class GenerateBalancedTeamsCommandHandler(
             .ToDictionaryAsync(x => x.PlayerId, x => x, cancellationToken);
 
         var playerSkills = new Dictionary<Guid, double>();
-        foreach (var playerId in playerIds)
+        foreach (Guid playerId in playerIds)
         {
             playerStats.TryGetValue(playerId, out var stats);
-            int wins = stats?.Wins ?? 0;
-            int draws = stats?.Draws ?? 0;
-            int total = stats?.Total ?? 0;
-            double winRate = total == 0 ? 0 : Math.Round((double)wins / total * 100, 1);
+            var wins = stats?.Wins ?? 0;
+            var draws = stats?.Draws ?? 0;
+            var total = stats?.Total ?? 0;
+            var winRate = total == 0 ? 0 : Math.Round((double)wins / total * 100, 1);
 
             // Formula Skill: (Wins * 3) + (Draws * 1) + WinRate
             var skill = (wins * 3) + (draws * 1) + winRate;
@@ -83,8 +83,8 @@ public class GenerateBalancedTeamsCommandHandler(
         // B. Crea i nuovi Team Accoppiati
         foreach ((Guid Player1, Guid Player2) in pairs)
         {
-            if (!pendingPlayersMap.TryGetValue(Player1, out var p1) ||
-                !pendingPlayersMap.TryGetValue(Player2, out var p2))
+            if (!pendingPlayersMap.TryGetValue(Player1, out Player? p1) ||
+                !pendingPlayersMap.TryGetValue(Player2, out Player? p2))
             {
                 continue;
             }

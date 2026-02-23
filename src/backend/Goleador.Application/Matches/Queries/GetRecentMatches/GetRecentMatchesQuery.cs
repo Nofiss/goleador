@@ -1,5 +1,4 @@
 using Goleador.Application.Common.Interfaces;
-using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
         // Optimization Bolt ⚡: Use .Select() projection instead of .Include().
         // This fetches only required fields and avoids instantiating full entities for Match, Participant and Player.
         // It significantly reduces data transfer and memory pressure (O(1) columns instead of fetching full entity graphs).
-        var matches = await context.Matches
+        var matchesData = await context.Matches
             .AsNoTracking()
             .Where(m => m.Status == MatchStatus.Played)
             .OrderByDescending(m => m.DatePlayed)
@@ -33,12 +32,26 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
                 m.ScoreHome,
                 m.ScoreAway,
                 m.Status,
-                HomeParticipantId = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).FirstOrDefault(),
-                AwayParticipantId = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).FirstOrDefault(),
-                Participants = m.Participants.Select(p => new { p.Side, p.Player.Nickname }).ToList(),
+                Participants = m.Participants.Select(p => new { p.PlayerId, p.Side, p.Player.Nickname }).ToList(),
                 CardUsages = m.CardUsages.Select(cu => new { cu.TeamId }).ToList()
             })
             .ToListAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Resolve participant IDs in memory instead of using database subqueries.
+        // This reduces database roundtrips and simplifies the generated SQL (from 20 subqueries to 0).
+        var matches = matchesData.Select(m => new
+        {
+            m.Id,
+            m.TournamentId,
+            m.DatePlayed,
+            m.ScoreHome,
+            m.ScoreAway,
+            m.Status,
+            m.Participants,
+            m.CardUsages,
+            HomeParticipantId = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).FirstOrDefault(),
+            AwayParticipantId = m.Participants.Where(p => p.Side == Side.Away).Select(p => p.PlayerId).FirstOrDefault(),
+        }).ToList();
 
         var tournamentIds = matches.Where(m => m.TournamentId.HasValue).Select(m => m.TournamentId!.Value).Distinct().ToList();
 
@@ -65,7 +78,8 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
             .SelectMany(t => t.PlayerIds.Select(pId => new { Key = (t.TournamentId, pId), TeamId = t.Id }))
             .ToDictionary(x => x.Key, x => x.TeamId);
 
-        return matches.Select(m => {
+        return [.. matches.Select(m =>
+        {
             Guid? homeTeamId = null;
             Guid? awayTeamId = null;
 
@@ -75,8 +89,15 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
                 awayTeamId = teamLookupMap.GetValueOrDefault((m.TournamentId.Value, m.AwayParticipantId));
 
                 // If GetValueOrDefault returns Guid.Empty (not found), we treat it as null for the DTO
-                if (homeTeamId == Guid.Empty) homeTeamId = null;
-                if (awayTeamId == Guid.Empty) awayTeamId = null;
+                if (homeTeamId == Guid.Empty)
+                {
+                    homeTeamId = null;
+                }
+
+                if (awayTeamId == Guid.Empty)
+                {
+                    awayTeamId = null;
+                }
             }
 
             var homeNicks = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.Nickname).ToList();
@@ -94,6 +115,6 @@ public class GetRecentMatchesQueryHandler(IApplicationDbContext context)
                 HasCardsHome = homeTeamId.HasValue && m.CardUsages.Any(cu => cu.TeamId == homeTeamId),
                 HasCardsAway = awayTeamId.HasValue && m.CardUsages.Any(cu => cu.TeamId == awayTeamId)
             };
-        }).ToList();
+        })];
     }
 }

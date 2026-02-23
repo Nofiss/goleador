@@ -12,7 +12,7 @@ public static class RoundRobinScheduler
         EnsureEvenTeams(workingTeams);
 
         var numRounds = workingTeams.Count - 1;
-        var matches = GenerateFirstLegMatches(tournament, workingTeams, numRounds);
+        List<Match> matches = GenerateFirstLegMatches(tournament, workingTeams, numRounds);
 
         if (tournament.HasReturnMatches)
         {
@@ -22,7 +22,7 @@ public static class RoundRobinScheduler
         return matches;
     }
 
-    private static void EnsureEvenTeams(List<TournamentTeam> teams)
+    static void EnsureEvenTeams(List<TournamentTeam> teams)
     {
         if (teams.Count % 2 != 0)
         {
@@ -30,7 +30,7 @@ public static class RoundRobinScheduler
         }
     }
 
-    private static List<Match> GenerateFirstLegMatches(Tournament tournament, List<TournamentTeam> teams, int numRounds)
+    static List<Match> GenerateFirstLegMatches(Tournament tournament, List<TournamentTeam> teams, int numRounds)
     {
         var matches = new List<Match>();
         var matchesPerRound = teams.Count / 2;
@@ -45,15 +45,15 @@ public static class RoundRobinScheduler
         return matches;
     }
 
-    private static List<Match> GenerateRoundMatches(Tournament tournament, List<TournamentTeam> teams, int roundIdx, int roundNumber, int matchesPerRound)
+    static List<Match> GenerateRoundMatches(Tournament tournament, List<TournamentTeam> teams, int roundIdx, int roundNumber, int matchesPerRound)
     {
         var roundMatches = new List<Match>();
         var teamsCount = teams.Count;
 
         for (var i = 0; i < matchesPerRound; i++)
         {
-            var teamHome = teams[i];
-            var teamAway = teams[teamsCount - 1 - i];
+            TournamentTeam teamHome = teams[i];
+            TournamentTeam teamAway = teams[teamsCount - 1 - i];
 
             if (teamHome == null || teamAway == null)
             {
@@ -74,19 +74,19 @@ public static class RoundRobinScheduler
         return roundMatches;
     }
 
-    private static void RotateTeams(List<TournamentTeam> teams)
+    static void RotateTeams(List<TournamentTeam> teams)
     {
         var teamsCount = teams.Count;
-        var lastTeam = teams[teamsCount - 1];
+        TournamentTeam lastTeam = teams[teamsCount - 1];
         teams.RemoveAt(teamsCount - 1);
         teams.Insert(1, lastTeam);
     }
 
-    private static List<Match> GenerateReturnLegMatches(Tournament tournament, List<Match> firstLegMatches, int firstLegRounds)
+    static List<Match> GenerateReturnLegMatches(Tournament tournament, List<Match> firstLegMatches, int firstLegRounds)
     {
         var returnMatches = new List<Match>();
 
-        foreach (var m in firstLegMatches)
+        foreach (Match m in firstLegMatches)
         {
             var returnRoundNumber = m.Round + firstLegRounds;
             var homePlayers = m.Participants.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).ToList();
@@ -94,12 +94,12 @@ public static class RoundRobinScheduler
 
             var returnMatch = new Match(0, 0, tournament.Id, null, returnRoundNumber);
 
-            foreach (var id in awayPlayers)
+            foreach (Guid id in awayPlayers)
             {
                 returnMatch.AddParticipant(id, Side.Home);
             }
 
-            foreach (var id in homePlayers)
+            foreach (Guid id in homePlayers)
             {
                 returnMatch.AddParticipant(id, Side.Away);
             }
@@ -110,16 +110,16 @@ public static class RoundRobinScheduler
         return returnMatches;
     }
 
-    private static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
+    static Match CreateMatch(Guid tournamentId, TournamentTeam home, TournamentTeam away, int round)
     {
         var match = new Match(0, 0, tournamentId, null, round);
 
-        foreach (var player in home.Players)
+        foreach (Player player in home.Players)
         {
             match.AddParticipant(player.Id, Side.Home);
         }
 
-        foreach (var player in away.Players)
+        foreach (Player player in away.Players)
         {
             match.AddParticipant(player.Id, Side.Away);
         }

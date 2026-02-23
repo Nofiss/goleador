@@ -1,5 +1,6 @@
 using Goleador.Application.Common.Exceptions;
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using Goleador.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ public class BulkAssignTableCommandHandler(IApplicationDbContext context, IMemor
         CancellationToken cancellationToken
     )
     {
-        var matches = await context.Matches
+        List<Match> matches = await context.Matches
             .Where(m => m.TournamentId == request.TournamentId)
             .ToListAsync(cancellationToken);
 
@@ -24,10 +25,10 @@ public class BulkAssignTableCommandHandler(IApplicationDbContext context, IMemor
             return Unit.Value;
         }
 
-        int maxRound = matches.Max(m => m.Round);
-        double splitRound = Math.Ceiling(maxRound / 2.0);
+        var maxRound = matches.Max(m => m.Round);
+        var splitRound = Math.Ceiling(maxRound / 2.0);
 
-        var targetMatches = request.Phase switch
+        IEnumerable<Match> targetMatches = request.Phase switch
         {
             TournamentPhase.All => matches,
             TournamentPhase.FirstLeg => matches.Where(m => m.Round <= splitRound),
@@ -36,7 +37,7 @@ public class BulkAssignTableCommandHandler(IApplicationDbContext context, IMemor
             _ => throw new ValidationException(nameof(request.Phase), "Invalid tournament phase")
         };
 
-        foreach (var match in targetMatches)
+        foreach (Match? match in targetMatches)
         {
             match.AssignTable(request.TableId);
         }

@@ -50,7 +50,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             return true;
         }
 
-        if (exception is NotFoundException || exception is KeyNotFoundException)
+        if (exception is NotFoundException or KeyNotFoundException)
         {
             var problemDetails = new ProblemDetails
             {

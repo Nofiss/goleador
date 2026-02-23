@@ -23,16 +23,10 @@ public class UploadTeamBrandingCommandHandler(
 {
     public async Task<BrandingUrlsDto> Handle(UploadTeamBrandingCommand request, CancellationToken cancellationToken)
     {
-        var team = await context.TournamentTeams
-            .FirstOrDefaultAsync(t => t.Id == request.TeamId, cancellationToken);
-
-        if (team == null)
-        {
-            throw new NotFoundException(nameof(TournamentTeam), request.TeamId);
-        }
-
-        string? newLogoUrl = team.LogoUrl;
-        string? newSponsorUrl = team.SponsorUrl;
+        TournamentTeam? team = await context.TournamentTeams
+            .FirstOrDefaultAsync(t => t.Id == request.TeamId, cancellationToken) ?? throw new NotFoundException(nameof(TournamentTeam), request.TeamId);
+        var newLogoUrl = team.LogoUrl;
+        var newSponsorUrl = team.SponsorUrl;
 
         if (request.Logo != null)
         {
@@ -60,10 +54,10 @@ public class UploadTeamBrandingCommandHandler(
         return new BrandingUrlsDto(newLogoUrl, newSponsorUrl);
     }
 
-    private static void ValidateFile(FileDto file, string propertyName)
+    static void ValidateFile(FileDto file, string propertyName)
     {
         var extension = Path.GetExtension(file.FileName).ToLower();
-        string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+        string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
         if (!allowedExtensions.Contains(extension))
         {

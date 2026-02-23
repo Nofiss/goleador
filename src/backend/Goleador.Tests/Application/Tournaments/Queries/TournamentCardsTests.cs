@@ -26,7 +26,7 @@ public class TournamentCardsTests
         // Use reflection to add card definition since it's private/readonly list and we want to bypass Setup status if needed
         // Actually, we can just use the public method if we are in Setup.
         tournament.AddCardDefinition("Double", "Double points", CardEffect.DoublePoints);
-        var actualCardDef = tournament.CardDefinitions.First();
+        TournamentCardDefinition actualCardDef = tournament.CardDefinitions.First();
 
         var p1 = new Player("P1", "N", "S", "e1");
         var p2 = new Player("P2", "N", "S", "e2");
@@ -51,10 +51,10 @@ public class TournamentCardsTests
 
         // Act
         var handler = new GetTournamentStandingsQueryHandler(context);
-        var result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
+        List<TournamentStandingDto> result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
 
         // Assert
-        var stats1 = result.First(x => x.TeamName == "Team1");
+        TournamentStandingDto stats1 = result.First(x => x.TeamName == "Team1");
         // Normal win = 3 pts. With DoublePoints = 6 pts.
         stats1.Points.Should().Be(6);
         stats1.Won.Should().Be(1);
@@ -73,7 +73,7 @@ public class TournamentCardsTests
 
         var tournament = new Tournament("Card Test Draw", TournamentType.RoundRobin, 1, false, null, null);
         tournament.AddCardDefinition("Double", "Double points", CardEffect.DoublePoints);
-        var actualCardDef = tournament.CardDefinitions.First();
+        TournamentCardDefinition actualCardDef = tournament.CardDefinitions.First();
 
         var p1 = new Player("P1", "N", "S", "e1");
         var p2 = new Player("P2", "N", "S", "e2");
@@ -98,10 +98,10 @@ public class TournamentCardsTests
 
         // Act
         var handler = new GetTournamentStandingsQueryHandler(context);
-        var result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
+        List<TournamentStandingDto> result = await handler.Handle(new GetTournamentStandingsQuery(tournament.Id), CancellationToken.None);
 
         // Assert
-        var stats1 = result.First(x => x.TeamName == "Team1");
+        TournamentStandingDto stats1 = result.First(x => x.TeamName == "Team1");
         // Draw = 1 pt. DoublePoints only applies on win.
         stats1.Points.Should().Be(1);
         stats1.Drawn.Should().Be(1);

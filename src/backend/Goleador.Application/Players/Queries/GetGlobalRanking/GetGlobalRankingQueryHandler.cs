@@ -44,10 +44,11 @@ public class GetGlobalRankingQueryHandler(IApplicationDbContext context)
 
         // 3. Mappa i risultati
         // Poiché abbiamo già aggregato le statistiche in un dizionario O(1), il mapping finale è estremamente veloce.
-        return players.Select(p => {
+        return [.. players.Select(p =>
+        {
             playerStats.TryGetValue(p.Id, out var stats);
-            int total = stats?.TotalMatches ?? 0;
-            int wins = stats?.Wins ?? 0;
+            var total = stats?.TotalMatches ?? 0;
+            var wins = stats?.Wins ?? 0;
 
             return new PlayerRankingDto
             {
@@ -57,6 +58,6 @@ public class GetGlobalRankingQueryHandler(IApplicationDbContext context)
                 TotalMatches = total,
                 WinRate = total == 0 ? 0 : Math.Round((double)wins / total * 100, 1)
             };
-        }).ToList();
+        })];
     }
 }

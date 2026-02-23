@@ -51,10 +51,7 @@ public class Tournament : BaseEntity
         Status = TournamentStatus.Setup;
     }
 
-    public void UpdateRules(string? rules)
-    {
-        Rules = rules;
-    }
+    public void UpdateRules(string? rules) => Rules = rules;
 
     // Metodi di dominio
     public void RegisterPlayer(Guid playerId)

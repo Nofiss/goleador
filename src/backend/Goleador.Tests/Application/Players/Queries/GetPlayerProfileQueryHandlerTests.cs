@@ -49,7 +49,7 @@ public class GetPlayerProfileQueryHandlerTests
         var handler = new GetPlayerProfileQueryHandler(context);
 
         // Act
-        var result = await handler.Handle(new GetPlayerProfileQuery(player.Id), CancellationToken.None);
+        PlayerProfileDto result = await handler.Handle(new GetPlayerProfileQuery(player.Id), CancellationToken.None);
 
         // Assert
         result.Nickname.Should().Be("Bolt");

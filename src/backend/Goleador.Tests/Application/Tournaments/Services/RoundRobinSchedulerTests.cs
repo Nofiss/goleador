@@ -27,7 +27,7 @@ public class RoundRobinSchedulerTests
         };
 
         // Act
-        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, new List<TournamentTeam>(teams));
+        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, [.. teams]);
 
         // Assert
         // Formula Girone all'italiana (n * (n-1)) / 2
@@ -35,9 +35,9 @@ public class RoundRobinSchedulerTests
         matches.Should().HaveCount(6);
 
         // Verify each team plays 3 matches
-        foreach (var team in teams)
+        foreach (TournamentTeam team in teams)
         {
-            var playerId = team.Players.First().Id;
+            Guid playerId = team.Players.First().Id;
             var count = matches.Count(m => m.Participants.Any(p => p.PlayerId == playerId));
             count.Should().Be(3);
         }
@@ -61,16 +61,16 @@ public class RoundRobinSchedulerTests
         };
 
         // Act
-        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, new List<TournamentTeam>(teams));
+        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, [.. teams]);
 
         // Assert
         // 3 teams -> 3 matches (each team plays 2 matches, 1 rest round)
         // A vs B, A vs C, B vs C
         matches.Should().HaveCount(3);
 
-        foreach (var team in teams)
+        foreach (TournamentTeam team in teams)
         {
-            var playerId = team.Players.First().Id;
+            Guid playerId = team.Players.First().Id;
             var count = matches.Count(m => m.Participants.Any(p => p.PlayerId == playerId));
             count.Should().Be(2);
         }
@@ -94,16 +94,16 @@ public class RoundRobinSchedulerTests
         };
 
         // Act
-        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, new List<TournamentTeam>(teams));
+        List<Match> matches = RoundRobinScheduler.GenerateMatches(tournament, [.. teams]);
 
         // Assert
         // 3 Teams -> 3 matches first leg + 3 matches second leg = 6 matches
         matches.Should().HaveCount(6);
 
         // Verify return matches exist (Home/Away swapped)
-        var firstMatch = matches.First(m => m.Round == 1);
-        var firstHomePlayerId = firstMatch.Participants.First(p => p.Side == Side.Home).PlayerId;
-        var firstAwayPlayerId = firstMatch.Participants.First(p => p.Side == Side.Away).PlayerId;
+        Match firstMatch = matches.First(m => m.Round == 1);
+        Guid firstHomePlayerId = firstMatch.Participants.First(p => p.Side == Side.Home).PlayerId;
+        Guid firstAwayPlayerId = firstMatch.Participants.First(p => p.Side == Side.Away).PlayerId;
 
         // There should be a match with swapped players in the second leg (rounds 4-6)
         matches.Should().Contain(m =>

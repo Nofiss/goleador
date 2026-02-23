@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Goleador.Application.Common.Interfaces;
+using Goleador.Domain.Entities;
 using MediatR;
 
 namespace Goleador.Application.Tables.Commands.DeleteTable;
@@ -12,9 +10,7 @@ public class DeleteTableCommandHandler(IApplicationDbContext context)
     // csharpsquid:S927 - Rename parameter 'token' to 'cancellationToken' to match the interface declaration.
     public async Task<Unit> Handle(DeleteTableCommand request, CancellationToken cancellationToken)
     {
-        var entity = await context.Tables.FindAsync(new object[] { request.Id }, cancellationToken);
-        if (entity == null)
-            throw new KeyNotFoundException("Table not found");
+        Table? entity = await context.Tables.FindAsync([request.Id], cancellationToken) ?? throw new KeyNotFoundException("Table not found");
 
         // Nota: Se ci sono partite collegate, EF Core lancerà un'eccezione FK.
         // In un'app reale faresti Soft Delete (IsActive = false).

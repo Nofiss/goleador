@@ -30,10 +30,10 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         // Ottimizzazione Bolt ⚡: Tutte le statistiche e i dati social sono calcolati lato Database (O(1) transfer)
         // Invece di scaricare migliaia di partite in memoria (O(N)), eseguiamo query mirate sequenziali.
         // Nota: Il DbContext non è thread-safe, quindi eseguiamo le query in sequenza.
-        var stats = await GetAggregateStatsAsync(request.PlayerId, cancellationToken);
-        var recentMatches = await GetRecentMatchesAsync(request.PlayerId, cancellationToken);
-        var nemesis = await GetNemesisAsync(request.PlayerId, cancellationToken);
-        var bestPartner = await GetBestPartnerAsync(request.PlayerId, cancellationToken);
+        AggregateStats? stats = await GetAggregateStatsAsync(request.PlayerId, cancellationToken);
+        List<MatchBriefDto> recentMatches = await GetRecentMatchesAsync(request.PlayerId, cancellationToken);
+        RelatedPlayerDto? nemesis = await GetNemesisAsync(request.PlayerId, cancellationToken);
+        RelatedPlayerDto? bestPartner = await GetBestPartnerAsync(request.PlayerId, cancellationToken);
 
         return new PlayerProfileDto
         {
@@ -55,7 +55,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         };
     }
 
-    private async Task<AggregateStats?> GetAggregateStatsAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<AggregateStats?> GetAggregateStatsAsync(Guid playerId, CancellationToken cancellationToken)
     {
         return await context.Matches
             .AsNoTracking()
@@ -77,7 +77,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task<List<MatchBriefDto>> GetRecentMatchesAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<List<MatchBriefDto>> GetRecentMatchesAsync(Guid playerId, CancellationToken cancellationToken)
     {
         var matches = await context.Matches
             .AsNoTracking()
@@ -97,7 +97,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         return [.. matches.Select(m =>
         {
             var myParticipant = m.Participants.First(p => p.PlayerId == playerId);
-            var mySide = myParticipant.Side;
+            Side mySide = myParticipant.Side;
             var myScore = mySide == Side.Home ? m.ScoreHome : m.ScoreAway;
             var opponentScore = mySide == Side.Home ? m.ScoreAway : m.ScoreHome;
 
@@ -116,7 +116,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
         })];
     }
 
-    private async Task<RelatedPlayerDto?> GetNemesisAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<RelatedPlayerDto?> GetNemesisAsync(Guid playerId, CancellationToken cancellationToken)
     {
         return await context.Matches
             .AsNoTracking()
@@ -135,7 +135,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private async Task<RelatedPlayerDto?> GetBestPartnerAsync(Guid playerId, CancellationToken cancellationToken)
+    async Task<RelatedPlayerDto?> GetBestPartnerAsync(Guid playerId, CancellationToken cancellationToken)
     {
         return await context.Matches
             .AsNoTracking()
@@ -154,7 +154,7 @@ public class GetPlayerProfileQueryHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    private record AggregateStats(
+    record AggregateStats(
         int TotalMatches,
         int Wins,
         int Losses,
