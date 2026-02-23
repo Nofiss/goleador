@@ -15,7 +15,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { TournamentCard, TournamentDetail, TournamentMatch } from "@/types";
+import { ScoreStepper } from "./components/ScoreStepper";
 
 interface MatchResultDialogProps {
 	match: TournamentMatch | null;
@@ -193,34 +193,31 @@ export const MatchResultDialog = ({
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between gap-4">
+					<div className="space-y-3">
 						{/* CASA */}
-						<div className="text-center w-1/3">
+						<div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
 							<Label
 								htmlFor="score-home"
-								className="block mb-2 font-bold text-blue-600 dark:text-blue-400 truncate"
+								className="font-bold text-blue-600 dark:text-blue-400 truncate flex-1"
 								title={match.homeTeamName}
 							>
 								{match.homeTeamName || "Casa"}
 							</Label>
-							<Input
-								id="score-home"
-								type="number"
-								min="0"
-								className="text-center text-2xl h-14 font-mono"
+							<ScoreStepper
+								label={`Punteggio ${match.homeTeamName || "Casa"}`}
 								value={scoreHome}
-								onChange={(e) => setScoreHome(parseInt(e.target.value, 10) || 0)}
-								aria-label={`Punteggio ${match.homeTeamName || "Casa"}`}
+								onChange={setScoreHome}
+								colorClass="blue"
+								className="w-36"
 							/>
 						</div>
 
-						<div className="flex flex-col items-center gap-1">
-							<span className="text-xl font-bold text-muted-foreground/40">-</span>
+						<div className="flex justify-center -my-1 relative z-10">
 							<Button
 								type="button"
 								variant="ghost"
-								size="icon"
-								className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+								size="sm"
+								className="h-8 gap-2 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors bg-background border"
 								onClick={() => {
 									const temp = scoreHome;
 									setScoreHome(scoreAway);
@@ -234,28 +231,27 @@ export const MatchResultDialog = ({
 									whileTap={{ scale: 0.8, rotate: 180 }}
 									transition={{ type: "spring", stiffness: 300, damping: 15 }}
 								>
-									<ArrowLeftRight className="h-4 w-4" />
+									<ArrowLeftRight className="h-3.5 w-3.5" />
 								</motion.div>
+								<span className="text-[10px] font-bold uppercase tracking-widest">Inverti</span>
 							</Button>
 						</div>
 
 						{/* OSPITE */}
-						<div className="text-center w-1/3">
+						<div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-red-500/5 border border-red-500/10">
 							<Label
 								htmlFor="score-away"
-								className="block mb-2 font-bold text-red-600 dark:text-red-400 truncate"
+								className="font-bold text-red-600 dark:text-red-400 truncate flex-1"
 								title={match.awayTeamName}
 							>
 								{match.awayTeamName || "Ospiti"}
 							</Label>
-							<Input
-								id="score-away"
-								type="number"
-								min="0"
-								className="text-center text-2xl h-14 font-mono"
+							<ScoreStepper
+								label={`Punteggio ${match.awayTeamName || "Ospiti"}`}
 								value={scoreAway}
-								onChange={(e) => setScoreAway(parseInt(e.target.value, 10) || 0)}
-								aria-label={`Punteggio ${match.awayTeamName || "Ospiti"}`}
+								onChange={setScoreAway}
+								colorClass="red"
+								className="w-36"
 							/>
 						</div>
 					</div>

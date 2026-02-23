@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeftRight, Swords, User } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createMatch } from "@/api/matches";
 import { getPlayers } from "@/api/players";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -15,6 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { ScoreStepper } from "./components/ScoreStepper";
 
 interface Props {
 	onSuccess: () => void;
@@ -42,15 +42,31 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 		},
 	});
 
-	const handleSwap = () => {
-		setFormData({
-			...formData,
-			playerHomeId: formData.playerAwayId,
-			playerAwayId: formData.playerHomeId,
-			scoreHome: formData.scoreAway,
-			scoreAway: formData.scoreHome,
-		});
-	};
+	const handleSwap = useCallback(() => {
+		setFormData((prev) => ({
+			...prev,
+			playerHomeId: prev.playerAwayId,
+			playerAwayId: prev.playerHomeId,
+			scoreHome: prev.scoreAway,
+			scoreAway: prev.scoreHome,
+		}));
+	}, []);
+
+	// Add keyboard listener for 'S' to swap teams
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (
+				e.key.toLowerCase() === "s" &&
+				!(e.target instanceof HTMLInputElement) &&
+				!(e.target instanceof HTMLTextAreaElement)
+			) {
+				handleSwap();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [handleSwap]);
 
 	const isSamePlayer =
 		formData.playerHomeId &&
@@ -99,19 +115,11 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						</div>
 
 						<div className="pt-2">
-							<Input
-								type="number"
-								min="0"
-								aria-label="Punteggio Squadra Casa"
-								title="Punteggio Squadra Casa"
-								className="text-5xl font-mono text-center h-20 w-full border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10 focus:ring-blue-500/50"
+							<ScoreStepper
+								label="Punteggio Squadra Casa"
 								value={formData.scoreHome}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										scoreHome: parseInt(e.target.value, 10) || 0,
-									})
-								}
+								onChange={(v) => setFormData({ ...formData, scoreHome: v })}
+								colorClass="blue"
 							/>
 						</div>
 					</CardContent>
@@ -173,19 +181,11 @@ export const MatchCreateForm = ({ onSuccess }: Props) => {
 						</div>
 
 						<div className="pt-2">
-							<Input
-								type="number"
-								min="0"
-								aria-label="Punteggio Squadra Ospite"
-								title="Punteggio Squadra Ospite"
-								className="text-5xl font-mono text-center h-20 w-full border-red-500/20 bg-red-500/5 dark:bg-red-500/10 focus:ring-red-500/50"
+							<ScoreStepper
+								label="Punteggio Squadra Ospite"
 								value={formData.scoreAway}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										scoreAway: parseInt(e.target.value, 10) || 0,
-									})
-								}
+								onChange={(v) => setFormData({ ...formData, scoreAway: v })}
+								colorClass="red"
 							/>
 						</div>
 					</CardContent>
