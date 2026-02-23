@@ -21,3 +21,7 @@
 ## 2025-06-15 - [Accessible Team Branding & Outcome Prominence]
 **Learning:** Hardcoded brand colors (like `blue-700`) often fail accessibility standards in dark mode. Standardizing these across the app using responsive Tailwind classes (`blue-600 dark:text-blue-400`) ensures inclusive design. Furthermore, enhancing "win" indicators from secondary to primary variants with clear descriptive labels (aria-label) and subtle hover animations (`framer-motion`) significantly improves both accessibility and interaction delight.
 **Action:** Audit and replace hardcoded brand colors with dark-mode responsive equivalents. Ensure match outcomes have descriptive `title` and `aria-label` attributes. Add `motion.div` hover effects to small status badges for a more polished feel.
+
+## 2025-06-20 - [Enhanced Score Entry & Keyboard Shortcuts]
+**Learning:** Manual numeric entry for scores on mobile is a common friction point. Providing oversized increment/decrement "Stepper" buttons significantly improves the tactile experience. Additionally, adding case-insensitive keyboard shortcuts (like 'S' for Swap) for non-input focused states provides a power-user "delight" factor that makes repetitive tasks feel much faster.
+**Action:** Use the `ScoreStepper` component for all numeric entries that involve small, frequent adjustments. Always ensure keyboard shortcuts are scoped to avoid firing when the user is typing in form fields (check `e.target` for `HTMLInputElement`).
