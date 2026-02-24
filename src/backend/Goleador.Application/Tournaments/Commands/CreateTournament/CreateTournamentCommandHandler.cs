@@ -2,10 +2,11 @@ using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using Goleador.Domain.ValueObjects;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Tournaments.Commands.CreateTournament;
 
-public class CreateTournamentCommandHandler(IApplicationDbContext context)
+public class CreateTournamentCommandHandler(IApplicationDbContext context, IMemoryCache cache)
     : IRequestHandler<CreateTournamentCommand, Guid>
 {
     public async Task<Guid> Handle(
@@ -42,6 +43,9 @@ public class CreateTournamentCommandHandler(IApplicationDbContext context)
 
         context.Tournaments.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Invalidate tournaments list cache when a new tournament is created
+        cache.Remove("TournamentsList");
 
         return entity.Id;
     }

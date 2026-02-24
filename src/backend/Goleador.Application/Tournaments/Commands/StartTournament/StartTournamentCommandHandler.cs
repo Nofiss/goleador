@@ -58,6 +58,7 @@ public class StartTournamentCommandHandler(IApplicationDbContext context, IMemor
         await context.SaveChangesAsync(cancellationToken);
 
         // Optimization Bolt ⚡: Invalidate cache when tournament starts
+        cache.Remove("TournamentsList");
         cache.Remove($"TournamentDetail-{tournament.Id}");
 
         return Unit.Value;

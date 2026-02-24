@@ -1,10 +1,11 @@
 using Goleador.Application.Common.Interfaces;
 using Goleador.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Goleador.Application.Players.Commands.CreatePlayer;
 
-public class CreatePlayerCommandHandler(IApplicationDbContext context)
+public class CreatePlayerCommandHandler(IApplicationDbContext context, IMemoryCache cache)
     : IRequestHandler<CreatePlayerCommand, Guid>
 {
     public async Task<Guid> Handle(CreatePlayerCommand request, CancellationToken cancellationToken)
@@ -22,6 +23,9 @@ public class CreatePlayerCommandHandler(IApplicationDbContext context)
 
         // 3. Salvataggio (EF Core converte in SQL INSERT)
         await context.SaveChangesAsync(cancellationToken);
+
+        // Optimization Bolt ⚡: Invalidate players list cache when a new player is created
+        cache.Remove("PlayersList");
 
         // 4. Ritorna l'ID generato
         return entity.Id;
