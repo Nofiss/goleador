@@ -97,7 +97,3 @@ Assicurati di avere installato sulla tua macchina:
 /src/backend     # API .NET (Clean Architecture)
 /src/frontend    # React App
 ```
-
-## 📝 Licenza
-
-Progetto interno - Tutti i diritti riservati.
