@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Goleador.Application.Players.Queries.GetPlayers;
 
-public record GetPlayersQuery : IRequest<List<PlayerDto>>;
+public record GetPlayersQuery : ICacheableQuery<List<PlayerDto>>
+{
+    public string CacheKey => "PlayersList";
+    public TimeSpan? Expiration => TimeSpan.FromMinutes(2);
+}
 
 public class GetPlayersQueryHandler(IApplicationDbContext context, IMapper mapper)
     : IRequestHandler<GetPlayersQuery, List<PlayerDto>>

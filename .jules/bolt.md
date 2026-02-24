@@ -77,3 +77,7 @@
 ## 2026-02-23 - [Recent Matches SQL Optimization]
 **Learning:** Found that using correlated subqueries in a LINQ projection (e.g., `.Where(p => p.Side == Side.Home).Select(p => p.PlayerId).FirstOrDefault()`) to resolve participant IDs created redundant SQL overhead, especially when the `Participants` collection was already being fetched.
 **Action:** Include `PlayerId` in the projected `Participants` collection and resolve the specific side IDs (Home/Away) in memory after materialization. This simplifies the SQL from O(N) correlated subqueries to a single clean join/projection.
+
+## 2025-02-17 - [High-Traffic List Caching & Invalidation]
+**Learning:** Implementing caching for high-traffic list queries (Tournaments, Players) significantly reduces database I/O. However, adding dependencies like `IMemoryCache` to command handlers requires updating existing unit tests to avoid build breakages.
+**Action:** Use `ICacheableQuery` for list queries and ensure all command handlers that modify the list state (e.g., Create, Start) explicitly call `cache.Remove`. Always verify and update unit tests for modified handlers.

@@ -3,6 +3,7 @@ using Goleador.Application.Common.Interfaces;
 using Goleador.Application.Players.Commands.CreatePlayer;
 using Goleador.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 
 namespace Goleador.Tests.Application.Players.Commands.CreatePlayer;
@@ -10,6 +11,7 @@ namespace Goleador.Tests.Application.Players.Commands.CreatePlayer;
 public class CreatePlayerCommandHandlerTests
 {
     readonly Mock<IApplicationDbContext> _mockContext;
+    readonly Mock<IMemoryCache> _mockCache;
     readonly Mock<DbSet<Player>> _mockSet;
     readonly CreatePlayerCommandHandler _handler;
 
@@ -21,11 +23,14 @@ public class CreatePlayerCommandHandlerTests
         // 2. Mock del Context (il database)
         _mockContext = new Mock<IApplicationDbContext>();
 
+        // 3. Mock della Cache
+        _mockCache = new Mock<IMemoryCache>();
+
         // Quando qualcuno chiede context.Players, restituisci il mio mockSet
         _mockContext.Setup(m => m.Players).Returns(_mockSet.Object);
 
-        // 3. Istanza dell'handler con il mock
-        _handler = new CreatePlayerCommandHandler(_mockContext.Object);
+        // 4. Istanza dell'handler con i mock
+        _handler = new CreatePlayerCommandHandler(_mockContext.Object, _mockCache.Object);
     }
 
     [Fact]
@@ -61,5 +66,8 @@ public class CreatePlayerCommandHandlerTests
 
         // 4. Verifica che sia stato chiamato SaveChangesAsync
         _mockContext.Verify(m => m.SaveChangesAsync(CancellationToken.None), Times.Once());
+
+        // 5. Verifica invalidazione cache
+        _mockCache.Verify(m => m.Remove("PlayersList"), Times.Once());
     }
 }
