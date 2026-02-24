@@ -6,6 +6,7 @@ import {
 	Menu,
 	ShieldCheck,
 	Trophy,
+	User,
 	Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -37,9 +38,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 export const AppLayout = () => {
-	const { isAuthenticated, logout, isAdmin, roles } = useAuth();
+	const { isAuthenticated, logout, isAdmin, roles, username } = useAuth();
 	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = useState(false);
+
+	const userInitials = username ? username.slice(0, 2).toUpperCase() : isAdmin ? "AD" : "RF";
 
 	const navigation = [
 		{ name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -139,9 +142,9 @@ export const AppLayout = () => {
 									className="relative h-9 w-9 rounded-full ring-offset-background transition-all hover:ring-2 hover:ring-primary/20"
 								>
 									<Avatar className="h-9 w-9 border-2 border-border">
-										<AvatarImage src="/avatars/01.png" alt="User" />
+										<AvatarImage src="/avatars/01.png" alt={username || "User"} />
 										<AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">
-											{isAdmin ? "AD" : "RF"}
+											{userInitials}
 										</AvatarFallback>
 									</Avatar>
 								</Button>
@@ -149,12 +152,19 @@ export const AppLayout = () => {
 							<DropdownMenuContent className="w-56" align="end" forceMount>
 								<DropdownMenuLabel className="font-normal">
 									<div className="flex flex-col space-y-1">
-										<p className="text-sm font-bold leading-none">Account</p>
+										<p className="text-sm font-bold leading-none">{username || "Account"}</p>
 										<p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
 											{roles.join(" • ")}
 										</p>
 									</div>
 								</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem asChild>
+									<Link to="/profile" className="cursor-pointer">
+										<User className="mr-2 h-4 w-4" aria-hidden="true" />
+										Mio Profilo
+									</Link>
+								</DropdownMenuItem>
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
 									onClick={handleLogout}
