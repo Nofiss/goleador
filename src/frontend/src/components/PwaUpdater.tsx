@@ -36,7 +36,10 @@ export function PwaUpdater() {
 				description: "L'applicazione è stata aggiornata con nuovi contenuti.",
 				action: {
 					label: "Ricarica",
-					onClick: () => updateServiceWorker(true),
+					onClick: () => {
+						// typescript:S6544 - Handle promise-returning function where void is expected
+						void updateServiceWorker(true);
+					},
 				},
 				duration: Infinity,
 			});
