@@ -1,8 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlayCircle } from "lucide-react";
+import { useState } from "react";
 import { startTournament } from "@/api/tournaments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { type TournamentDetail, TournamentStatus } from "@/types";
@@ -35,13 +44,16 @@ export const TournamentHeaderSkeleton = () => (
 export const TournamentHeader = ({ tournament }: Props) => {
 	const { isAdmin, isAuthenticated } = useAuth();
 	const queryClient = useQueryClient();
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
 	const startMutation = useMutation({
 		mutationFn: startTournament,
-		onSuccess: () =>
+		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["tournament", tournament.id],
-			}),
+			});
+			setIsConfirmOpen(false);
+		},
 	});
 
 	return (
@@ -73,15 +85,48 @@ export const TournamentHeader = ({ tournament }: Props) => {
 
 				{/* Admin: Start */}
 				{isAdmin && tournament.status === TournamentStatus.setup && (
-					<Button
-						onClick={() => startMutation.mutate(tournament.id)}
-						loading={startMutation.isPending}
-						disabled={tournament.teams.length < 2}
-						className="bg-green-600 hover:bg-green-700"
-					>
-						{!startMutation.isPending && <PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" />}
-						Avvia Torneo
-					</Button>
+					<>
+						<Button
+							onClick={() => setIsConfirmOpen(true)}
+							disabled={tournament.teams.length < 2}
+							className="bg-green-600 hover:bg-green-700"
+						>
+							<PlayCircle className="mr-2 h-4 w-4" aria-hidden="true" />
+							Avvia Torneo
+						</Button>
+
+						<Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+							<DialogContent className="sm:max-w-md">
+								<DialogHeader>
+									<DialogTitle>Avvia Torneo</DialogTitle>
+									<DialogDescription className="pt-2">
+										Sei sicuro di voler avviare il torneo <strong>{tournament.name}</strong>?
+										<br />
+										<br />
+										Questa azione genererà il calendario delle partite e{" "}
+										<strong>non sarà più possibile</strong> modificare le squadre o iscrivere nuovi
+										giocatori.
+									</DialogDescription>
+								</DialogHeader>
+								<DialogFooter className="mt-4">
+									<Button
+										variant="outline"
+										onClick={() => setIsConfirmOpen(false)}
+										disabled={startMutation.isPending}
+									>
+										Annulla
+									</Button>
+									<Button
+										onClick={() => startMutation.mutate(tournament.id)}
+										loading={startMutation.isPending}
+										className="bg-green-600 hover:bg-green-700"
+									>
+										Conferma e Inizia
+									</Button>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+					</>
 				)}
 
 				{/* Admin: AI Generate (2v2) */}
