@@ -143,11 +143,12 @@ const SingleCrossTable = memo(
 													title={`${homeTeam.name} vs ${awayTeam.name}`}
 													className={cn(
 														"border-b border-r p-0 text-center transition-all relative group/cell",
-														isPlayed
-															? "bg-green-500/5 dark:bg-green-500/10"
-															: isUpper
-																? "bg-primary/5 hover:bg-primary/10"
-																: "bg-background hover:bg-muted/30",
+														(() => {
+															// typescript:S3358
+															if (isPlayed) return "bg-green-500/5 dark:bg-green-500/10";
+															if (isUpper) return "bg-primary/5 hover:bg-primary/10";
+															return "bg-background hover:bg-muted/30";
+														})(),
 													)}
 												>
 													{isReferee ? (
