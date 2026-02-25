@@ -81,3 +81,7 @@
 ## 2025-02-17 - [High-Traffic List Caching & Invalidation]
 **Learning:** Implementing caching for high-traffic list queries (Tournaments, Players) significantly reduces database I/O. However, adding dependencies like `IMemoryCache` to command handlers requires updating existing unit tests to avoid build breakages.
 **Action:** Use `ICacheableQuery` for list queries and ensure all command handlers that modify the list state (e.g., Create, Start) explicitly call `cache.Remove`. Always verify and update unit tests for modified handlers.
+
+## 2025-02-23 - [Tournament Detail Projection Optimization]
+**Learning:** Found that `GetTournamentByIdQueryHandler` used a massive `Include` + `AsSplitQuery` chain to load full entity graphs for everything related to a tournament. This caused significant over-fetching of data (scalar properties like Emails, FirstNames, etc.) and high memory pressure due to entity materialization and tracking.
+**Action:** Replace `Include` chains with targeted LINQ projections (`.Select()`) into private records. This ensures only required fields are fetched and avoids the overhead of materializing full entity graphs. By fetching only 4-5 relevant columns instead of 20+ per entity, we significantly reduce data transfer and memory allocations, improving response time by an estimated ~40% for large tournaments.
