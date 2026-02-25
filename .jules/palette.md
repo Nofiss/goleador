@@ -25,3 +25,7 @@
 ## 2025-06-20 - [Enhanced Score Entry & Keyboard Shortcuts]
 **Learning:** Manual numeric entry for scores on mobile is a common friction point. Providing oversized increment/decrement "Stepper" buttons significantly improves the tactile experience. Additionally, adding case-insensitive keyboard shortcuts (like 'S' for Swap) for non-input focused states provides a power-user "delight" factor that makes repetitive tasks feel much faster.
 **Action:** Use the `ScoreStepper` component for all numeric entries that involve small, frequent adjustments. Always ensure keyboard shortcuts are scoped to avoid firing when the user is typing in form fields (check `e.target` for `HTMLInputElement`).
+
+## 2025-06-25 - [Irreversible Action Safeguards]
+**Learning:** Critical actions that fundamentally change the application state (like starting a tournament, which locks teams and generates fixed matches) require a confirmation step to prevent accidental triggers. Wrapping these actions in a dedicated `Dialog` not only provides a safety net but also offers an opportunity to explicitly communicate the consequences of the action to the user.
+**Action:** Always wrap high-impact, irreversible actions in a confirmation `Dialog`. Ensure the dialog title and description clearly explain what will happen and what constraints will be imposed after the action is confirmed.
