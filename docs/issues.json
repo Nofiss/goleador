@@ -7114,7 +7114,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-26"
 		},
 		{
 			"key": "7b05c7d2-c409-4bdb-81d5-bfd76b8778f8",
@@ -7159,7 +7161,9 @@
 			"prioritizedRule": false,
 			"fromSonarQubeUpdate": false,
 			"internalTags": [],
-			"linkedTicketStatus": "NOT_LINKED"
+			"linkedTicketStatus": "NOT_LINKED",
+			"warden_status": "resolved",
+			"resolved_at": "2026-02-26"
 		},
 		{
 			"key": "fbd33e3e-4ca3-40e2-86dd-32a46d0d86d9",

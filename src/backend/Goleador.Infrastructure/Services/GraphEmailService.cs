@@ -87,8 +87,9 @@ public class GraphEmailService : IEmailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Errore durante l'invio email a {to}");
-            throw;
+            // csharpsquid:S2139 & csharpsquid:S2629 - Avoid redundant logging and rethrowing;
+            // wrap in contextual exception instead and let GlobalExceptionHandler handle logging.
+            throw new InvalidOperationException($"Errore durante l'invio email a {to}", ex);
         }
     }
 }

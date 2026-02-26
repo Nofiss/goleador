@@ -22,3 +22,7 @@
 ## 2026-02-22 - Raw String API Body DTO
 **Learning:** Sending raw strings as the body of a PUT/POST request in ASP.NET Core with default JSON formatters fails if the string is not wrapped in a DTO, as the raw string (e.g., Markdown) is not valid JSON.
 **Action:** Always wrap raw string inputs in a DTO object (e.g., `UpdateRulesRequest(string? Rules)`) to ensure compatibility with standard JSON serializers and frontend API clients like Axios.
+
+## 2026-02-26 - Exception Logging Redundancy (S2139)
+**Learning:** Logging an exception and then immediately rethrowing it is a MAJOR code smell (S2139) that causes log bloat when a GlobalExceptionHandler is also present.
+**Action:** Avoid local logging of exceptions that are being rethrown. Instead, wrap the exception in a contextual exception (like `InvalidOperationException` with additional details) and let the global handler capture and log the failure.
