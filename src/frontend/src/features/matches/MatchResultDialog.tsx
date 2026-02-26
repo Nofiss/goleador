@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { motion } from "framer-motion";
 import { ArrowLeftRight, Table, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { setMatchResult } from "@/api/matches";
 import { getTables } from "@/api/tables";
@@ -95,6 +95,29 @@ export const MatchResultDialog = ({
 		}
 		return map;
 	}, [allMatches, match]);
+
+	const handleSwap = useCallback(() => {
+		const temp = scoreHome;
+		setScoreHome(scoreAway);
+		setScoreAway(temp);
+	}, [scoreHome, scoreAway]);
+
+	// Add keyboard listener for 'S' to swap teams
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (
+				isOpen &&
+				e.key.toLowerCase() === "s" &&
+				!(e.target instanceof HTMLInputElement) &&
+				!(e.target instanceof HTMLTextAreaElement)
+			) {
+				handleSwap();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, handleSwap]);
 
 	const mutation = useMutation({
 		mutationFn: async (variables: {
@@ -218,11 +241,7 @@ export const MatchResultDialog = ({
 								variant="ghost"
 								size="sm"
 								className="h-8 gap-2 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors bg-background border"
-								onClick={() => {
-									const temp = scoreHome;
-									setScoreHome(scoreAway);
-									setScoreAway(temp);
-								}}
+								onClick={handleSwap}
 								aria-label="Scambia punteggi"
 								title="Scambia punteggi"
 							>

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { History, Zap } from "lucide-react";
 import { memo } from "react";
 import { getRecentMatches } from "@/api/matches";
@@ -36,14 +37,19 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 					)}
 					{match.homeTeamName || "Player A"}
 					{match.scoreHome > match.scoreAway && (
-						<Badge
-							variant="default"
-							className="ml-2 text-[10px] h-4 px-1"
-							title="Vincitore"
-							aria-label="Vincitore"
+						<motion.div
+							whileHover={{ scale: 1.1 }}
+							transition={{ type: "spring", stiffness: 400, damping: 10 }}
 						>
-							W
-						</Badge>
+							<Badge
+								variant="default"
+								className="ml-2 text-[10px] h-4 px-1"
+								title="Vincitore"
+								aria-label="Vincitore"
+							>
+								W
+							</Badge>
+						</motion.div>
 					)}
 				</div>
 			</TableCell>
@@ -53,14 +59,19 @@ const MatchRow = memo(({ match }: { match: MatchDto }) => {
 			<TableCell className="text-left font-medium text-red-600 dark:text-red-400">
 				<div className="flex items-center justify-start gap-1">
 					{match.scoreAway > match.scoreHome && (
-						<Badge
-							variant="default"
-							className="mr-2 text-[10px] h-4 px-1"
-							title="Vincitore"
-							aria-label="Vincitore"
+						<motion.div
+							whileHover={{ scale: 1.1 }}
+							transition={{ type: "spring", stiffness: 400, damping: 10 }}
 						>
-							W
-						</Badge>
+							<Badge
+								variant="default"
+								className="mr-2 text-[10px] h-4 px-1"
+								title="Vincitore"
+								aria-label="Vincitore"
+							>
+								W
+							</Badge>
+						</motion.div>
 					)}
 					{match.awayTeamName || "Player B"}
 					{match.hasCardsAway && (
