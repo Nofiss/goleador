@@ -19,7 +19,7 @@ jobs:
         working-directory: ./src/backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -56,7 +56,7 @@ jobs:
         working-directory: ./src/frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # 1. Installa e configura PNPM
       - name: Install pnpm
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
